@@ -1,0 +1,56 @@
+{% macro card(v, linked=True) %}
+{% set loc = v.loc %}{% set lic = v.lic %}{% set r = v.r %}
+<article class="result {{ v.category }}">
+  <header class="source">
+    <a class="repo" href="https://github.com/{{ loc.repo }}">{{ loc.repo }}</a>
+    <a class="path" href="{{ loc.url }}">{{ loc.path }}<span class="lines">:{{ loc.start }}–{{ loc.end }}</span></a>
+    <span class="symbol">{{ loc.symbol }}</span>
+  </header>
+  <div class="verdict">
+    <span class="grade" title="Evidence level {{ lic.level }}">{{ lic.level }}</span>
+    <div>
+      <p class="expression">{{ lic.expression or "No license found" }}</p>
+      <p class="why">{{ v.level_text }}{% if lic.conflict %} Other evidence names other licenses.{% endif %}</p>
+    </div>
+  </div>
+  <aside class="details">
+    {% if lic.notices %}
+    <ul class="notices">
+      {% for notice in lic.notices[:3] %}<li>{{ notice }}</li>{% endfor %}
+      {% if lic.notices|length > 3 %}<li>and {{ lic.notices|length - 3 }} more</li>{% endif %}
+    </ul>
+    {% elif lic.shareable %}
+    <p class="notices none">No copyright statement in the file or its license files.</p>
+    {% endif %}
+    {% if lic.evidence %}
+    <details class="evidence">
+      <summary>Evidence</summary>
+      <ul>
+        {% for e in lic.evidence %}<li><span class="kind">{{ e.kind.replace("_", " ") }}</span> <code>{{ e.path }}</code> {{ e.expression }}</li>{% endfor %}
+      </ul>
+    </details>
+    {% endif %}
+    {% if r.copies > 1 %}
+    <p class="copies">
+      {% if linked %}<a href="/s/{{ r.id }}">{% endif %}Same code in {{ r.copies }} places{% if r.repos > 1 %}, {{ r.repos }} repositories{% endif %}{% if linked %}</a>{% endif %}{% if r.licenses > 1 %}, <strong class="warn">under {{ r.licenses }} different licenses</strong>{% endif %}
+    </p>
+    {% endif %}
+    <div class="actions">
+      {% if v.attribution %}
+      <button type="button" class="copy" data-copy="att-{{ r.id }}">Copy with attribution</button>
+      <pre class="attribution" id="att-{{ r.id }}" hidden>{{ v.attribution }}</pre>
+      {% endif %}
+      <a class="open" href="{{ loc.url }}">Open on GitHub</a>
+    </div>
+  </aside>
+  {% if v.lines %}
+  <div class="code{% if v.lines|length > 24 %} long{% endif %}">
+    <pre><code>{% for n, line in v.lines %}<span class="line" data-n="{{ n }}">{{ line }}</span>
+{% endfor %}</code></pre>
+    {% if v.lines|length > 24 %}<button type="button" class="more">Show all {{ v.lines|length }} lines</button>{% endif %}
+  </div>
+  {% else %}
+  <p class="withheld">The code is not shown here: no license found in it lets it be shared. It is on GitHub at the link above.</p>
+  {% endif %}
+</article>
+{% endmacro %}

@@ -1183,6 +1183,7 @@ name = "provgrep"
 version = "0.0.0"
 source = { editable = "." }
 dependencies = [
+    { name = "jinja2" },
     { name = "license-expression" },
     { name = "pluggy" },
     { name = "scancode-toolkit" },
@@ -1210,6 +1211,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "jinja2", specifier = ">=3.1" },
     { name = "license-expression", specifier = ">=30.4" },
     { name = "pluggy", specifier = "<1.7" },
     { name = "scancode-toolkit", specifier = ">=32.5" },

@@ -1,0 +1,335 @@
+/* provgrep: code on the left, the evidence for its license on the right. The one loud thing is
+   the grade of that evidence; everything else is ink on paper. */
+
+:root {
+  --paper: #f6f7f4;
+  --surface: #ffffff;
+  --ink: #1f2a44;
+  --ink-soft: #545f78;
+  --rule: #d3d8d2;
+  --mark: #ffef9a;
+  --permissive: #0f6b5e;
+  --copyleft: #8a5a00;
+  --link: #962d3e;
+  --focus: #2457c5;
+  --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", sans-serif;
+  --mono: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  --book: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #121722;
+    --surface: #181e2b;
+    --ink: #dce3ee;
+    --ink-soft: #9aa6bc;
+    --rule: #2c3547;
+    --mark: #5c4b00;
+    --permissive: #5cc8b4;
+    --copyleft: #e2a84b;
+    --link: #f28b9c;
+    --focus: #7fa6ff;
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font: 1rem/1.5 var(--sans);
+}
+
+a { color: inherit; text-underline-offset: 0.18em; }
+a:hover { text-decoration-thickness: 2px; }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.masthead, main, .colophon {
+  max-width: 76rem;
+  margin: 0 auto;
+  padding: 0 1.25rem;
+}
+
+/* The search form */
+
+.masthead {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.75rem 1.5rem;
+  align-items: start;
+  padding-top: 1.25rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--rule);
+}
+
+.wordmark {
+  font-weight: 750;
+  font-size: 1.375rem;
+  letter-spacing: -0.02em;
+  text-decoration: none;
+  line-height: 2.9rem;
+}
+
+.search { display: grid; gap: 0.6rem; }
+
+.query input {
+  width: 100%;
+  height: 2.9rem;
+  padding: 0 0.9rem;
+  border: 2px solid var(--ink);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-size: 1.125rem;
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  align-items: end;
+  font-size: 0.875rem;
+}
+
+.filters label { display: flex; flex-direction: column; gap: 0.15rem; color: var(--ink-soft); }
+
+.filters select, .filters input, .filters button {
+  height: 2.1rem;
+  padding: 0 0.6rem;
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+}
+
+.filters .allowed { display: none; }
+.filters .allowed input { width: 19rem; max-width: 100%; }
+.search:has(option[value="allowed"]:checked) .allowed { display: flex; }
+
+.filters button {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--paper);
+  font-weight: 600;
+  padding: 0 1rem;
+}
+
+/* With the script, results follow what is typed; the button is only needed without it. */
+.live .filters button { display: none; }
+
+/* The page before a search */
+
+.intro { max-width: 44rem; padding: 3rem 0 2rem; }
+
+.intro h1 {
+  margin: 0 0 1rem;
+  font-size: clamp(1.75rem, 4.5vw, 2.6rem);
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+  font-weight: 750;
+}
+
+.intro p { margin: 0 0 1.25rem; max-width: 38rem; }
+
+.examples { margin: 0 0 2rem; padding: 0; list-style: none; display: grid; gap: 0.35rem; }
+.examples a { font-family: var(--mono); font-size: 0.9375rem; }
+.corpus { color: var(--ink-soft); font-size: 0.875rem; }
+
+/* Results */
+
+.count, .message, .next { margin: 1.25rem 0; color: var(--ink-soft); }
+.message { color: var(--ink); max-width: 40rem; }
+
+.result {
+  --verdict: var(--permissive);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 17.5rem;
+  grid-template-rows: auto auto 1fr;
+  grid-template-areas: "source source" "code verdict" "code details";
+  gap: 0.6rem 1.5rem;
+  padding: 1.5rem 0;
+  border-top: 1px solid var(--rule);
+}
+.result.copyleft { --verdict: var(--copyleft); }
+.result.link { --verdict: var(--link); }
+
+.source {
+  grid-area: source;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.15rem 0.9rem;
+  align-items: baseline;
+  min-width: 0;
+}
+.repo { font-weight: 650; }
+.path { font-family: var(--mono); font-size: 0.8125rem; overflow-wrap: anywhere; }
+.lines { color: var(--ink-soft); }
+.symbol { font-family: var(--mono); font-size: 0.8125rem; color: var(--ink-soft); overflow-wrap: anywhere; }
+
+.code { grid-area: code; min-width: 0; align-self: start; }
+
+.code pre {
+  margin: 0;
+  padding: 0.75rem 0;
+  overflow: auto;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  font: 0.8125rem/1.55 var(--mono);
+  tab-size: 4;
+}
+.code.long pre { max-height: 36em; }
+.code.long.open pre { max-height: none; }
+
+.line { padding-right: 1rem; }
+.line::before {
+  content: attr(data-n);
+  display: inline-block;
+  width: 5ch;
+  margin-right: 1.5ch;
+  text-align: right;
+  color: var(--ink-soft);
+  user-select: none;
+}
+
+mark { background: var(--mark); color: inherit; border-radius: 2px; }
+
+.more {
+  margin-top: 0.5rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.875rem;
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+  cursor: pointer;
+}
+.code.open .more { display: none; }
+
+.withheld {
+  grid-area: code;
+  margin: 0;
+  padding: 1rem;
+  border: 1px dashed var(--rule);
+  border-radius: 6px;
+  color: var(--ink-soft);
+  max-width: 40rem;
+}
+
+/* The evidence */
+
+.verdict { grid-area: verdict; display: flex; gap: 0.8rem; align-items: center; font-size: 0.875rem; }
+
+.details {
+  grid-area: details;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  font-size: 0.875rem;
+  min-width: 0;
+}
+
+.grade {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 3.4rem;
+  height: 3.4rem;
+  border: 2px solid var(--verdict);
+  border-radius: 50%;
+  color: var(--verdict);
+  font: 700 2.1rem/1 var(--book);
+}
+
+.expression {
+  margin: 0;
+  font-weight: 650;
+  font-size: 0.9375rem;
+  color: var(--verdict);
+  overflow-wrap: anywhere;
+}
+.why { margin: 0.1rem 0 0; color: var(--ink-soft); }
+
+.notices { margin: 0; padding: 0; list-style: none; }
+.notices li + li { margin-top: 0.15rem; }
+.notices.none { color: var(--ink-soft); }
+
+.evidence summary { cursor: pointer; color: var(--ink-soft); width: max-content; }
+.evidence ul { margin: 0.4rem 0 0; padding: 0; list-style: none; display: grid; gap: 0.3rem; }
+.evidence .kind { color: var(--ink-soft); }
+.evidence code { font-family: var(--mono); font-size: 0.8125rem; overflow-wrap: anywhere; }
+
+.copies { margin: 0; }
+.warn { color: var(--link); font-weight: 600; }
+
+.actions { display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; align-items: center; }
+
+.copy {
+  padding: 0.4rem 0.8rem;
+  border: 1.5px solid var(--ink);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+.copy:hover { background: var(--ink); color: var(--paper); }
+
+.attribution {
+  flex-basis: 100%;
+  margin: 0;
+  padding: 0.6rem;
+  max-height: 16em;
+  overflow: auto;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  font: 0.75rem/1.5 var(--mono);
+}
+
+/* A snippet's copies */
+
+.copies-title { margin: 2rem 0 0.25rem; font-size: 1.125rem; }
+.copies-note { margin: 0 0 1rem; color: var(--ink-soft); max-width: 40rem; }
+.copies-list { margin: 0 0 2rem; padding-left: 1.5rem; display: grid; gap: 0.6rem; }
+.copies-list .path { font-family: var(--mono); font-size: 0.8125rem; overflow-wrap: anywhere; }
+.copies-list .expression { display: block; color: var(--ink); font-weight: 600; font-size: 0.875rem; }
+.copies-list .why { display: inline; font-size: 0.8125rem; }
+
+.colophon {
+  margin-top: 2rem;
+  padding-top: 1rem;
+  padding-bottom: 2rem;
+  border-top: 1px solid var(--rule);
+  color: var(--ink-soft);
+  font-size: 0.8125rem;
+}
+.colophon p { margin: 0 0 0.25rem; }
+
+@media (max-width: 760px) {
+  .masthead { grid-template-columns: minmax(0, 1fr); }
+  .wordmark { line-height: 1.2; }
+  .result {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: none;
+    grid-template-areas: "source" "verdict" "code" "details";
+  }
+  .grade { width: 2.8rem; height: 2.8rem; font-size: 1.7rem; }
+  .intro { padding-top: 2rem; }
+}

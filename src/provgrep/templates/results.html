@@ -1,0 +1,12 @@
+{% from "card.html" import card %}
+<section class="results" aria-live="polite">
+{% if error %}
+  <p class="message">That search could not run: {{ error }}.</p>
+{% elif found.total == 0 %}
+  <p class="message">No functions match. Try fewer words, another language, or any license.</p>
+{% else %}
+  <p class="count">{{ "{:,}".format(found.total) }} function{{ "s" if found.total != 1 }}{% if query.page > 1 %}, page {{ query.page }}{% endif %}</p>
+  {% for v in results %}{{ card(v) }}{% endfor %}
+  {% if next %}<p class="next"><a href="{{ next }}">More results</a></p>{% endif %}
+{% endif %}
+</section>

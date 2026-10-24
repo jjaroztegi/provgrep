@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% from "card.html" import card %}
+{% block title %}{{ result.loc.symbol }} - provgrep{% endblock %}
+{% block main %}
+<section class="results">
+  {{ card(result, linked=False) }}
+  <h2 class="copies-title">Where this code is</h2>
+  <p class="copies-note">Every copy in the index, each under the license its own file is under. Which copy came first is not decided here.</p>
+  <ol class="copies-list">
+    {% for c, why in copies %}
+    <li>
+      <a href="{{ c.url }}">{{ c.repo }} <span class="path">{{ c.path }}:{{ c.start }}–{{ c.end }}</span></a>
+      <span class="expression">{{ c.license.expression or "No license found" }}</span>
+      <span class="why">level {{ c.license.level }}{% if c.vendored %}, vendored{% endif %}</span>
+    </li>
+    {% endfor %}
+  </ol>
+</section>
+{% endblock %}

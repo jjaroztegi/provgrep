@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}{% if query.q %}{{ query.q }} - {% endif %}provgrep{% endblock %}</title>
+<meta name="description" content="Search open-source code by what it does: real functions, each with the license it is under and the evidence for it.">
+<link rel="stylesheet" href="{{ url_for('static', path='site.css') }}">
+<script src="{{ url_for('static', path='site.js') }}" defer></script>
+</head>
+<body>
+<header class="masthead">
+  <a class="wordmark" href="/">provgrep</a>
+  <form class="search" action="/" method="get" role="search">
+    <label class="query">
+      <span class="visually-hidden">What should the code do?</span>
+      <input type="search" name="q" value="{{ query.q }}" placeholder="What should the code do?" autocomplete="off" spellcheck="false" {% if not query.q %}autofocus{% endif %}>
+    </label>
+    <div class="filters">
+      <label>
+        <span>Language</span>
+        <select name="language">
+          <option value="">Any</option>
+          {% for key, name in languages.items() %}
+          <option value="{{ key }}" {% if query.language == key %}selected{% endif %}>{{ name }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label>
+        <span>License</span>
+        <select name="license">
+          <option value="permissive" {% if query.license == "permissive" %}selected{% endif %}>Permissive</option>
+          <option value="any" {% if query.license == "any" %}selected{% endif %}>Any</option>
+          <option value="allowed" {% if query.license == "allowed" %}selected{% endif %}>Only these…</option>
+        </select>
+      </label>
+      <label class="allowed">
+        <span>SPDX ids</span>
+        <input type="text" name="allowed" value="{{ query.allowed or '' }}" placeholder="MIT, BSD-3-Clause, GPL-2.0-or-later" spellcheck="false">
+      </label>
+      <button type="submit">Search</button>
+    </div>
+  </form>
+</header>
+<main id="main">
+{% block main %}{% endblock %}
+</main>
+<footer class="colophon">
+  <p>Licenses are as detected, with their evidence. They are not legal advice.</p>
+  <p><a href="https://github.com/jjaroztegi/provgrep">Source and how it is measured</a></p>
+</footer>
+</body>
+</html>

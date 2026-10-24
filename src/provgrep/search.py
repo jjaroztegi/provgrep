@@ -147,6 +147,7 @@ def _split(word: str) -> list[str]:
 @dataclass(frozen=True)
 class License:
     expression: str | None  # SPDX; None when no license was found
+    permissive: bool  # whether a permissive filter lets it through (licenses.permissive)
     shareable: bool  # whether it lets the code be shown (licenses.shareable)
     level: str
     conflict: bool
@@ -295,14 +296,14 @@ class Index:
 
 _LOCATION = (
     "r.name, r.commit_id, r.stars, f.path, l.start, l.end, l.symbol, f.vendored,"
-    " f.license, f.shareable, f.level, f.conflict, f.evidence, f.notices"
+    " f.license, f.permissive, f.shareable, f.level, f.conflict, f.evidence, f.notices"
 )
-_LOCATION_COLUMNS = 14
+_LOCATION_COLUMNS = 15
 
 
 def _location(row: tuple[Any, ...]) -> Location:
     repo, commit, stars, path, start, end, symbol, vendored = row[:8]
-    expression, shareable, level, conflict, evidence, notices = row[8:_LOCATION_COLUMNS]
+    expression, permissive, shareable, level, conflict, evidence, notices = row[8:_LOCATION_COLUMNS]
     return Location(
         repo,
         commit,
@@ -315,6 +316,7 @@ def _location(row: tuple[Any, ...]) -> Location:
         f"https://github.com/{repo}/blob/{commit}/{path}#L{start}-L{end}",
         License(
             expression,
+            bool(permissive),
             bool(shareable),
             level,
             bool(conflict),
