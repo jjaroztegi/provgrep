@@ -13,7 +13,7 @@ nearest package manifest, with the evidence and a level for how much of it agree
 header; B: license file and manifest agree; C: one source, or they disagree; X: nothing found).
 
 Against the licenses Debian maintainers record in `debian/copyright` for 300 Python source
-packages from GitHub upstreams (19,534 code files, Debian snapshot 20261024T000000Z): of 15,558
+packages from GitHub upstreams (19,534 code files, Debian snapshot 20261024T000000Z): of 15,555
 files a permissive filter would show, 74 are under a license Debian does not record as
 permissive. Each of the 74 was read by hand. Debian's record is stale for 30 (upstream
 relicensed since) and coarse for 44 (the files carry their own notices); provgrep is wrong for

@@ -11,7 +11,6 @@ automatically a mistake of ours.
 
 import fnmatch
 import json
-import subprocess
 import sys
 import time
 from collections import Counter
@@ -22,7 +21,7 @@ from importlib.metadata import version
 from pathlib import Path
 from typing import Any
 
-from provgrep import debian
+from provgrep import debian, source_commit
 from provgrep.fetch import sha256_of
 from provgrep.licenses import licensing, permissive, resolve_tree
 
@@ -106,7 +105,7 @@ def evaluate(
         "audit_sha256": sha256_of(audit_path),
         "snapshot": snapshot,
         "limit": limit,
-        "commit": _commit(),
+        "commit": source_commit(),
         "scancode-toolkit": version("scancode-toolkit"),
         "license-expression": version("license-expression"),
         "packages": len(packages),
@@ -205,19 +204,3 @@ def _table(rows: list[Row]) -> list[str]:
 
 def _pct(part: int, whole: int) -> str:
     return f"{100 * part / whole:.1f}%" if whole else "-"
-
-
-def _commit() -> str | None:
-    """The source commit, with `-dirty` if tracked files have changed since."""
-    here = Path(__file__).parent
-
-    def git(*args: str) -> str:
-        return subprocess.run(
-            ["git", *args], cwd=here, capture_output=True, text=True, check=True
-        ).stdout.strip()
-
-    try:
-        dirty = git("status", "--porcelain", "--untracked-files=no")
-        return git("rev-parse", "--short", "HEAD") + ("-dirty" if dirty else "")
-    except OSError, subprocess.CalledProcessError:
-        return None

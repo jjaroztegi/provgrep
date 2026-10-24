@@ -38,7 +38,7 @@ strict = true
 files = ["src", "tests"]
 
 [[tool.mypy.overrides]]
-module = ["license_expression", "licensedcode.*", "scancode.*"]
+module = ["cluecode.*", "license_expression", "licensedcode.*", "scancode.*"]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]

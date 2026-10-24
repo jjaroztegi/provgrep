@@ -1,5 +1,7 @@
 from pathlib import Path
 
+import licensedcode
+
 from provgrep.licenses import (
     Evidence,
     _combine,
@@ -82,3 +84,19 @@ def test_resolve_tree(tmp_path: Path) -> None:
     assert resolved["pkg/plain.py"].expression == "MIT"
     assert resolved["pkg/gpl.py"].expression == "GPL-2.0-or-later"
     assert resolved["pkg/gpl.py"].level == "A"
+
+
+def test_notices(tmp_path: Path) -> None:
+    # ScanCode's own copy of the GPL text: it states the FSF's copyright on the license itself.
+    data = Path(licensedcode.__file__).parent / "data" / "licenses" / "gpl-3.0.LICENSE"
+    gpl = data.read_text(encoding="utf-8").split("---", 2)[2]
+    (tmp_path / "COPYING").write_text(gpl)
+    (tmp_path / "a.c").write_text("int a(void) { return 0; }\n")
+    (tmp_path / "b.c").write_text(
+        "/* Copyright (C) 2021 Jane Doe <jane@example.org>\n"
+        " * SPDX-License-Identifier: GPL-3.0-or-later */\nint b(void) { return 0; }\n"
+    )
+    resolved = resolve_tree(tmp_path)
+    assert resolved["a.c"].expression == "GPL-3.0-only"
+    assert resolved["a.c"].notices == ()  # not the FSF's, which is on the license text
+    assert resolved["b.c"].notices == ("Copyright (c) 2021 Jane Doe",)  # no email address

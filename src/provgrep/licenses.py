@@ -11,6 +11,9 @@ manifest. The level says how much of it agrees:
 - X: nothing. All rights reserved until shown otherwise.
 
 Licenses are as detected, never concluded: a label is what the evidence says, not legal advice.
+
+Notices go with the license: the copyright statements in the file's header, or else in the license
+files it falls under, without email addresses.
 """
 
 import contextlib
@@ -18,14 +21,17 @@ import email.parser
 import re
 import tomllib
 from collections.abc import Callable, Iterable
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from functools import cache, lru_cache
 from pathlib import Path, PurePosixPath
 from typing import Any
 
+from cluecode.copyrights import detect_copyrights_from_lines
 from license_expression import LicenseWithExceptionSymbol, Licensing, get_spdx_licensing
 from licensedcode.cache import get_licenses_db
 from scancode.api import get_licenses, get_package_data
+
+from provgrep import without_emails
 
 _HASH = ("#",)
 _SLASH = ("//",)
@@ -37,9 +43,11 @@ _DOCSTRING = (('"""', '"""'), ("'''", "'''"))
 _COMMENTS: dict[str, tuple[tuple[str, ...], tuple[tuple[str, str], ...]]] = {
     **dict.fromkeys((".py", ".pyi", ".pyx", ".pxd"), (_HASH, _DOCSTRING)),
     **dict.fromkeys((".sh", ".bash", ".rb", ".pl", ".r"), (_HASH, ())),
-    **dict.fromkeys((".c", ".h", ".cc", ".cpp", ".cxx", ".hh", ".hpp"), (_SLASH, _C_BLOCK)),
+    **dict.fromkeys((".c", ".h", ".cc", ".cpp", ".cxx", ".c++"), (_SLASH, _C_BLOCK)),
+    **dict.fromkeys((".hh", ".hpp", ".hxx", ".h++"), (_SLASH, _C_BLOCK)),
     **dict.fromkeys((".java", ".kt", ".scala", ".swift", ".cs", ".go", ".rs"), (_SLASH, _C_BLOCK)),
-    **dict.fromkeys((".js", ".mjs", ".cjs", ".jsx", ".ts", ".tsx"), (_SLASH, _C_BLOCK)),
+    **dict.fromkeys((".js", ".mjs", ".cjs", ".jsx"), (_SLASH, _C_BLOCK)),
+    **dict.fromkeys((".ts", ".mts", ".cts", ".tsx"), (_SLASH, _C_BLOCK)),
     ".lua": (("--",), (("--[[", "]]"),)),
 }
 CODE_SUFFIXES = frozenset(_COMMENTS)
@@ -59,6 +67,8 @@ _HINT = re.compile(
 _GNU_VERSION = re.compile(r"-(only|or-later)$")
 _MAX_SCAN = 1 << 20  # larger files are generated or minified, and slow to scan
 PERMISSIVE_CATEGORIES = frozenset({"Permissive", "Public Domain"})
+# Licenses that let code be copied and passed on, with conditions or without.
+SHAREABLE_CATEGORIES = PERMISSIVE_CATEGORIES | {"Copyleft", "Copyleft Limited", "Free Restricted"}
 
 
 @dataclass(frozen=True)
@@ -74,6 +84,7 @@ class Resolution:
     level: str
     evidence: tuple[Evidence, ...]
     conflict: bool  # some evidence named other licenses
+    notices: tuple[str, ...] = ()  # copyright statements
 
 
 @dataclass(frozen=True)
@@ -81,6 +92,7 @@ class _Scope:
     depth: int
     expression: str
     evidence: tuple[Evidence, ...]
+    notices: tuple[str, ...] = ()
 
 
 @cache
@@ -115,6 +127,15 @@ def header_end(text: str, suffix: str) -> int:
     return end
 
 
+def evidence_file(rel: PurePosixPath) -> bool:
+    """A license file or a manifest: what resolve_tree reads besides code."""
+    return rel.name in MANIFESTS or _license_file_name(rel)
+
+
+def _license_file_name(rel: PurePosixPath) -> bool:
+    return bool(_LEGAL_NAME.fullmatch(rel.name)) and rel.parent.name.lower() != "licenses"
+
+
 def resolve_tree(root: Path) -> dict[str, Resolution]:
     """Resolve every code file under root, keyed by its path relative to root."""
     code: list[PurePosixPath] = []
@@ -130,23 +151,47 @@ def resolve_tree(root: Path) -> dict[str, Resolution]:
             manifests.append(rel)
         if rel.suffix.lower() in CODE_SUFFIXES:
             code.append(rel)
-        elif _LEGAL_NAME.fullmatch(rel.name) and rel.parent.name.lower() != "licenses":
+        elif _license_file_name(rel):
             legal.append(rel)
 
     legal_scopes = _scopes(root, legal, "license_file", _license_file)
     manifest_scopes = _scopes(root, manifests, "manifest", _declared)
-    return {
-        rel.as_posix(): _resolve(
-            _header(root / rel, rel), _nearest(rel, legal_scopes), _nearest(rel, manifest_scopes)
-        )
-        for rel in code
-    }
+    resolved = {}
+    for rel in code:
+        own, own_notices = _header(root / rel, rel)
+        license_file = _nearest(rel, legal_scopes)
+        resolution = _resolve(own, license_file, _nearest(rel, manifest_scopes))
+        notices = own_notices or (license_file.notices if license_file else ())
+        resolved[rel.as_posix()] = replace(resolution, notices=notices)
+    return resolved
 
 
 def permissive(expression: str | None) -> bool:
     """Whether code under this expression can be copied keeping only notices: every license an
     AND requires is permissive or public domain, or at least one choice of an OR is."""
     return bool(expression) and _permissive(licensing().parse(expression))
+
+
+def shareable(expression: str | None) -> bool:
+    """Whether an expression names a license that lets the code be shared. Code under none
+    (proprietary, source-available, unknown, or no license found) is linked to, not shown. A
+    shareable license beside others is enough: GPL headers also match commercial or proprietary
+    rules on their wording, and the whole expression goes with the code."""
+    return bool(expression) and any(
+        _categories().get(key.lower()) in SHAREABLE_CATEGORIES
+        for key in licensing().license_keys(expression)
+    )
+
+
+def choices(expression: str) -> list[tuple[str, ...]]:
+    """The ways to comply with an expression, each the licenses it takes together:
+    `MIT OR (Apache-2.0 AND BSD-3-Clause)` is [("MIT",), ("Apache-2.0", "BSD-3-Clause")]."""
+    dnf = licensing().dnf(licensing().parse(expression))
+    alternatives = dnf.args if isinstance(dnf, licensing().OR) else (dnf,)
+    return [
+        tuple(sorted(str(a) for a in (alt.args if isinstance(alt, licensing().AND) else (alt,))))
+        for alt in alternatives
+    ]
 
 
 def _permissive(node: Any) -> bool:
@@ -197,31 +242,72 @@ def _pointer_or_cla(node: Any) -> bool:
     return "unknown-license-reference" in key or _categories().get(key) == "CLA"
 
 
+Lines = tuple[tuple[int, int], ...]
+
+
 @lru_cache(maxsize=1 << 16)
-def _detect(text: str) -> str | None:
-    """What ScanCode detects in a text. Headers repeat across a project's files, and license
-    texts across projects, so each distinct text is matched once per process."""
+def _detect(text: str, approximate: bool = True) -> tuple[str | None, Lines]:
+    """What ScanCode detects in a text, and the lines it matched as the whole text of a license.
+    Headers repeat across a project's files, and license texts across projects, so each distinct
+    text is matched once per process. Without `approximate`, only exact matches of license
+    texts, notices and SPDX ids."""
     # Below 50 are fragments of longer notices: 12% of an EUPL notice matched in an MIT header.
-    detections = get_licenses(None, query_string=text, min_score=50)["license_detections"]
-    return _combine(detection["license_expression_spdx"] for detection in detections)
+    found = get_licenses(None, query_string=text, min_score=50, approximate=approximate)
+    detections = found["license_detections"]
+    whole = tuple(
+        (m["start_line"], m["end_line"])
+        for d in detections
+        for m in d["matches"]
+        if m["rule_identifier"].endswith(".LICENSE")  # ScanCode's rule for a license's own text
+    )
+    return _combine(d["license_expression_spdx"] for d in detections), whole
 
 
-def _header(path: Path, rel: PurePosixPath) -> Evidence | None:
+@lru_cache(maxsize=1 << 16)
+def _copyrights(text: str, license_texts: Lines = ()) -> tuple[str, ...]:
+    """The copyright statements in a text, without email addresses. Those inside the text of a
+    license are the license's own, like the FSF's in a copy of the GPL, and are left out."""
+    lines = list(enumerate(text.splitlines(), 1))
+    found = detect_copyrights_from_lines(lines, include_holders=False, include_authors=False)
+    return tuple(
+        dict.fromkeys(
+            " ".join(without_emails(d.copyright).split())
+            for d in found
+            if not any(a <= d.start_line and d.end_line <= b for a, b in license_texts)
+        )
+    )
+
+
+def _header(path: Path, rel: PurePosixPath) -> tuple[Evidence | None, tuple[str, ...]]:
+    """The license a file's header names, and its copyright statements."""
     if path.stat().st_size > _MAX_SCAN:
-        return None
+        return None, ()
     text = path.read_text(encoding="utf-8", errors="replace")
     header = "\n".join(text.splitlines()[: header_end(text, rel.suffix.lower())])
-    expression = _detect(header) if _HINT.search(header) else None
-    return Evidence("header", rel.as_posix(), expression) if expression else None
+    if not _HINT.search(header):
+        return None, ()
+    # Approximate matching costs ~0.5 s a header with prose beside its notice; it is kept for
+    # notices that no exact match finds, edited ones.
+    expression, texts = _detect(header, approximate=False)
+    if not expression:
+        expression, texts = _detect(header)
+    own = Evidence("header", rel.as_posix(), expression) if expression else None
+    return own, _copyrights(header, texts)
 
 
-def _license_file(path: Path) -> str | None:
+def _license_file(path: Path) -> tuple[str | None, tuple[str, ...]]:
     if path.stat().st_size > _MAX_SCAN:
-        return None
-    return _detect(path.read_text(encoding="utf-8", errors="replace"))
+        return None, ()
+    text = path.read_text(encoding="utf-8", errors="replace")
+    expression, texts = _detect(text)
+    return expression, _copyrights(text, texts)
 
 
-def _declared(path: Path) -> str | None:
+def _declared(path: Path) -> tuple[str | None, tuple[str, ...]]:
+    return _declared_expression(path), ()
+
+
+def _declared_expression(path: Path) -> str | None:
     """The license a manifest declares. An SPDX expression in the field made for one (PEP 639
     `project.license`, `License-Expression`) is taken as written: ScanCode would AND it with the
     classifiers, turning `MIT OR Apache-2.0` into `(MIT OR Apache-2.0) AND MIT`."""
@@ -244,19 +330,27 @@ def _declared(path: Path) -> str | None:
 
 
 def _scopes(
-    root: Path, files: list[PurePosixPath], kind: str, detect: Callable[[Path], str | None]
+    root: Path,
+    files: list[PurePosixPath],
+    kind: str,
+    detect: Callable[[Path], tuple[str | None, tuple[str, ...]]],
 ) -> dict[PurePosixPath, _Scope]:
-    """One scope per directory: the AND of what its files name, with each file as evidence."""
+    """One scope per directory: the AND of what its files name, with each file as evidence, and
+    their copyright statements."""
     found: dict[PurePosixPath, list[Evidence]] = {}
+    notices: dict[PurePosixPath, list[str]] = {}
     for rel in files:
-        if expression := detect(root / rel):
+        expression, statements = detect(root / rel)
+        if expression:
             found.setdefault(rel.parent, []).append(Evidence(kind, rel.as_posix(), expression))
+            notices.setdefault(rel.parent, []).extend(statements)
     scopes = {}
     for directory, evidence in found.items():
         expression = _combine(e.expression for e in evidence)
         if expression:
             depth = 0 if directory == PurePosixPath(".") else len(directory.parts)
-            scopes[directory] = _Scope(depth, expression, tuple(evidence))
+            statements = tuple(dict.fromkeys(notices[directory]))
+            scopes[directory] = _Scope(depth, expression, tuple(evidence), statements)
     return scopes
 
 
