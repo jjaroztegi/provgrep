@@ -97,7 +97,9 @@ _UNMARKED = frozenset(
 )
 
 
-def app(index: Index) -> Starlette:
+def app(index: Index, host: str = "127.0.0.1") -> Starlette:
+    """The site over an index. host is where it listens: MCP refuses requests addressed to other
+    hosts unless it listens on all of them (DNS rebinding protection)."""
     templates = Jinja2Templates(directory=_HERE / "templates")
 
     def search(params: Any) -> tuple[dict[str, Any], Page]:
@@ -105,9 +107,10 @@ def app(index: Index) -> Starlette:
         license = params.get("license", "permissive")
         allowed = params.get("allowed", "")
         licenses = allowed.split(",") if license == "allowed" else licenses_of(license)
-        page = int(params.get("page", "1"))
-        if not 1 <= page <= MAX_PAGE:
+        number = params.get("page", "1")
+        if not number.isdigit() or not 1 <= int(number) <= MAX_PAGE:
             raise ValueError(f"page goes from 1 to {MAX_PAGE}")
+        page = int(number)
         query = {
             "q": params.get("q", ""),
             "language": params.get("language", ""),
@@ -145,7 +148,10 @@ def app(index: Index) -> Starlette:
             "languages": LANGUAGES,
             "examples": EXAMPLES,
         }
-        name = "results.html" if params.get("partial") else "search.html"
+        if params.get("partial"):
+            name = "results.html" if found or error else "intro.html"
+        else:
+            name = "search.html"
         return templates.TemplateResponse(request, name, context, status_code=400 if error else 200)
 
     def snippet_page(request: Request) -> Response:
@@ -177,8 +183,12 @@ def app(index: Index) -> Starlette:
     mcp = mcp_server(index)
     # Stateless and plain JSON: any replica answers any request, as it does pages.
     mcp_app = mcp.streamable_http_app(
-        streamable_http_path="/", stateless_http=True, json_response=True
+        streamable_http_path="/", stateless_http=True, json_response=True, host=host
     )
+
+    def no_stream(_: Request) -> Response:
+        # Stateless: there is no stream of server messages to hold open for a GET.
+        return Response(status_code=405, headers={"Allow": "POST"})
 
     @asynccontextmanager
     async def lifespan(_: Starlette) -> AsyncIterator[None]:
@@ -191,6 +201,7 @@ def app(index: Index) -> Starlette:
             Route("/s/{id}", snippet_page),
             Route("/api/search", api_search),
             Route("/api/snippets/{id}", api_snippet),
+            Route("/mcp/", no_stream, methods=["GET"]),
             Mount("/mcp", app=mcp_app),
             Mount("/static", StaticFiles(directory=_HERE / "static"), name="static"),
         ],
@@ -245,4 +256,4 @@ def _next(request: Request, found: Page | None, page: int) -> str | None:
 def serve(index_path: Path, host: str, port: int) -> None:
     import uvicorn
 
-    uvicorn.run(app(Index(index_path)), host=host, port=port)
+    uvicorn.run(app(Index(index_path), host), host=host, port=port)

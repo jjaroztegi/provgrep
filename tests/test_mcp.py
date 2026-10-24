@@ -33,3 +33,6 @@ async def test_tools(index: search.Index) -> None:
         assert unlicensed[0]["code"] is None
         refused = await client.call_tool("attribution", {"id": unlicensed[0]["id"]})
         assert refused.is_error
+        reason = refused.content[0]
+        assert isinstance(reason, TextContent)
+        assert "link to it instead" in reason.text

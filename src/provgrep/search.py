@@ -19,6 +19,7 @@ from collections.abc import Sequence
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
+from urllib.parse import quote
 
 import tantivy
 from tantivy import Occur, Query
@@ -28,6 +29,8 @@ IDENTIFIER = 3.0
 LEVELS = ("A", "B", "C", "X")
 # Each combination of the licenses in an allow list is one term of the query.
 MAX_ALLOWED = 8
+MAX_QUERY = 1000  # characters: a question, not a file
+MAX_REQUIRED = 8
 ID_LENGTH = 16  # hex digits of a snippet's hash that name it
 _WORD = re.compile(r"\w+")
 _ASCII_PARTS = re.compile(r"[A-Z]+(?=[A-Z][a-z])|[A-Z]?[a-z]+|[A-Z]+|[0-9]+")
@@ -100,7 +103,8 @@ def terms(text: str) -> list[str]:
 
 def licenses_of(text: str) -> str | list[str]:
     """The licenses filter as people write it: "permissive", "any", or SPDX ids, comma-separated."""
-    return text if text in ("permissive", "any") else text.split(",")
+    word = text.strip().lower()
+    return word if word in ("permissive", "any") else text.split(",")
 
 
 def identifiers(text: str) -> set[str]:
@@ -229,6 +233,9 @@ class Index:
         require: identifiers the code must contain, whole; `A|B` for either."""
         if limit < 1 or offset < 0:
             raise ValueError("limit must be at least 1 and offset at least 0")
+        if len(query) > MAX_QUERY or len(require) > MAX_REQUIRED:
+            raise ValueError(f"a query has at most {MAX_QUERY} characters, {MAX_REQUIRED} required")
+        languages = [language.lower() for language in languages]
         words = query_terms(query)
         clauses = []
         if words:
@@ -318,7 +325,7 @@ def _location(row: tuple[Any, ...]) -> Location:
         end,
         symbol,
         bool(vendored),
-        f"https://github.com/{repo}/blob/{commit}/{path}#L{start}-L{end}",
+        f"https://github.com/{repo}/blob/{commit}/{quote(path)}#L{start}-L{end}",
         License(
             expression,
             bool(permissive),

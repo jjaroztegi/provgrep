@@ -16,9 +16,10 @@ function params() {
 
 async function update() {
   const query = params();
+  const words = query.get("q");
   history.replaceState(null, "", query.size ? `/?${query}` : "/");
-  if (!query.get("q")) return;
-  query.set("partial", "1");
+  document.title = words ? `${words} - provgrep` : "provgrep";
+  query.set("partial", "1");  // without words, the page from before a search
   pending?.abort();
   pending = new AbortController();
   try {

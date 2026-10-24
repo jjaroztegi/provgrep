@@ -1,3 +1,5 @@
+import pytest
+
 from provgrep import search
 
 
@@ -42,6 +44,9 @@ def test_search_filters_and_withholds_unlicensed_code(index: search.Index) -> No
     assert index.search("", licenses="any", require=["epoll_wait|nothing"]).total == 1
     assert index.search("fill", licenses=["GPL-2.0-or-later ", " MIT"]).total == 1
     assert index.search("fill", licenses="any", languages=["go"]).total == 0
+    assert index.search("fill", licenses=search.licenses_of("Any"), languages=["C"]).total == 2
+    with pytest.raises(ValueError, match="at most"):
+        index.search("fill " * 500)
 
 
 def test_snippet_lists_every_copy(index: search.Index) -> None:

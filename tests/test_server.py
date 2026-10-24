@@ -41,6 +41,11 @@ def test_pages(index: search.Index) -> None:
     copies = client.get(f"/s/{picture.id}").text
     assert "third_party/x/pic.h" in copies
     assert client.get("/s/nope").status_code == 404
+    assert "What should the code do" not in client.get("/", params={"partial": "1"}).text
+    assert "Real code for what you want to do" in client.get("/", params={"partial": "1"}).text
+    assert client.get("/", params={"q": "x", "page": "1_0"}).status_code == 400
+    with TestClient(server.app(index)) as live:  # runs the lifespan MCP needs
+        assert live.get("/mcp/").status_code == 405
 
 
 def test_attribution(index: search.Index) -> None:

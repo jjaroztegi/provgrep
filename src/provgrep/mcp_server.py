@@ -7,6 +7,7 @@ Streamable HTTP, stateless, so replicas of the server answer them as they answer
 from typing import Annotated
 
 from mcp.server import MCPServer
+from mcp.server.mcpserver.exceptions import ToolError
 from mcp.types import ToolAnnotations
 from pydantic import Field
 
@@ -47,16 +48,23 @@ def server(index: Index) -> MCPServer:
         """Functions that do what the query asks, best first, each with its license, evidence
         level, copyright notices, the lines at their commit on GitHub, and how many copies of the
         same code the index has."""
-        return index.search(
-            query, languages=languages, licenses=licenses_of(licenses), require=require, limit=limit
-        )
+        try:
+            return index.search(
+                query,
+                languages=languages,
+                licenses=licenses_of(licenses),
+                require=require,
+                limit=limit,
+            )
+        except ValueError as e:  # a reason the agent can act on, not "Error executing tool"
+            raise ToolError(str(e)) from e
 
     @mcp.tool(annotations=_READ_ONLY)
     def snippet(id: Annotated[str, Field(description="A result's id")]) -> Snippet:
         """One result with every copy of its code in the index, each under its own license."""
         found = index.snippet(id)
         if found is None:
-            raise ValueError(f"no snippet {id!r} in this index")
+            raise ToolError(f"no snippet {id!r} in this index")
         return found
 
     @mcp.tool(annotations=_READ_ONLY)
@@ -65,10 +73,10 @@ def server(index: Index) -> MCPServer:
         a file as it is."""
         found = index.snippet(id)
         if found is None:
-            raise ValueError(f"no snippet {id!r} in this index")
+            raise ToolError(f"no snippet {id!r} in this index")
         text = reuse_snippet(found.result)
         if text is None:
-            raise ValueError("no license found lets this code be shared; link to it instead")
+            raise ToolError("no license found lets this code be shared; link to it instead")
         return text
 
     return mcp

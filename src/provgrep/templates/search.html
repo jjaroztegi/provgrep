@@ -3,16 +3,6 @@
 {% if found or error %}
 {% include "results.html" %}
 {% else %}
-<section class="intro">
-  <h1>Real code for what you want to do, and the license it is under.</h1>
-  <p>Describe a task or name an API. Every result is a function from a public repository, shown with the license it is under, the evidence for that license, and its copyright notices, so you know before you copy whether you may.</p>
-  <ul class="examples">
-    {% for example in examples %}<li><a href="/?q={{ example|urlencode }}">{{ example }}</a></li>{% endfor %}
-  </ul>
-  {% set counts = manifest.get("counts", {}) %}
-  {% if counts %}
-  <p class="corpus">{{ "{:,}".format(counts.get("snippets", 0)) }} functions from {{ "{:,}".format(counts.get("repos", 0)) }} of the most-starred repositories on GitHub, in {{ counts.get("by_language", {})|length }} languages, as of {{ manifest.get("built", "")[:10] }}.</p>
-  {% endif %}
-</section>
+{% include "intro.html" %}
 {% endif %}
 {% endblock %}
