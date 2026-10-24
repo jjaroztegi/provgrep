@@ -150,3 +150,15 @@ def test_emails_leave_comments_not_code() -> None:
     assert '"ops@example.org"' in unit.code  # a string literal is code
     assert "[at]" not in unit.code
     assert (unit.start, unit.end) == (2, 6)
+
+
+def test_declarations_without_a_body_are_not_units() -> None:
+    java = """interface I {
+  private static native void render(int dst, byte op,
+                                    short red, short green,
+                                    short blue, short alpha);
+}
+"""
+    assert units(java, "java") == []
+    go = "package p\n\n// Implemented in assembly.\nfunc add(\n\tx int,\n\ty int,\n) int\n"
+    assert units(go, "go") == []

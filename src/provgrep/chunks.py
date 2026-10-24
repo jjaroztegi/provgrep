@@ -148,10 +148,10 @@ LANGUAGES = {
         tree_sitter_go.language,
         (".go",),
         """
-        (function_declaration name: (_) @name) @unit
+        (function_declaration name: (_) @name body: (_)) @unit
         (method_declaration
           receiver: (parameter_list (parameter_declaration type: (_) @scope))
-          name: (_) @name) @unit
+          name: (_) @name body: (_)) @unit
         """,
         "",
         "(comment) @doc",
@@ -175,7 +175,7 @@ LANGUAGES = {
         tree_sitter_java.language,
         (".java",),
         """
-        (method_declaration name: (_) @name) @unit
+        (method_declaration name: (_) @name body: (_)) @unit
         (constructor_declaration name: (_) @name) @unit
         """,
         """
