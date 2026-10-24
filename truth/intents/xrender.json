@@ -1,0 +1,55 @@
+{
+ "suite": "xrender",
+ "about": "What a programmer needed to find while writing an XRender program in C from scratch, live, from documentation that answers little. Queries name only what was known at that point; expected identifiers are what the code that answered it calls.",
+ "source": "Tsoding Daily, \"X11 extension that changes everything (XRender)\", https://www.youtube.com/watch?v=auzZCp45dJc",
+ "intents": [
+  {
+   "id": "version",
+   "query": "check that the X server supports the XRender extension and get its version",
+   "languages": ["c", "cpp"],
+   "expect": ["XRenderQueryVersion|XRenderQueryExtension"]
+  },
+  {
+   "id": "visual-format",
+   "query": "find the XRender picture format that matches the visual of a window",
+   "languages": ["c", "cpp"],
+   "expect": ["XRenderFindVisualFormat"]
+  },
+  {
+   "id": "window-picture",
+   "query": "create an XRender picture for an X11 window to draw on",
+   "languages": ["c", "cpp"],
+   "expect": ["XRenderCreatePicture", "XRenderFindVisualFormat"]
+  },
+  {
+   "id": "fill-rectangle",
+   "query": "fill a rectangle with a solid color using XRender",
+   "languages": ["c", "cpp"],
+   "expect": ["XRenderFillRectangle", "XRenderColor"]
+  },
+  {
+   "id": "composite-op",
+   "query": "what op to pass to XRenderComposite to copy one picture onto another",
+   "languages": ["c", "cpp"],
+   "expect": ["XRenderComposite", "PictOpSrc|PictOpOver"]
+  },
+  {
+   "id": "pixels-to-picture",
+   "query": "upload an image from memory to a pixmap and make an XRender picture of it",
+   "languages": ["c", "cpp"],
+   "expect": ["XPutImage", "XRenderCreatePicture"]
+  },
+  {
+   "id": "scale",
+   "query": "scale an image on the X server with an XRender picture transform",
+   "languages": ["c", "cpp"],
+   "expect": ["XRenderSetPictureTransform", "XDoubleToFixed"]
+  },
+  {
+   "id": "shared-memory",
+   "query": "put a shared memory image (MIT-SHM) on a pixmap and composite it with XRender",
+   "languages": ["c", "cpp"],
+   "expect": ["XShmPutImage|XShmCreatePixmap", "XRenderComposite|XRenderCreatePicture"]
+  }
+ ]
+}

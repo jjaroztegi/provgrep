@@ -1,0 +1,51 @@
+{
+ "suite": "apis",
+ "about": "How to do a common task with a platform or library API, in each indexed language. Expected identifiers are the calls a working answer cannot do without.",
+ "intents": [
+  {"id": "c-nonblocking-socket", "query": "set a socket to non-blocking mode", "languages": ["c", "cpp"], "expect": ["fcntl", "O_NONBLOCK"]},
+  {"id": "c-epoll-loop", "query": "event loop waiting on many sockets with epoll", "languages": ["c", "cpp"], "expect": ["epoll_wait", "epoll_ctl"]},
+  {"id": "c-mmap-file", "query": "map a whole file into memory to read it", "languages": ["c", "cpp"], "expect": ["mmap", "fstat|lseek"]},
+  {"id": "c-pipe-child", "query": "start a child process and read its output through a pipe", "languages": ["c", "cpp"], "expect": ["pipe", "fork", "dup2"]},
+  {"id": "c-monotonic-time", "query": "monotonic clock time in nanoseconds", "languages": ["c", "cpp"], "expect": ["clock_gettime", "CLOCK_MONOTONIC|CLOCK_MONOTONIC_RAW"]},
+  {"id": "c-gl-shader", "query": "compile an OpenGL shader and print the compile error log", "languages": ["c", "cpp"], "expect": ["glCompileShader", "glGetShaderInfoLog"]},
+  {"id": "c-xlib-window", "query": "open an X11 window with Xlib and wait for events", "languages": ["c", "cpp"], "expect": ["XOpenDisplay", "XNextEvent"]},
+  {"id": "c-signal-handler", "query": "install a signal handler for SIGINT with sigaction", "languages": ["c", "cpp"], "expect": ["sigaction", "SIGINT"]},
+  {"id": "c-getaddrinfo-connect", "query": "resolve a host name and connect a TCP socket to it", "languages": ["c", "cpp"], "expect": ["getaddrinfo", "connect"]},
+  {"id": "cpp-thread-pool", "query": "thread pool with a task queue and condition variable", "languages": ["cpp"], "expect": ["condition_variable|std::condition_variable", "notify_one|notify_all"]},
+
+  {"id": "py-subcommands", "query": "command line interface with subcommands using argparse", "languages": ["python"], "expect": ["add_subparsers"]},
+  {"id": "py-csv-dicts", "query": "read a CSV file as a list of dictionaries", "languages": ["python"], "expect": ["DictReader"]},
+  {"id": "py-sha256-file", "query": "SHA-256 of a large file read in chunks", "languages": ["python"], "expect": ["sha256", "read"]},
+  {"id": "py-download-progress", "query": "download a large file in chunks with requests", "languages": ["python"], "expect": ["iter_content"]},
+  {"id": "py-async-limit", "query": "run many async tasks at once with a concurrency limit", "languages": ["python"], "expect": ["Semaphore", "gather"]},
+  {"id": "py-subprocess-output", "query": "run a shell command and capture its output", "languages": ["python"], "expect": ["subprocess", "check_output|capture_output|PIPE"]},
+  {"id": "py-retry-backoff", "query": "retry a function with exponential backoff", "languages": ["python"], "expect": ["sleep"]},
+  {"id": "py-sqlite-query", "query": "query a SQLite database with parameters", "languages": ["python"], "expect": ["sqlite3", "execute"]},
+
+  {"id": "js-debounce", "query": "debounce a function", "languages": ["javascript", "typescript"], "expect": ["setTimeout", "clearTimeout"]},
+  {"id": "js-clipboard", "query": "copy text to the clipboard in the browser", "languages": ["javascript", "typescript"], "expect": ["writeText|execCommand"]},
+  {"id": "js-readline", "query": "read a file line by line in Node.js", "languages": ["javascript", "typescript"], "expect": ["createInterface"]},
+  {"id": "js-fetch-timeout", "query": "fetch with a timeout that aborts the request", "languages": ["javascript", "typescript"], "expect": ["AbortController", "setTimeout"]},
+  {"id": "js-visible", "query": "detect when an element scrolls into view", "languages": ["javascript", "typescript"], "expect": ["IntersectionObserver"]},
+  {"id": "js-websocket-reconnect", "query": "reconnect a WebSocket after it closes", "languages": ["javascript", "typescript"], "expect": ["WebSocket", "onclose|close"]},
+
+  {"id": "go-graceful-shutdown", "query": "shut down an HTTP server gracefully on interrupt", "languages": ["go"], "expect": ["Shutdown", "Notify|NotifyContext"]},
+  {"id": "go-json-body", "query": "decode a JSON request body into a struct", "languages": ["go"], "expect": ["NewDecoder", "Decode"]},
+  {"id": "go-worker-pool", "query": "worker pool of goroutines and wait for all of them", "languages": ["go"], "expect": ["WaitGroup"]},
+  {"id": "go-request-timeout", "query": "HTTP request with a context timeout", "languages": ["go"], "expect": ["WithTimeout", "NewRequestWithContext"]},
+
+  {"id": "rust-threads-mutex", "query": "share state between threads with a mutex", "languages": ["rust"], "expect": ["Arc", "Mutex", "spawn"]},
+  {"id": "rust-read-file", "query": "read a whole file into a string", "languages": ["rust"], "expect": ["read_to_string"]},
+  {"id": "rust-json", "query": "serialize a struct to JSON", "languages": ["rust"], "expect": ["serde_json", "to_string|to_string_pretty|to_writer|to_vec"]},
+  {"id": "rust-tcp-server", "query": "TCP server accepting connections with tokio", "languages": ["rust"], "expect": ["TcpListener", "accept"]},
+
+  {"id": "java-read-lines", "query": "read all lines of a text file", "languages": ["java"], "expect": ["readAllLines|readLine|lines"]},
+  {"id": "java-periodic-task", "query": "run a task periodically on a scheduler", "languages": ["java"], "expect": ["scheduleAtFixedRate|scheduleWithFixedDelay"]},
+  {"id": "java-http-get", "query": "send an HTTP GET request and read the response body", "languages": ["java"], "expect": ["HttpClient|HttpURLConnection", "getInputStream|send|body"]},
+  {"id": "java-sha256", "query": "SHA-256 hash of a string as hex", "languages": ["java"], "expect": ["MessageDigest", "digest"]},
+
+  {"id": "rtp-jitter", "query": "RTP interarrival jitter estimate as in RFC 3550", "expect": ["jitter", "transit"]},
+  {"id": "rtp-header", "query": "parse the fixed header of an RTP packet: version, payload type, sequence number, timestamp, SSRC", "expect": ["ssrc|SSRC|Ssrc"]},
+  {"id": "g711-ulaw", "query": "decode G.711 mu-law samples to 16-bit linear PCM", "expect": ["ulaw|mulaw|ulaw2linear|ulaw_to_linear|mulaw_decode|ulaw_decode"]}
+ ]
+}

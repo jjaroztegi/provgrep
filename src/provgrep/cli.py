@@ -29,13 +29,20 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--count", type=int, default=300, help="packages to pin (default: 300)")
     p.add_argument("--out", type=Path, default=Path("truth/debian-python.json"))
 
-    p = commands.add_parser(
-        "evaluate", help="measure the resolved licenses against the pinned ground-truth set"
+    evaluate = commands.add_parser("evaluate", help="measure licenses or search").add_subparsers(
+        dest="target", required=True
+    )
+    p = evaluate.add_parser(
+        "licenses", help="the resolved licenses against the pinned Debian ground-truth set"
     )
     p.add_argument("--set", type=Path, default=Path("truth/debian-python.json"))
     p.add_argument("--audit", type=Path, default=Path("truth/debian-python-audit.json"))
     p.add_argument("--limit", type=int, help="only the first N packages of the set")
     p.add_argument("--jobs", type=int, default=4, help="packages resolved at once (default: 4)")
+    p.add_argument("--out", type=Path, default=Path("results"))
+    p = evaluate.add_parser("search", help="search against suites of intents")
+    p.add_argument("suites", type=Path, nargs="*", default=sorted(Path("truth/intents").glob("*")))
+    p.add_argument("--index", type=Path, default=Path("index/github"))
     p.add_argument("--out", type=Path, default=Path("results"))
 
     p = commands.add_parser(
@@ -128,11 +135,17 @@ def main(argv: list[str] | None = None) -> int:
         from provgrep.debian import pin
 
         print(f"pinned {pin(args.snapshot, args.count, args.out)} packages in {args.out}")
-    else:
-        from provgrep.evaluate import evaluate
+    elif args.target == "licenses":
+        from provgrep.evaluate import evaluate as evaluate_licenses
 
-        out = evaluate(args.set, args.audit, args.out, args.limit, args.jobs)
+        out = evaluate_licenses(args.set, args.audit, args.out, args.limit, args.jobs)
         print((out / "summary.md").read_text(encoding="utf-8").split("\n")[2])
+        print(f"details in {out}")
+    else:
+        from provgrep.intents import evaluate as evaluate_search
+
+        out = evaluate_search(args.suites, args.index, args.out)
+        print((out / "summary.md").read_text(encoding="utf-8"))
         print(f"details in {out}")
     return 0
 

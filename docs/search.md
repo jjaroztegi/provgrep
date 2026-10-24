@@ -56,3 +56,10 @@ either: `--require XRenderCreatePicture` in the command line, `require=` in the 
 case and underscores aside (`parse_rtp_header` is `parseRtpHeader`) but not a part: `wait` does
 not match `epoll_wait`.
 
+## Measuring it
+
+`provgrep evaluate search` runs the suites in `truth/intents/`. An intent is a question and the
+identifiers a right answer's code contains; a result is a hit when its code has all of them.
+That grades without anyone reading results, but a hit is not proof of the best answer: the
+summary lists them to be read. Coverage counts the snippets that contain the identifiers at all,
+so a miss can be told from a corpus without the answer.

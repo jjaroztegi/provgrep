@@ -24,7 +24,7 @@ Needs [uv](https://docs.astral.sh/uv/) and Python 3.14.
 
 ```sh
 uv run provgrep license PATH       # the license of every code file under PATH
-uv run provgrep evaluate --jobs 8  # the measurement above: ~630 MB of downloads, a few minutes
+uv run provgrep evaluate licenses --jobs 8  # the measurement above: ~630 MB of downloads, ~1 min
 ```
 
 Licenses are as detected, with their evidence. They are not legal advice.
