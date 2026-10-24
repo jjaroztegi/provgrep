@@ -100,3 +100,9 @@ def test_notices(tmp_path: Path) -> None:
     assert resolved["a.c"].expression == "GPL-3.0-only"
     assert resolved["a.c"].notices == ()  # not the FSF's, which is on the license text
     assert resolved["b.c"].notices == ("Copyright (c) 2021 Jane Doe",)  # no email address
+
+    # A copy of the GPL-2.0 with the FSF's old address matches a variant rule, not gpl-2.0.LICENSE.
+    rules = Path(licensedcode.__file__).parent / "data" / "rules"
+    variant = (rules / "gpl-2.0_temple_variant.RULE").read_text(encoding="utf-8").split("---", 2)[2]
+    (tmp_path / "COPYING").write_text(variant)
+    assert resolve_tree(tmp_path)["a.c"].notices == ()

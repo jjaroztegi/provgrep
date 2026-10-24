@@ -28,7 +28,7 @@ from typing import Any
 
 from cluecode.copyrights import detect_copyrights_from_lines
 from license_expression import LicenseWithExceptionSymbol, Licensing, get_spdx_licensing
-from licensedcode.cache import get_licenses_db
+from licensedcode.cache import get_index, get_licenses_db
 from scancode.api import get_licenses, get_package_data
 
 from provgrep import without_emails
@@ -258,9 +258,16 @@ def _detect(text: str, approximate: bool = True) -> tuple[str | None, Lines]:
         (m["start_line"], m["end_line"])
         for d in detections
         for m in d["matches"]
-        if m["rule_identifier"].endswith(".LICENSE")  # ScanCode's rule for a license's own text
+        if m["rule_identifier"] in _license_texts()
     )
     return _combine(d["license_expression_spdx"] for d in detections), whole
+
+
+@cache
+def _license_texts() -> frozenset[str]:
+    """ScanCode rules that are the whole text of a license: its canonical `*.LICENSE` and the
+    variants a project's copy matches instead (`gpl-2.0_temple_variant.RULE`, the old address)."""
+    return frozenset(r.identifier for r in get_index().rules_by_rid if r.is_license_text)
 
 
 @lru_cache(maxsize=1 << 16)
