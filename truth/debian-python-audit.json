@@ -1,0 +1,43 @@
+{
+ "about": "Files provgrep shows as permissive while debian/copyright records another license, each read by hand. verdict: debian-stale (upstream relicensed since Debian recorded it), debian-coarse (the files carry their own notice, which DEP-5 does not list), provgrep-wrong.",
+ "entries": [
+  {
+   "package": "aioacaia",
+   "paths": ["*"],
+   "verdict": "debian-stale",
+   "why": "The tarball's LICENSE and pyproject.toml say MIT; upstream moved from AGPL-3.0 to MIT in 2026, and debian/copyright still says AGPL-3.",
+   "source": "https://github.com/zweckj/aioacaia/commits/main/LICENSE"
+  },
+  {
+   "package": "yalexs-ble",
+   "paths": ["*"],
+   "verdict": "debian-stale",
+   "why": "The tarball's LICENSE and pyproject.toml say Apache-2.0; upstream relicensed from GPL-3.0 on 2026-08-17, and debian/copyright still says GPL-3.",
+   "source": "https://github.com/bdraco/yalexs-ble/pull/380"
+  },
+  {
+   "package": "libnbd",
+   "paths": ["common/*", "lib/nbd-protocol.h", "tests/make-pki.sh"],
+   "verdict": "debian-coarse",
+   "why": "Each file's header is the BSD-3-Clause notice; DEP-5 gives LGPL-2.0+ to everything outside */examples/*."
+  },
+  {
+   "package": "libnbd",
+   "paths": ["golang/callbacks.go"],
+   "verdict": "debian-coarse",
+   "why": "The header is the MIT notice of the libvirt-go project the code comes from."
+  },
+  {
+   "package": "libiio",
+   "paths": ["deps/mdns/*", "deps/wingetopt/*"],
+   "verdict": "debian-coarse",
+   "why": "Vendored libraries, each with its own LICENSE beside it (Unlicense; BSD-2-Clause, ISC-style and public domain) and matching headers; DEP-5 gives LGPL-2.1+ to the whole tree."
+  },
+  {
+   "package": "libiio",
+   "paths": ["iiod/queue.h"],
+   "verdict": "debian-coarse",
+   "why": "The header is the BSD-3-Clause notice of the BSD sys/queue.h it was copied from."
+  }
+ ]
+}

@@ -1,0 +1,4809 @@
+{
+ "snapshot": "20261024T000000Z",
+ "sources": {
+  "url": "https://snapshot.debian.org/archive/debian/20261024T000000Z/dists/unstable/main/source/Sources.xz",
+  "sha256": "bfba6fd64c37bd40e7de0709911b6b7c7e8ee4d8e69e69ae1c47d1b7e1d244b4"
+ },
+ "packages": [
+  {
+   "name": "gmplot",
+   "version": "1.4.1-1",
+   "directory": "pool/main/g/gmplot",
+   "homepage": "https://github.com/vgm64/gmplot",
+   "orig": {
+    "name": "gmplot_1.4.1.orig.tar.gz",
+    "sha256": "4073dd6d963bd1b4a489b8fe7c8c730e4a4d3f8d18d0f85ea933723a4efec2c9",
+    "size": 21466976
+   },
+   "debian": {
+    "name": "gmplot_1.4.1-1.debian.tar.xz",
+    "sha256": "529e4fdaa9f886b01a9147660f28755daa2a2d1e74de94fd4a34cf80687a7f26",
+    "size": 2684
+   }
+  },
+  {
+   "name": "asfsmd",
+   "version": "1.4.1-2",
+   "directory": "pool/main/a/asfsmd",
+   "homepage": "https://github.com/avalentino/asfsmd",
+   "orig": {
+    "name": "asfsmd_1.4.1.orig.tar.gz",
+    "sha256": "1fd6715237688a1908d63942350fb9a092994c5c38123360a72609ad1125b7f8",
+    "size": 15645
+   },
+   "debian": {
+    "name": "asfsmd_1.4.1-2.debian.tar.xz",
+    "sha256": "e8378c37e03e665105eb92d9e25f2c6cc31d658c5126ce5ddcea05b6c47e1997",
+    "size": 4328
+   }
+  },
+  {
+   "name": "python-datrie",
+   "version": "0.8.3-2",
+   "directory": "pool/main/p/python-datrie",
+   "homepage": "https://github.com/pytries/datrie",
+   "orig": {
+    "name": "python-datrie_0.8.3.orig.tar.gz",
+    "sha256": "ea021ad4c8a8bf14e08a71c7872a622aa399a510f981296825091c7ca0436e80",
+    "size": 499040
+   },
+   "debian": {
+    "name": "python-datrie_0.8.3-2.debian.tar.xz",
+    "sha256": "a3380b433345df3ff40c9de22736cc035b5f930086829bedd62a4c47807b703a",
+    "size": 4972
+   }
+  },
+  {
+   "name": "flask-security",
+   "version": "5.9.1-1",
+   "directory": "pool/main/f/flask-security",
+   "homepage": "https://github.com/pallets-eco/flask-security",
+   "orig": {
+    "name": "flask-security_5.9.1.orig.tar.gz",
+    "sha256": "4347a7d39cd485abfe17d73073c48b6a20148fa6612a276070e4add83b0ee1dc",
+    "size": 722746
+   },
+   "debian": {
+    "name": "flask-security_5.9.1-1.debian.tar.xz",
+    "sha256": "279f9ce4ca0620420a66a419afdc79bdc806dd01286817c147fce16d5a077f5a",
+    "size": 6688
+   }
+  },
+  {
+   "name": "magics-python",
+   "version": "2:1.5.8-3",
+   "directory": "pool/main/m/magics-python",
+   "homepage": "https://github.com/ecmwf/magics-python",
+   "orig": {
+    "name": "magics-python_1.5.8.orig.tar.xz",
+    "sha256": "7ef6a117cf1c2bb234635f7308d93c2438d94576fc1bee466d5c74c11a350d3e",
+    "size": 238632
+   },
+   "debian": {
+    "name": "magics-python_1.5.8-3.debian.tar.xz",
+    "sha256": "9ddac43d610cf8b8de7be56ddf96b6a8227516282d4599d7c763d8a5d3860fd8",
+    "size": 2780
+   }
+  },
+  {
+   "name": "python-aiosenz",
+   "version": "1.0.0-2",
+   "directory": "pool/main/p/python-aiosenz",
+   "homepage": "https://github.com/milanmeu/aiosenz",
+   "orig": {
+    "name": "python-aiosenz_1.0.0.orig.tar.xz",
+    "sha256": "9efb523124e15ca9a66fc892f25a1137d601c2c1af275d303b117f02407b0d5c",
+    "size": 17916
+   },
+   "debian": {
+    "name": "python-aiosenz_1.0.0-2.debian.tar.xz",
+    "sha256": "be64107c5ec46c2fd1c743e1b0021315d1c67afb03cf4478507d275115fb7bec",
+    "size": 1836
+   }
+  },
+  {
+   "name": "python-pyeclib",
+   "version": "1.7.0-3",
+   "directory": "pool/main/p/python-pyeclib",
+   "homepage": "https://github.com/openstack/pyeclib",
+   "orig": {
+    "name": "python-pyeclib_1.7.0.orig.tar.xz",
+    "sha256": "08c3a47643a1fa3d3b75abd474d49c5502524695923a4e2e603a232d248539f9",
+    "size": 5990192
+   },
+   "debian": {
+    "name": "python-pyeclib_1.7.0-3.debian.tar.xz",
+    "sha256": "0316b2bbdd15b80a41a4ca281e0c8a179e89ee00e95a157c6de9cdde97a694ad",
+    "size": 4948
+   }
+  },
+  {
+   "name": "freenub",
+   "version": "0.1.2-1",
+   "directory": "pool/main/f/freenub",
+   "homepage": "https://github.com/bdraco/freenub",
+   "orig": {
+    "name": "freenub_0.1.2.orig.tar.gz",
+    "sha256": "e3fc37c81297672d835d368f3643833230ad03074fca29b619e903967c4a5e5d",
+    "size": 134065
+   },
+   "debian": {
+    "name": "freenub_0.1.2-1.debian.tar.xz",
+    "sha256": "61a1655fede5f90d6981b39971f56015340e1521e005695bef29f18e6b8b7c8b",
+    "size": 2472
+   }
+  },
+  {
+   "name": "python-aio-wattwaechter",
+   "version": "1.2.0-1",
+   "directory": "pool/main/p/python-aio-wattwaechter",
+   "homepage": "https://github.com/SmartCircuits-GmbH/WattWaechter-PyPI",
+   "orig": {
+    "name": "python-aio-wattwaechter_1.2.0.orig.tar.xz",
+    "sha256": "887b2386f2abeaf0d1e41adace2eac25ca22889bcb6e8019a149bddb167f3157",
+    "size": 31436
+   },
+   "debian": {
+    "name": "python-aio-wattwaechter_1.2.0-1.debian.tar.xz",
+    "sha256": "6fe6e66dd0a200571878ca2cc82a2638786199ea67c1958b3cf49e2d68e6711f",
+    "size": 2096
+   }
+  },
+  {
+   "name": "pymarkups",
+   "version": "4.1.1-2",
+   "directory": "pool/main/p/pymarkups",
+   "homepage": "https://github.com/retext-project/pymarkups",
+   "orig": {
+    "name": "pymarkups_4.1.1.orig.tar.gz",
+    "sha256": "d0284b14fe046037cb0473f08d5c63556042c14c5ed65379e81982afeb55bc21",
+    "size": 22985
+   },
+   "debian": {
+    "name": "pymarkups_4.1.1-2.debian.tar.xz",
+    "sha256": "85c18b1d58c4726915088e4153491fb865135487b8a0e23cbca1dcbca1cccb7a",
+    "size": 4668
+   }
+  },
+  {
+   "name": "python-shopifyapi",
+   "version": "12.7.0-3",
+   "directory": "pool/main/p/python-shopifyapi",
+   "homepage": "https://github.com/Shopify/shopify_python_api",
+   "orig": {
+    "name": "python-shopifyapi_12.7.0.orig.tar.gz",
+    "sha256": "d7a903eb8df659aba4b8dce6ad3d8dec0395b1a5f353bf59299eda6aa4fac289",
+    "size": 33676
+   },
+   "debian": {
+    "name": "python-shopifyapi_12.7.0-3.debian.tar.xz",
+    "sha256": "1a7c40c2527fcf98a8723a0424d82f2aca47ab904c777c2fd78c74d7dad8852a",
+    "size": 3344
+   }
+  },
+  {
+   "name": "cyarray",
+   "version": "1.2-1",
+   "directory": "pool/main/c/cyarray",
+   "homepage": "https://github.com/pypr/cyarray",
+   "orig": {
+    "name": "cyarray_1.2.orig.tar.gz",
+    "sha256": "6c06d63c1b413eb8631d5089fe1e75e9cf0c931bb8f1254a7df7fe8f68624f18",
+    "size": 23860
+   },
+   "debian": {
+    "name": "cyarray_1.2-1.debian.tar.xz",
+    "sha256": "c0e8a3d6094bed02d6ede3a05aad77e8798f7f9ba1601f1dda03a7e4ccf30846",
+    "size": 4716
+   }
+  },
+  {
+   "name": "rpyc",
+   "version": "6.0.2-1",
+   "directory": "pool/main/r/rpyc",
+   "homepage": "https://github.com/tomerfiliba-org/rpyc",
+   "orig": {
+    "name": "rpyc_6.0.2.orig.tar.gz",
+    "sha256": "8395a9cc3a213ac4ff9952691036a0a52d36f4585a2ac8aaa8894aedd05e81a6",
+    "size": 1274507
+   },
+   "debian": {
+    "name": "rpyc_6.0.2-1.debian.tar.xz",
+    "sha256": "217bac26dd1e0c54c9bd13c031c4cb22e0646cca67abbb1363029472bc1d51fb",
+    "size": 6884
+   }
+  },
+  {
+   "name": "python-opentelemetry",
+   "version": "1.45.1-1",
+   "directory": "pool/main/p/python-opentelemetry",
+   "homepage": "https://github.com/open-telemetry/opentelemetry-python",
+   "orig": {
+    "name": "python-opentelemetry_1.45.1.orig.tar.gz",
+    "sha256": "fcf4658d58baa473970fb9e8a1045b5ec886dbb497b27649900a07b6ac1cb884",
+    "size": 1701157
+   },
+   "debian": {
+    "name": "python-opentelemetry_1.45.1-1.debian.tar.xz",
+    "sha256": "d80fc5b773e2531cfcc20f99688cf1395a8281127c925425d7082a353172fa7f",
+    "size": 10496
+   }
+  },
+  {
+   "name": "biomaj3-download",
+   "version": "3.2.12-4",
+   "directory": "pool/main/b/biomaj3-download",
+   "homepage": "https://github.com/genouest/biomaj-download",
+   "orig": {
+    "name": "biomaj3-download_3.2.12.orig.tar.xz",
+    "sha256": "bfdb8e613f4f1e142fb7166a0bd7a7e1c49f06b9cfe179a65b279dfb4ba4b4af",
+    "size": 51764
+   },
+   "debian": {
+    "name": "biomaj3-download_3.2.12-4.debian.tar.xz",
+    "sha256": "ad38457abc772fa07c93d6841e86c738ce7f725e4b50af085318e572fb87daed",
+    "size": 14860
+   }
+  },
+  {
+   "name": "django-guardian",
+   "version": "3.5.0-1",
+   "directory": "pool/main/d/django-guardian",
+   "homepage": "https://github.com/lukaszb/django-guardian",
+   "orig": {
+    "name": "django-guardian_3.5.0.orig.tar.gz",
+    "sha256": "90e6df3c82fbdec98a60694ad805aa1eba4a5b48c17801edf992fa314fe650f0",
+    "size": 317486
+   },
+   "debian": {
+    "name": "django-guardian_3.5.0-1.debian.tar.xz",
+    "sha256": "c95df42a5851a9678845b4069e0c3009ac17126861e3f395f4283128a98f3fd1",
+    "size": 31544
+   }
+  },
+  {
+   "name": "cookiecutter",
+   "version": "2.6.0-2",
+   "directory": "pool/main/c/cookiecutter",
+   "homepage": "https://github.com/cookiecutter/cookiecutter",
+   "orig": {
+    "name": "cookiecutter_2.6.0.orig.tar.gz",
+    "sha256": "da014a94d85c1b1be14be214662982c8c90d860834cbf9ddb2391a37ad7d08be",
+    "size": 277486
+   },
+   "debian": {
+    "name": "cookiecutter_2.6.0-2.debian.tar.xz",
+    "sha256": "eaf49b7b6e45f8c799996d063f479d66a88648fabf9b4f223b2472037b2aac86",
+    "size": 7200
+   }
+  },
+  {
+   "name": "python-b2sdk",
+   "version": "2.10.2-1",
+   "directory": "pool/main/p/python-b2sdk",
+   "homepage": "https://github.com/Backblaze/b2-sdk-python",
+   "orig": {
+    "name": "python-b2sdk_2.10.2.orig.tar.gz",
+    "sha256": "0871f1a54532725df19a877152b2937690174b119c08ab2fef652562ff7b321d",
+    "size": 431919
+   },
+   "debian": {
+    "name": "python-b2sdk_2.10.2-1.debian.tar.xz",
+    "sha256": "952c1a45caf9bda618707dad7331e1842a0d76a9a0e0cc75a300b01118221ee8",
+    "size": 5852
+   }
+  },
+  {
+   "name": "python-sfdlib",
+   "version": "1.2.5.8.g06e25bc-3",
+   "directory": "pool/main/p/python-sfdlib",
+   "homepage": "https://github.com/MFEK/sfdLib.py",
+   "orig": {
+    "name": "python-sfdlib_1.2.5.8.g06e25bc.orig.tar.xz",
+    "sha256": "e40fd7da7f9b30b50cb6a5ba28624ed21d850652c978c64c34abe04463b8e619",
+    "size": 14580
+   },
+   "debian": {
+    "name": "python-sfdlib_1.2.5.8.g06e25bc-3.debian.tar.xz",
+    "sha256": "86ae53afb934eb198af431c4f755d8ab75742b1403959f01340dd6af0e86c7b6",
+    "size": 2520
+   }
+  },
+  {
+   "name": "python-pgq",
+   "version": "3.8-1",
+   "directory": "pool/main/p/python-pgq",
+   "homepage": "https://github.com/pgq/python-pgq",
+   "orig": {
+    "name": "python-pgq_3.8.orig.tar.gz",
+    "sha256": "4e58e3208be20f17ba0ba9cc743126e75e2fc5386120b45d6ec2223fcd840f7c",
+    "size": 44885
+   },
+   "debian": {
+    "name": "python-pgq_3.8-1.debian.tar.xz",
+    "sha256": "fbeda8ea6401887e4d634b07c88b2493b273df0d7462de7d3258f0759ad41937",
+    "size": 2444
+   }
+  },
+  {
+   "name": "typogrify",
+   "version": "1:2.0.7-5",
+   "directory": "pool/main/t/typogrify",
+   "homepage": "https://github.com/justinmayer/typogrify",
+   "orig": {
+    "name": "typogrify_2.0.7.orig.tar.gz",
+    "sha256": "8be4668cda434163ce229d87ca273a11922cb1614cb359970b7dc96eed13cb38",
+    "size": 12903
+   },
+   "debian": {
+    "name": "typogrify_2.0.7-5.debian.tar.xz",
+    "sha256": "9a95f8a7a7bfde79c63bdd8886992a08ad67a5541b80bdc1ce689c8e490f1869",
+    "size": 4244
+   }
+  },
+  {
+   "name": "sphinxcontrib-pecanwsme",
+   "version": "0.11.0-2",
+   "directory": "pool/main/s/sphinxcontrib-pecanwsme",
+   "homepage": "https://github.com/dreamhost/sphinxcontrib-pecanwsme",
+   "orig": {
+    "name": "sphinxcontrib-pecanwsme_0.11.0.orig.tar.xz",
+    "sha256": "d61f913a6cd825cb8af228aba762a9b2b7c4567e439af026d3d74221c732a906",
+    "size": 8008
+   },
+   "debian": {
+    "name": "sphinxcontrib-pecanwsme_0.11.0-2.debian.tar.xz",
+    "sha256": "7bcd29aae3cbc7815c70d7089a4ea395022336eb3f0be5314df1b8be8104eeb6",
+    "size": 3156
+   }
+  },
+  {
+   "name": "sphinx-mdinclude",
+   "version": "0.6.2-2",
+   "directory": "pool/main/s/sphinx-mdinclude",
+   "homepage": "https://github.com/omnilib/sphinx-mdinclude",
+   "orig": {
+    "name": "sphinx-mdinclude_0.6.2.orig.tar.gz",
+    "sha256": "7381a7c510df05ce30bad5e68a03a576d41dbc0d215f89609498a9a1f7e66800",
+    "size": 62125
+   },
+   "debian": {
+    "name": "sphinx-mdinclude_0.6.2-2.debian.tar.xz",
+    "sha256": "dc56bb28ff516a999f4598b820b458c9266545d63e0339de257bd8c16e8a15b9",
+    "size": 4864
+   }
+  },
+  {
+   "name": "pynx584",
+   "version": "0.8.2-4",
+   "directory": "pool/main/p/pynx584",
+   "homepage": "https://github.com/kk7ds/pynx584",
+   "orig": {
+    "name": "pynx584_0.8.2.orig.tar.gz",
+    "sha256": "23fcee5caca759d4269c24d76773b0f12f8c7e89b04ba8ce15353a848f1d163d",
+    "size": 32014
+   },
+   "debian": {
+    "name": "pynx584_0.8.2-4.debian.tar.xz",
+    "sha256": "3c0dec5a24384ff0b3bbcbb8ab1b62450240e74e137ec1b1c997a85d3de62527",
+    "size": 2844
+   }
+  },
+  {
+   "name": "python-markdown-include",
+   "version": "0.8.1-2",
+   "directory": "pool/main/p/python-markdown-include",
+   "homepage": "https://github.com/cmacmackin/markdown-include",
+   "orig": {
+    "name": "python-markdown-include_0.8.1.orig.tar.gz",
+    "sha256": "4a92c09ed36fa0cf5ec3afcdf75e062f915e66d472811e99c1536135f429010f",
+    "size": 20471
+   },
+   "debian": {
+    "name": "python-markdown-include_0.8.1-2.debian.tar.xz",
+    "sha256": "31b6188056f50884478abfc96ecf4505918ad802c8df1d02ff348bf963d8af29",
+    "size": 3380
+   }
+  },
+  {
+   "name": "python-sparkpost",
+   "version": "1.3.10-6",
+   "directory": "pool/main/p/python-sparkpost",
+   "homepage": "https://github.com/SparkPost/python-sparkpost",
+   "orig": {
+    "name": "python-sparkpost_1.3.10.orig.tar.gz",
+    "sha256": "c09c24c4fba13034f0fe97fc5e6271d6cb0865ad80263d5dc9416295e169dd7e",
+    "size": 36086
+   },
+   "debian": {
+    "name": "python-sparkpost_1.3.10-6.debian.tar.xz",
+    "sha256": "7018973fea1a9148e12c2961bd35522e95be65c716be5983ad49da08e9ae8ad5",
+    "size": 3992
+   }
+  },
+  {
+   "name": "python-jsbeautifier",
+   "version": "2.0.3-1",
+   "directory": "pool/main/p/python-jsbeautifier",
+   "homepage": "https://github.com/beautify-web/js-beautify",
+   "orig": {
+    "name": "python-jsbeautifier_2.0.3.orig.tar.gz",
+    "sha256": "9579d4e9dbaa00383f3efdff4c98c8140bb85ba319398e8b97cdaba27abd6ba3",
+    "size": 74659
+   },
+   "debian": {
+    "name": "python-jsbeautifier_2.0.3-1.debian.tar.xz",
+    "sha256": "2c0d68088a262478a057ab9cc9991aa7ae95d4f5a892dbbaa685d13ee5575ec8",
+    "size": 6052
+   }
+  },
+  {
+   "name": "pybalboa",
+   "version": "1.1.3-3",
+   "directory": "pool/main/p/pybalboa",
+   "homepage": "https://github.com/garbled1/pybalboa",
+   "orig": {
+    "name": "pybalboa_1.1.3.orig.tar.gz",
+    "sha256": "64a51cec32faba78fb7c90c9bedfd1880f7dfa50213a8b684ed9b9207ef1b3a8",
+    "size": 39098
+   },
+   "debian": {
+    "name": "pybalboa_1.1.3-3.debian.tar.xz",
+    "sha256": "02d0ee346f4f295fecc9fd8b044e258e052d6ba59969b217fe9e65e03c64ef10",
+    "size": 2352
+   }
+  },
+  {
+   "name": "subvertpy",
+   "version": "0.11.1-2",
+   "directory": "pool/main/s/subvertpy",
+   "homepage": "https://github.com/jelmer/subvertpy",
+   "orig": {
+    "name": "subvertpy_0.11.1.orig.tar.gz",
+    "sha256": "6503d4cf34efca6b4a5e51dc7ea9806e08fdf983b07a55708f681df5e525722b",
+    "size": 126358
+   },
+   "debian": {
+    "name": "subvertpy_0.11.1-2.debian.tar.xz",
+    "sha256": "35032c1bb1e7b101a1ad259ad7eccdbb805f67eb39580d6391eb211056b7d530",
+    "size": 6796
+   }
+  },
+  {
+   "name": "python-pystow",
+   "version": "0.9.8-1",
+   "directory": "pool/main/p/python-pystow",
+   "homepage": "https://github.com/cthoyt/pystow/",
+   "orig": {
+    "name": "python-pystow_0.9.8.orig.tar.gz",
+    "sha256": "e66a9f4a5c98b87db202bf792d9706a38920c001ef6ff3049907e2dcd55f50e9",
+    "size": 89822
+   },
+   "debian": {
+    "name": "python-pystow_0.9.8-1.debian.tar.xz",
+    "sha256": "4d5c7ef7d953f0267fb9d86983de17d775e94f1b505b2e521d7dd22714570dbe",
+    "size": 3024
+   }
+  },
+  {
+   "name": "ormar",
+   "version": "0.26.0-1",
+   "directory": "pool/main/o/ormar",
+   "homepage": "https://github.com/collerek/ormar",
+   "orig": {
+    "name": "ormar_0.26.0.orig.tar.gz",
+    "sha256": "bc8a653b16d896787da45441aa4bdb66901bd87b6259a8a9337549f38a6ad12f",
+    "size": 473364
+   },
+   "debian": {
+    "name": "ormar_0.26.0-1.debian.tar.xz",
+    "sha256": "a54e77fa13584a61281deefdbbdc713058f384ba29737c0d89872235683d6679",
+    "size": 5296
+   }
+  },
+  {
+   "name": "sphinxcontrib-runcmd",
+   "version": "0.2.0-2",
+   "directory": "pool/main/s/sphinxcontrib-runcmd",
+   "homepage": "https://github.com/invenia/sphinxcontrib-runcmd",
+   "orig": {
+    "name": "sphinxcontrib-runcmd_0.2.0.orig.tar.gz",
+    "sha256": "43ca96b494daab18b4c82d42894a42439db327018fef1ce0d347fd8ecfda3f03",
+    "size": 6627
+   },
+   "debian": {
+    "name": "sphinxcontrib-runcmd_0.2.0-2.debian.tar.xz",
+    "sha256": "8c74c753171e3fef89419cba16786cc149bf320bb0a5f8f887d7b964238df681",
+    "size": 4068
+   }
+  },
+  {
+   "name": "python-depinfo",
+   "version": "2.2.0-4",
+   "directory": "pool/main/p/python-depinfo",
+   "homepage": "https://github.com/Midnighter/dependency-info",
+   "orig": {
+    "name": "python-depinfo_2.2.0.orig.tar.gz",
+    "sha256": "b1695c11a2acc1e25ed2d1e42411f2e75771955941bb8c6e8936a33a6a36854d",
+    "size": 22074
+   },
+   "debian": {
+    "name": "python-depinfo_2.2.0-4.debian.tar.xz",
+    "sha256": "f7702db3711ea87e442f40ef8c303b9f051d1d9d17565cb7715539864ddb6191",
+    "size": 17168
+   }
+  },
+  {
+   "name": "django-webpack-loader",
+   "version": "0.6.0-5",
+   "directory": "pool/main/d/django-webpack-loader",
+   "homepage": "https://github.com/owais/django-webpack-loader",
+   "orig": {
+    "name": "django-webpack-loader_0.6.0.orig.tar.gz",
+    "sha256": "60bab6b9a037a5346fad12d2a70a6bc046afb33154cf75ed640b93d3ebd5f520",
+    "size": 17385
+   },
+   "debian": {
+    "name": "django-webpack-loader_0.6.0-5.debian.tar.xz",
+    "sha256": "a0116616207273cfc321fa048a22c26ac4ed8ccf4c66d4c73c4005f3bf55f5a0",
+    "size": 2720
+   }
+  },
+  {
+   "name": "python-x3dh",
+   "version": "1.3.0-1",
+   "directory": "pool/main/p/python-x3dh",
+   "homepage": "https://github.com/Syndace/python-x3dh",
+   "orig": {
+    "name": "python-x3dh_1.3.0.orig.tar.xz",
+    "sha256": "1d993584eae1d9b91ac61ca639668eb68a0d018495d254edc20c753b15057401",
+    "size": 41800
+   },
+   "debian": {
+    "name": "python-x3dh_1.3.0-1.debian.tar.xz",
+    "sha256": "21c65a1ea3fe3f86039045a4c28f201979b4bf40a4ea25e3bc408814229d977e",
+    "size": 2824
+   }
+  },
+  {
+   "name": "speaklater",
+   "version": "1.3-7",
+   "directory": "pool/main/s/speaklater",
+   "homepage": "https://github.com/mitsuhiko/speaklater",
+   "orig": {
+    "name": "speaklater_1.3.orig.tar.gz",
+    "sha256": "59fea336d0eed38c1f0bf3181ee1222d0ef45f3a9dd34ebe65e6bfffdd6a65a9",
+    "size": 3582
+   },
+   "debian": {
+    "name": "speaklater_1.3-7.debian.tar.xz",
+    "sha256": "9f6b93fc2cd47333aac3d9b4acdbe9627dca9ee12506e36e727d0267a481e0ab",
+    "size": 5688
+   }
+  },
+  {
+   "name": "python-css-parser",
+   "version": "1.0.10-1",
+   "directory": "pool/main/p/python-css-parser",
+   "homepage": "https://github.com/ebook-utils/css-parser",
+   "orig": {
+    "name": "python-css-parser_1.0.10.orig.tar.xz",
+    "sha256": "44b98a3a5d657817d5d24c0c8c52576a90792f81c1d87ef7772f2215cfa67c14",
+    "size": 274624
+   },
+   "debian": {
+    "name": "python-css-parser_1.0.10-1.debian.tar.xz",
+    "sha256": "66452047e8936863ce7dae20f5f8af0e90eae5648a8cf90b64ea7eb98d493576",
+    "size": 12688
+   }
+  },
+  {
+   "name": "python-isoduration",
+   "version": "20.11.0+git20211126.ae0bd61-3",
+   "directory": "pool/main/p/python-isoduration",
+   "homepage": "https://github.com/bolsote/isoduration",
+   "orig": {
+    "name": "python-isoduration_20.11.0+git20211126.ae0bd61.orig.tar.gz",
+    "sha256": "841f5f657dd5141e733bcb061d41ec9ee5e4f7fd70c0f928fa82fa0cc8a8a3ed",
+    "size": 18201
+   },
+   "debian": {
+    "name": "python-isoduration_20.11.0+git20211126.ae0bd61-3.debian.tar.xz",
+    "sha256": "ef1dcfef29cd80a7847f0b77a0c55a46e17ff03e1274ad2b4ce2feb1f3e27577",
+    "size": 2688
+   }
+  },
+  {
+   "name": "zigpy-zigate",
+   "version": "0.14.0-2",
+   "directory": "pool/main/z/zigpy-zigate",
+   "homepage": "https://github.com/zigpy/zigpy-zigate",
+   "orig": {
+    "name": "zigpy-zigate_0.14.0.orig.tar.xz",
+    "sha256": "db6948f82a55d6bfca0903ba3de2ea4b3066bab9023476be9916af508336ecff",
+    "size": 36804
+   },
+   "debian": {
+    "name": "zigpy-zigate_0.14.0-2.debian.tar.xz",
+    "sha256": "0b02b9048eeb310f7b541e5a2743dc82cad01bcc1c41b46c44d44ace277b3302",
+    "size": 3480
+   }
+  },
+  {
+   "name": "python-fullykiosk",
+   "version": "0.0.16-1",
+   "directory": "pool/main/p/python-fullykiosk",
+   "homepage": "https://github.com/cgarwood/python-fullykiosk",
+   "orig": {
+    "name": "python-fullykiosk_0.0.16.orig.tar.gz",
+    "sha256": "d3500683cb1a41c84ac57d5926ce96999f3b6059403067ee5909d45ec3e6981b",
+    "size": 8699
+   },
+   "debian": {
+    "name": "python-fullykiosk_0.0.16-1.debian.tar.xz",
+    "sha256": "0198caf696d40750f189bc0b70b27b678b78a05c9628237de5b73a1fb83b4a5e",
+    "size": 2204
+   }
+  },
+  {
+   "name": "python-dpkt",
+   "version": "1.9.8-2",
+   "directory": "pool/main/p/python-dpkt",
+   "homepage": "https://github.com/kbandla/dpkt",
+   "orig": {
+    "name": "python-dpkt_1.9.8.orig.tar.gz",
+    "sha256": "9990639e19a9c8f1db4af453b7e6a45ef2995ec03e13bac35b9824839fd46867",
+    "size": 196917
+   },
+   "debian": {
+    "name": "python-dpkt_1.9.8-2.debian.tar.xz",
+    "sha256": "e374491e8b322d840f606ffb56d32014823ad639c7a74f605bbad74ca266f78e",
+    "size": 3716
+   }
+  },
+  {
+   "name": "python-altruistclient",
+   "version": "0.1.1-2",
+   "directory": "pool/main/p/python-altruistclient",
+   "homepage": "https://github.com/LoSk-p/altruistclient",
+   "orig": {
+    "name": "python-altruistclient_0.1.1.orig.tar.xz",
+    "sha256": "74fc19ba721e485a2f87767a35bcf183016b7f8e55a45e9b0a79bfc0d59a5eb0",
+    "size": 32200
+   },
+   "debian": {
+    "name": "python-altruistclient_0.1.1-2.debian.tar.xz",
+    "sha256": "23f92d1a4077a037bc97972bb41aec33f2ce2d26ea6996228929964c17fb3dbd",
+    "size": 2116
+   }
+  },
+  {
+   "name": "python-msgspec",
+   "version": "0.22.0-2",
+   "directory": "pool/main/p/python-msgspec",
+   "homepage": "https://github.com/msgspec/msgspec",
+   "orig": {
+    "name": "python-msgspec_0.22.0.orig.tar.gz",
+    "sha256": "eb4db60bc95842bd0bc9eaab89c29c52a5364804a9693448face7c04ba8fc0c4",
+    "size": 1353265
+   },
+   "debian": {
+    "name": "python-msgspec_0.22.0-2.debian.tar.xz",
+    "sha256": "d536bff4044ca571b18a2f255234cd1a5a8e316bea44393489bafffc7324ca2d",
+    "size": 250984
+   }
+  },
+  {
+   "name": "mimerender",
+   "version": "0.6.0-3",
+   "directory": "pool/main/m/mimerender",
+   "homepage": "https://github.com/martinblech/mimerender",
+   "orig": {
+    "name": "mimerender_0.6.0.orig.tar.gz",
+    "sha256": "e7f1377efee18c3f562cee54907a3329223c824332889fb74b745ddfd0a9b1c6",
+    "size": 5310
+   },
+   "debian": {
+    "name": "mimerender_0.6.0-3.debian.tar.xz",
+    "sha256": "f9837c2c4e4571d35229e5ce942925520ebdfd120f08506cbf9c6516061c6d25",
+    "size": 2548
+   }
+  },
+  {
+   "name": "python-mrcfile",
+   "version": "1.5.4-4",
+   "directory": "pool/main/p/python-mrcfile",
+   "homepage": "https://github.com/ccpem/mrcfile",
+   "orig": {
+    "name": "python-mrcfile_1.5.4.orig.tar.gz",
+    "sha256": "16d8f3dc15dbf5fc0fbe55accad9de053dd2ac8d065a1160ac781cad94a0beef",
+    "size": 52054331
+   },
+   "debian": {
+    "name": "python-mrcfile_1.5.4-4.debian.tar.xz",
+    "sha256": "86bf2ee6c28d20ea7e57ac57c44f2de5b7215e5af41aeb37eab6b2e61c740228",
+    "size": 6144
+   }
+  },
+  {
+   "name": "python-fiscalyear",
+   "version": "0.4.0-2",
+   "directory": "pool/main/p/python-fiscalyear",
+   "homepage": "https://github.com/adamjstewart/fiscalyear",
+   "orig": {
+    "name": "python-fiscalyear_0.4.0.orig.tar.xz",
+    "sha256": "f0d5c110f2c30821052810aa47b7cfd47fd10018fd6b10b6450a2a0afd43d140",
+    "size": 15316
+   },
+   "debian": {
+    "name": "python-fiscalyear_0.4.0-2.debian.tar.xz",
+    "sha256": "180f9405f061f97ee94d9604ee6706fc4bd941ecc9189bcaee03b120f7b2b99c",
+    "size": 2624
+   }
+  },
+  {
+   "name": "python-pubchempy",
+   "version": "1.0.5-1",
+   "directory": "pool/main/p/python-pubchempy",
+   "homepage": "https://github.com/mcs07/PubChemPy",
+   "orig": {
+    "name": "python-pubchempy_1.0.5.orig.tar.gz",
+    "sha256": "e43d63c3c43932eb8b22d77c3cf70eaee6e4ad04b43885ea4e881e8294d3092a",
+    "size": 135104
+   },
+   "debian": {
+    "name": "python-pubchempy_1.0.5-1.debian.tar.xz",
+    "sha256": "816aeba0fd899c211957ea07c03e7f6b074865df7a3c697fe6f09c36e435835b",
+    "size": 2416
+   }
+  },
+  {
+   "name": "pdm-backend",
+   "version": "2.5.0+ds1-1",
+   "directory": "pool/main/p/pdm-backend",
+   "homepage": "https://github.com/pdm-project/pdm-backend",
+   "orig": {
+    "name": "pdm-backend_2.5.0+ds1.orig.tar.xz",
+    "sha256": "30d1537dcc766c1fe2ac5b88c2db923a4fdfaf4d1475921213d5f85731d6636f",
+    "size": 80432
+   },
+   "debian": {
+    "name": "pdm-backend_2.5.0+ds1-1.debian.tar.xz",
+    "sha256": "88fc7ba1428e643ea815f0414881cdc0709f5649ebf92aa21b89997efaf20a28",
+    "size": 6256
+   }
+  },
+  {
+   "name": "python-stack-data",
+   "version": "0.6.3-4",
+   "directory": "pool/main/p/python-stack-data",
+   "homepage": "https://github.com/alexmojaki/stack_data",
+   "orig": {
+    "name": "python-stack-data_0.6.3.orig.tar.gz",
+    "sha256": "836a778de4fec4dcd1dcd89ed8abff8a221f58308462e1c4aa2a3cf30148f0b9",
+    "size": 44707
+   },
+   "debian": {
+    "name": "python-stack-data_0.6.3-4.debian.tar.xz",
+    "sha256": "38cc0ee1d38153096a7e98cc155468cdc14c6ad958a8b6d39b8190d2ace6851c",
+    "size": 6224
+   }
+  },
+  {
+   "name": "aioairzone",
+   "version": "1.0.5-1",
+   "directory": "pool/main/a/aioairzone",
+   "homepage": "https://github.com/Noltari/aioairzone",
+   "orig": {
+    "name": "aioairzone_1.0.5.orig.tar.gz",
+    "sha256": "674bd3fceecc0820fc473e22668f75b6bf40021aa04bc939e9a5ba5d4c3f707b",
+    "size": 271740
+   },
+   "debian": {
+    "name": "aioairzone_1.0.5-1.debian.tar.xz",
+    "sha256": "00f1126750d77e048d61c4688f83849d4f969c3abf50872ff3485388b26f553e",
+    "size": 2424
+   }
+  },
+  {
+   "name": "pyairnow",
+   "version": "1.4.1-1",
+   "directory": "pool/main/p/pyairnow",
+   "homepage": "https://github.com/asymworks/pyairnow",
+   "orig": {
+    "name": "pyairnow_1.4.1.orig.tar.xz",
+    "sha256": "763c40555c43bfa90d9a1f2719cb987758b13108838dbbfa00f672ecab75d8a6",
+    "size": 33724
+   },
+   "debian": {
+    "name": "pyairnow_1.4.1-1.debian.tar.xz",
+    "sha256": "5e296d636001eb2963667fd68ae20a69fa9075a68c5bc506b0fdaf06673bf576",
+    "size": 2464
+   }
+  },
+  {
+   "name": "censys",
+   "version": "2.3.0-2",
+   "directory": "pool/main/c/censys",
+   "homepage": "https://github.com/censys/censys-python",
+   "orig": {
+    "name": "censys_2.3.0.orig.tar.gz",
+    "sha256": "95417f8d98775a93ff81cc295590db9fc8910ce229415654571f69d4902a07c9",
+    "size": 419602
+   },
+   "debian": {
+    "name": "censys_2.3.0-2.debian.tar.xz",
+    "sha256": "031475ebb0c27d83bd1c1c2c56ba2adeaa9a8c5dc1defa9818347b7fadff7c39",
+    "size": 2788
+   }
+  },
+  {
+   "name": "python-yamlfix",
+   "version": "1.19.1-2",
+   "directory": "pool/main/p/python-yamlfix",
+   "homepage": "https://github.com/lyz-code/yamlfix",
+   "orig": {
+    "name": "python-yamlfix_1.19.1.orig.tar.gz",
+    "sha256": "a9381f5fb4de31fc5fac96ea567e635562ebf9d7ef44c845b76557203b0983ac",
+    "size": 182602
+   },
+   "debian": {
+    "name": "python-yamlfix_1.19.1-2.debian.tar.xz",
+    "sha256": "ad328076507c89751dd40255e232fc8d9cf9eae01c97503e7fad625ccc0ff6ea",
+    "size": 8220
+   }
+  },
+  {
+   "name": "python-dicttoxml2",
+   "version": "2.1.0-2",
+   "directory": "pool/main/p/python-dicttoxml2",
+   "homepage": "https://github.com/Ousret/dicttoxml",
+   "orig": {
+    "name": "python-dicttoxml2_2.1.0.orig.tar.gz",
+    "sha256": "d59c633abab041f0e869af64ef561d4dae862da01096b378c3892ba1846f3467",
+    "size": 21125
+   },
+   "debian": {
+    "name": "python-dicttoxml2_2.1.0-2.debian.tar.xz",
+    "sha256": "2d13cfe2b02eb82f866f766104f0b80bdc7bfa1e8c5112085a22b0f68bbe2369",
+    "size": 2288
+   }
+  },
+  {
+   "name": "python-cramjam",
+   "version": "2.12.0+ds1-1",
+   "directory": "pool/main/p/python-cramjam",
+   "homepage": "https://github.com/milesgranger/cramjam",
+   "orig": {
+    "name": "python-cramjam_2.12.0+ds1.orig.tar.xz",
+    "sha256": "91ce09fbd2cd0960887472fe42aa2fdb84ed757677a8ebeb5360f1cbb5fb9717",
+    "size": 56075840
+   },
+   "debian": {
+    "name": "python-cramjam_2.12.0+ds1-1.debian.tar.xz",
+    "sha256": "51dfe2422792fb72f25bbbeff45943bf0d9f4f602e3c379d8e6d40f2eae2222c",
+    "size": 6364
+   }
+  },
+  {
+   "name": "sphinxcontrib-images",
+   "version": "1.0.1-2",
+   "directory": "pool/main/s/sphinxcontrib-images",
+   "homepage": "https://github.com/sphinx-contrib/images",
+   "orig": {
+    "name": "sphinxcontrib-images_1.0.1.orig.tar.gz",
+    "sha256": "c711a29d066e60a8b997e040989ebe8a0e33af94057ab7dec73bf53e0a51575e",
+    "size": 53627
+   },
+   "debian": {
+    "name": "sphinxcontrib-images_1.0.1-2.debian.tar.xz",
+    "sha256": "fe4a853504bafc7c3699da583340131a1f2153722aa5a85379a67ba75dc9cf35",
+    "size": 2520
+   }
+  },
+  {
+   "name": "stevedore",
+   "version": "5.9.1-4",
+   "directory": "pool/main/s/stevedore",
+   "homepage": "https://github.com/openstack/stevedore",
+   "orig": {
+    "name": "stevedore_5.9.1.orig.tar.xz",
+    "sha256": "4b56e1b6aed001669e764e4da4a34e69c7fc3256a947da6f31fd569be0e032bc",
+    "size": 485384
+   },
+   "debian": {
+    "name": "stevedore_5.9.1-4.debian.tar.xz",
+    "sha256": "fda9163c80623111c0e2219fb2cc977028867a93faeb1da6e5648715194750cb",
+    "size": 5456
+   }
+  },
+  {
+   "name": "python-watchdog",
+   "version": "6.0.0-5",
+   "directory": "pool/main/p/python-watchdog",
+   "homepage": "https://github.com/gorakhargosh/watchdog",
+   "orig": {
+    "name": "python-watchdog_6.0.0.orig.tar.gz",
+    "sha256": "313cdbe5dea8fed7bc7a5e498aab146cb4e672602577ca239e7e2b4031f12009",
+    "size": 108680
+   },
+   "debian": {
+    "name": "python-watchdog_6.0.0-5.debian.tar.xz",
+    "sha256": "88f90e167a29c53fa13b566c44e4583ded29f60693dad7bc51ad3514bdfc641a",
+    "size": 6788
+   }
+  },
+  {
+   "name": "wand",
+   "version": "0.7.2-1",
+   "directory": "pool/main/w/wand",
+   "homepage": "https://github.com/emcconville/wand",
+   "orig": {
+    "name": "wand_0.7.2.orig.tar.gz",
+    "sha256": "ad434962526c123eab92a46c8fc891de5b750504f8685a875e69afc95996da24",
+    "size": 11878736
+   },
+   "debian": {
+    "name": "wand_0.7.2-1.debian.tar.xz",
+    "sha256": "d979971e532a9c991ff1be61f4fadc2ee5f1fa414d70917215bbfa5e22156b52",
+    "size": 8692
+   }
+  },
+  {
+   "name": "mrgingham",
+   "version": "1.28-1",
+   "directory": "pool/main/m/mrgingham",
+   "homepage": "https://github.com/dkogan/mrgingham/",
+   "orig": {
+    "name": "mrgingham_1.28.orig.tar.xz",
+    "sha256": "04064aac50f1c495200e61afbb8b61dc8bd042d8feafe3e14bcb310ae71271f3",
+    "size": 47480
+   },
+   "debian": {
+    "name": "mrgingham_1.28-1.debian.tar.xz",
+    "sha256": "ce6f8b7e825f09100fae69f28ee85462b75a9fbf06b8ed69422146a2f4d2a053",
+    "size": 3868
+   }
+  },
+  {
+   "name": "nc-py-api",
+   "version": "0.19.2-1",
+   "directory": "pool/main/n/nc-py-api",
+   "homepage": "https://github.com/cloud-py-api/nc_py_api",
+   "orig": {
+    "name": "nc-py-api_0.19.2.orig.tar.gz",
+    "sha256": "b69556523ee887999844642f4342814a5f064582b97ad679c330a5dfab4571fe",
+    "size": 849236
+   },
+   "debian": {
+    "name": "nc-py-api_0.19.2-1.debian.tar.xz",
+    "sha256": "f4c1739dc29088cde751f59624ebc3193311c11bee3143fb5d6157df153d4ef1",
+    "size": 4276
+   }
+  },
+  {
+   "name": "pykoplenti",
+   "version": "1.5.0-1",
+   "directory": "pool/main/p/pykoplenti",
+   "homepage": "https://github.com/stegm/pyclient_koplenti",
+   "orig": {
+    "name": "pykoplenti_1.5.0.orig.tar.gz",
+    "sha256": "9262446bdfa42a2ef7b6aa13df5d71d2227cfce9e04ef90b087ed22103f31dcd",
+    "size": 155733
+   },
+   "debian": {
+    "name": "pykoplenti_1.5.0-1.debian.tar.xz",
+    "sha256": "a4d7226442182ca73852225d29f413b7feb34ff04ae5cfcf7e0fe49538f6f5d8",
+    "size": 2420
+   }
+  },
+  {
+   "name": "pynfft",
+   "version": "1.3.2-12",
+   "directory": "pool/main/p/pynfft",
+   "homepage": "https://github.com/ghisvail/pyNFFT",
+   "orig": {
+    "name": "pynfft_1.3.2.orig.tar.gz",
+    "sha256": "ae41e720e569d0d99e3a44c82c36b35a49cfc9ecc23a1cd039fe9e2895aada2c",
+    "size": 180500
+   },
+   "debian": {
+    "name": "pynfft_1.3.2-12.debian.tar.xz",
+    "sha256": "67b5574abeb495fb185c5a58957a8ad1e5877dbed7d88285e949fa554e92c431",
+    "size": 6632
+   }
+  },
+  {
+   "name": "karabo-bridge",
+   "version": "0.6.2-2",
+   "directory": "pool/main/k/karabo-bridge",
+   "homepage": "https://github.com/European-XFEL/karabo-bridge-py",
+   "orig": {
+    "name": "karabo-bridge_0.6.2.orig.tar.gz",
+    "sha256": "1dcac2322a1bbc6aa0ce441f0f91630546630670490a92525ddfd03b506e382a",
+    "size": 16242
+   },
+   "debian": {
+    "name": "karabo-bridge_0.6.2-2.debian.tar.xz",
+    "sha256": "919a967721d688d94cdd2fa576ab9d2ed7a586f661c07a7aa8dbff517718d99d",
+    "size": 3336
+   }
+  },
+  {
+   "name": "python-ua-parser",
+   "version": "1.0.2-1",
+   "directory": "pool/main/p/python-ua-parser",
+   "homepage": "https://github.com/ua-parser/uap-python",
+   "orig": {
+    "name": "python-ua-parser_1.0.2.orig.tar.gz",
+    "sha256": "3b072e634fa3de072d819772172645073077c25d772ab3db2a57fa095975fdff",
+    "size": 781241
+   },
+   "debian": {
+    "name": "python-ua-parser_1.0.2-1.debian.tar.xz",
+    "sha256": "dbfd639b4f3a1e07a71af2d11f603c91ba93a83d0a864c4b10be0783680dd692",
+    "size": 4172
+   }
+  },
+  {
+   "name": "azure-data-lake-store-python",
+   "version": "1.0.1-2",
+   "directory": "pool/main/a/azure-data-lake-store-python",
+   "homepage": "https://github.com/Azure/azure-data-lake-store-python",
+   "orig": {
+    "name": "azure-data-lake-store-python_1.0.1.orig.tar.gz",
+    "sha256": "0425b588703ffa1bcb2f23938ca3a88c6e9b2b38b3775bcaaac04d0868b118f3",
+    "size": 1613742
+   },
+   "debian": {
+    "name": "azure-data-lake-store-python_1.0.1-2.debian.tar.xz",
+    "sha256": "165efc68558da82420997be1f904cccb2be703f7c5162f101392274c7c159f14",
+    "size": 3428
+   }
+  },
+  {
+   "name": "python-django-timescaledb",
+   "version": "0.2.13-4",
+   "directory": "pool/main/p/python-django-timescaledb",
+   "homepage": "https://github.com/jamessewell/django-timescaledb",
+   "orig": {
+    "name": "python-django-timescaledb_0.2.13.orig.tar.gz",
+    "sha256": "e20d5f2880a1b72915e5237103fa9bcd4f02f69d16d4c2a2a3a320a4c64430b2",
+    "size": 17472
+   },
+   "debian": {
+    "name": "python-django-timescaledb_0.2.13-4.debian.tar.xz",
+    "sha256": "536f7e7487a191c4568ba717396b5e8035741ca397ba6692110785fa9f2b9cfb",
+    "size": 3180
+   }
+  },
+  {
+   "name": "prettytable",
+   "version": "3.18.0-1",
+   "directory": "pool/main/p/prettytable",
+   "homepage": "https://github.com/prettytable/prettytable",
+   "orig": {
+    "name": "prettytable_3.18.0.orig.tar.xz",
+    "sha256": "69d257deede6b7358150b229dab761a331060189fc2e01699230097210328d36",
+    "size": 55596
+   },
+   "debian": {
+    "name": "prettytable_3.18.0-1.debian.tar.xz",
+    "sha256": "3ba7dc5c2c89c807c9c1e6142f4c60cefaaada83ce4c0a7b75344adf8f7e4d29",
+    "size": 4332
+   }
+  },
+  {
+   "name": "stac-check",
+   "version": "1.14.0-2",
+   "directory": "pool/main/s/stac-check",
+   "homepage": "https://github.com/stac-utils/stac-check",
+   "orig": {
+    "name": "stac-check_1.14.0.orig.tar.gz",
+    "sha256": "f15dad45468f88f5ba1c6f0bad16127bd6f77dac94f79d800c4206fdbf54fca4",
+    "size": 4446790
+   },
+   "debian": {
+    "name": "stac-check_1.14.0-2.debian.tar.xz",
+    "sha256": "5dc2cc479cebda2c79b6505166944d2f77923ddbec6814db12d007439db3f1ec",
+    "size": 7756
+   }
+  },
+  {
+   "name": "python-motor",
+   "version": "3.7.1-1",
+   "directory": "pool/main/p/python-motor",
+   "homepage": "https://github.com/mongodb/motor",
+   "orig": {
+    "name": "python-motor_3.7.1.orig.tar.gz",
+    "sha256": "8a1b89a73a55be08c59b6bf1bbeb4578f134cda881d1926898a0171799620404",
+    "size": 283038
+   },
+   "debian": {
+    "name": "python-motor_3.7.1-1.debian.tar.xz",
+    "sha256": "961e5aafdc0b94fdcab16efddabad040cd23c2429fab83fe55b5aae09eb8e762",
+    "size": 4136
+   }
+  },
+  {
+   "name": "django-tables",
+   "version": "3.0.1-1",
+   "directory": "pool/main/d/django-tables",
+   "homepage": "https://github.com/jieter/django-tables2",
+   "orig": {
+    "name": "django-tables_3.0.1.orig.tar.gz",
+    "sha256": "f599c89d75d7d35152a889f25c15a9aa69497705e296d27a65f1fe846cf010ed",
+    "size": 431734
+   },
+   "debian": {
+    "name": "django-tables_3.0.1-1.debian.tar.xz",
+    "sha256": "7fa531f15fc69ed2bbf24bd468b471f21407c4b1e09ce946aeb1fd59dfbe5277",
+    "size": 10636
+   }
+  },
+  {
+   "name": "python-oslo.vmware",
+   "version": "4.10.1-3",
+   "directory": "pool/main/p/python-oslo.vmware",
+   "homepage": "https://github.com/openstack/oslo.vmware",
+   "orig": {
+    "name": "python-oslo.vmware_4.10.1.orig.tar.xz",
+    "sha256": "6275b7904827c1682e02ecfb8a2df68c7bf45cab2cc909940146d31327c13aa5",
+    "size": 180868
+   },
+   "debian": {
+    "name": "python-oslo.vmware_4.10.1-3.debian.tar.xz",
+    "sha256": "e0a25481e6046a8b8ff475c5b2126922b08ff77214b25ad661c010f9798d51fe",
+    "size": 5156
+   }
+  },
+  {
+   "name": "libiio",
+   "version": "0.26-2",
+   "directory": "pool/main/libi/libiio",
+   "homepage": "https://github.com/analogdevicesinc/libiio",
+   "orig": {
+    "name": "libiio_0.26.orig.tar.gz",
+    "sha256": "fb445fb860ef1248759f45d4273a4eff360534480ec87af64c6b8db3b99be7e5",
+    "size": 519150
+   },
+   "debian": {
+    "name": "libiio_0.26-2.debian.tar.xz",
+    "sha256": "b872304bf837a90ddff0790f5317150542703b8491b19fa6337d542be50bab0b",
+    "size": 10300
+   }
+  },
+  {
+   "name": "django-haystack",
+   "version": "3.3.0-2",
+   "directory": "pool/main/d/django-haystack",
+   "homepage": "https://github.com/toastdriven/django-haystack",
+   "orig": {
+    "name": "django-haystack_3.3.0.orig.tar.gz",
+    "sha256": "ae970e0ca63f237840cb7f13a1dcf7af13ad4d4cc9e69cc80c9cc1fb7986ad99",
+    "size": 458337
+   },
+   "debian": {
+    "name": "django-haystack_3.3.0-2.debian.tar.xz",
+    "sha256": "57f0f022cfe72bb020ca9c5b9cb7a37a0dcdf5c065fa76051cc3f13cefcdc23f",
+    "size": 5516
+   }
+  },
+  {
+   "name": "voluptuous-serialize",
+   "version": "2.4.0-2",
+   "directory": "pool/main/v/voluptuous-serialize",
+   "homepage": "https://github.com/balloob/voluptuous-serialize",
+   "orig": {
+    "name": "voluptuous-serialize_2.4.0.orig.tar.gz",
+    "sha256": "5baa4a0702253368d73b569bed4b2d600a692773032f02e7cd9c512cf34f5456",
+    "size": 8558
+   },
+   "debian": {
+    "name": "voluptuous-serialize_2.4.0-2.debian.tar.xz",
+    "sha256": "5f51144a4e42569ebfd6f4cdfdf8c4d91cb220abfb97cb3ba73f508a01d3e751",
+    "size": 2256
+   }
+  },
+  {
+   "name": "dm-tree",
+   "version": "0.1.9-2",
+   "directory": "pool/main/d/dm-tree",
+   "homepage": "https://github.com/deepmind/tree",
+   "orig": {
+    "name": "dm-tree_0.1.9.orig.tar.gz",
+    "sha256": "d736ec355daf39c93633373a160120cdd45717e6717d105efed722d2cd2cfcc9",
+    "size": 37080
+   },
+   "debian": {
+    "name": "dm-tree_0.1.9-2.debian.tar.xz",
+    "sha256": "d6e414ca6fed71c06844b060fa1d73da94f6e0d9991205903b4271cccd9c2af1",
+    "size": 7216
+   }
+  },
+  {
+   "name": "python-hypothesis-jsonschema",
+   "version": "0.23.1-1",
+   "directory": "pool/main/p/python-hypothesis-jsonschema",
+   "homepage": "https://github.com/python-jsonschema/hypothesis-jsonschema",
+   "orig": {
+    "name": "python-hypothesis-jsonschema_0.23.1.orig.tar.gz",
+    "sha256": "f4ac032024342a4149a10253984f5a5736b82b3fe2afb0888f3834a31153f215",
+    "size": 42896
+   },
+   "debian": {
+    "name": "python-hypothesis-jsonschema_0.23.1-1.debian.tar.xz",
+    "sha256": "e68612ab85b216760097446db50afa9278a7ee0c32d93c27f7319824c339d849",
+    "size": 6464
+   }
+  },
+  {
+   "name": "python-openstep-plist",
+   "version": "0.5.2-1",
+   "directory": "pool/main/p/python-openstep-plist",
+   "homepage": "https://github.com/fonttools/openstep-plist",
+   "orig": {
+    "name": "python-openstep-plist_0.5.2.orig.tar.gz",
+    "sha256": "10eb124874434cbef6a42dfee7c0a8887e733b29f4068d55ce0761f5bba180fd",
+    "size": 21754
+   },
+   "debian": {
+    "name": "python-openstep-plist_0.5.2-1.debian.tar.xz",
+    "sha256": "587f248e5449a413bf2d57873d01d241461fe295074d873fed95f4170dbd2c98",
+    "size": 2740
+   }
+  },
+  {
+   "name": "opentsne",
+   "version": "1.0.2-5",
+   "directory": "pool/main/o/opentsne",
+   "homepage": "https://github.com/pavlin-policar/openTSNE",
+   "orig": {
+    "name": "opentsne_1.0.2.orig.tar.gz",
+    "sha256": "41d34d969b26649a1f3a3778a1b874b690bfbe71536c0d436fe35318bf3aedae",
+    "size": 22107860
+   },
+   "debian": {
+    "name": "opentsne_1.0.2-5.debian.tar.xz",
+    "sha256": "9afbaa8035bbb471103fb6a2b59a45819e9f4a14e58dd3eaf8bf2f4a4537b01e",
+    "size": 6128
+   }
+  },
+  {
+   "name": "mutagen",
+   "version": "1.48.1-1",
+   "directory": "pool/main/m/mutagen",
+   "homepage": "https://github.com/quodlibet/mutagen",
+   "orig": {
+    "name": "mutagen_1.48.1.orig.tar.xz",
+    "sha256": "d3d0fdcc49dc971e96700259ad6117f8e5b760adfc24d3dd689cbdae4619e9e0",
+    "size": 1036216
+   },
+   "debian": {
+    "name": "mutagen_1.48.1-1.debian.tar.xz",
+    "sha256": "b1a768ac7a96a9050630eb054f3e954b295f48222f766d652451f205d92da539",
+    "size": 8068
+   }
+  },
+  {
+   "name": "python-elmax-api",
+   "version": "0.0.5-2",
+   "directory": "pool/main/p/python-elmax-api",
+   "homepage": "https://github.com/albertogeniola/elmax-api",
+   "orig": {
+    "name": "python-elmax-api_0.0.5.orig.tar.gz",
+    "sha256": "7628bb43de7e605b3ed1ac5df1bc2253163591e3ddda48321cfa922520ea5e3a",
+    "size": 39807
+   },
+   "debian": {
+    "name": "python-elmax-api_0.0.5-2.debian.tar.xz",
+    "sha256": "13753a8b3dad2dddb806b449b5cffccbc411b80d9b05022d1cd407c6b4a672ab",
+    "size": 2920
+   }
+  },
+  {
+   "name": "python-buienradar",
+   "version": "1.0.6-3",
+   "directory": "pool/main/p/python-buienradar",
+   "homepage": "https://github.com/mjj4791/python-buienradar",
+   "orig": {
+    "name": "python-buienradar_1.0.6.orig.tar.xz",
+    "sha256": "9c3b43b7af4fc98f2a21be6c2423d8eba8b246a01d9bd4428660c0c9d75e6c4f",
+    "size": 41884
+   },
+   "debian": {
+    "name": "python-buienradar_1.0.6-3.debian.tar.xz",
+    "sha256": "407f19e8cb46755718f429b599a275e2f9bb1c330cb94e3bb4ff304635f994a0",
+    "size": 2900
+   }
+  },
+  {
+   "name": "python-aiopulse",
+   "version": "0.5.3-1",
+   "directory": "pool/main/p/python-aiopulse",
+   "homepage": "https://github.com/atmurray/aiopulse",
+   "orig": {
+    "name": "python-aiopulse_0.5.3.orig.tar.gz",
+    "sha256": "69c51c24ce6085429ece96139dc0c00d04d96ba34ccad786e98bbb1853dbb8bb",
+    "size": 91798
+   },
+   "debian": {
+    "name": "python-aiopulse_0.5.3-1.debian.tar.xz",
+    "sha256": "6d7d91286f5c54debcedda204fc4d5aa780958fb0ad08c76e9ec086610edb67b",
+    "size": 2348
+   }
+  },
+  {
+   "name": "genetic",
+   "version": "0.1.1b+git20170527.98255cb-5",
+   "directory": "pool/main/g/genetic",
+   "homepage": "https://github.com/skoblov-lab/genetic",
+   "orig": {
+    "name": "genetic_0.1.1b+git20170527.98255cb.orig.tar.gz",
+    "sha256": "150a463fd9bdac4502bcc3a915d8113aae2c736b16b21f4858503e2bdcb18db8",
+    "size": 9255
+   },
+   "debian": {
+    "name": "genetic_0.1.1b+git20170527.98255cb-5.debian.tar.xz",
+    "sha256": "2ef50990e626fe267b3cbdf8da3309ce500eef4659800a2de34d5eda95d2d7c3",
+    "size": 4228
+   }
+  },
+  {
+   "name": "python-matrix-nio",
+   "version": "0.25.2-2",
+   "directory": "pool/main/p/python-matrix-nio",
+   "homepage": "https://github.com/poljar/matrix-nio",
+   "orig": {
+    "name": "python-matrix-nio_0.25.2.orig.tar.gz",
+    "sha256": "c421c2bd8169a3089d2adaa5de7f5c4cb620338cc80fa8b9aad7e6bfd20a34d9",
+    "size": 261074
+   },
+   "debian": {
+    "name": "python-matrix-nio_0.25.2-2.debian.tar.xz",
+    "sha256": "ade60b3615cc460b32bdb09901b7b5bf21595690350b2e2e88dc8dbcaaa9d635",
+    "size": 6488
+   }
+  },
+  {
+   "name": "python-srptools",
+   "version": "1.0.1-3",
+   "directory": "pool/main/p/python-srptools",
+   "homepage": "https://github.com/idlesign/srptools",
+   "orig": {
+    "name": "python-srptools_1.0.1.orig.tar.gz",
+    "sha256": "b4a2291c0ff43d1e5bfc6687d15e710e62592976c105cd9bc521d8687ff5cdff",
+    "size": 14445
+   },
+   "debian": {
+    "name": "python-srptools_1.0.1-3.debian.tar.xz",
+    "sha256": "1413c0b31371f6c3bd356607af0a90cf640352478e70f4791b92b06d670e3f6f",
+    "size": 3432
+   }
+  },
+  {
+   "name": "oslo-sphinx",
+   "version": "4.18.0-6",
+   "directory": "pool/main/o/oslo-sphinx",
+   "homepage": "https://github.com/openstack/oslo.sphinx",
+   "orig": {
+    "name": "oslo-sphinx_4.18.0.orig.tar.xz",
+    "sha256": "ec69e59e29bfaabd0bc5e915498d36b5cf6979c81257137e84bd666fdb6d3d42",
+    "size": 25544
+   },
+   "debian": {
+    "name": "oslo-sphinx_4.18.0-6.debian.tar.xz",
+    "sha256": "6e65001fc6483fcae41d60091f3405ee7bf385558dcb1b6c7434b564a3421668",
+    "size": 17960
+   }
+  },
+  {
+   "name": "suds",
+   "version": "1.2.0-2",
+   "directory": "pool/main/s/suds",
+   "homepage": "https://github.com/suds-community/suds",
+   "orig": {
+    "name": "suds_1.2.0.orig.tar.gz",
+    "sha256": "5c8752020826c8bc93fd6422b347ae3cfa2aeb76b477868644e5630c70d6d644",
+    "size": 301246
+   },
+   "debian": {
+    "name": "suds_1.2.0-2.debian.tar.xz",
+    "sha256": "10e9f037de94527a166b986b4ee83e43cc70a3715981d945c4427e06c793436b",
+    "size": 5080
+   }
+  },
+  {
+   "name": "python-pyknon",
+   "version": "1.2-7",
+   "directory": "pool/main/p/python-pyknon",
+   "homepage": "https://github.com/kroger/pyknon",
+   "orig": {
+    "name": "python-pyknon_1.2.orig.tar.gz",
+    "sha256": "f6d01f9cb124a575482dbb922873f82766a812f79d1444dff79e9d52c5ed521a",
+    "size": 29038
+   },
+   "debian": {
+    "name": "python-pyknon_1.2-7.debian.tar.xz",
+    "sha256": "02e149592305338cf88276fe7fd636a3ca8c9da4906d90f064b9fed9f6478929",
+    "size": 4724
+   }
+  },
+  {
+   "name": "python-gunicorn-h1c",
+   "version": "0.6.9-2",
+   "directory": "pool/main/p/python-gunicorn-h1c",
+   "homepage": "https://github.com/benoitc/gunicorn_h1c",
+   "orig": {
+    "name": "python-gunicorn-h1c_0.6.9.orig.tar.gz",
+    "sha256": "2aabdf893735c7352c4d32434eb4cdc344872127442860b6fc4b05dae0beaeda",
+    "size": 56793
+   },
+   "debian": {
+    "name": "python-gunicorn-h1c_0.6.9-2.debian.tar.xz",
+    "sha256": "47f9f3cab4bfb820ed76c72df70b408f98eb4b4e7eec85ed2fd18c8b411f853f",
+    "size": 8796
+   }
+  },
+  {
+   "name": "fritzconnection",
+   "version": "1.15.0-2",
+   "directory": "pool/main/f/fritzconnection",
+   "homepage": "https://github.com/kbr/fritzconnection",
+   "orig": {
+    "name": "fritzconnection_1.15.0.orig.tar.gz",
+    "sha256": "711d7043809f3c3fd7bfa2878cdba3c4ab84d1b58daa10b6d5c036a36a610925",
+    "size": 167546
+   },
+   "debian": {
+    "name": "fritzconnection_1.15.0-2.debian.tar.xz",
+    "sha256": "d2981c6f8e5d67a09ddad70211c91d2fa518ea183d01afc51c8a03309d253767",
+    "size": 3632
+   }
+  },
+  {
+   "name": "python-temperusb",
+   "version": "1.6.1-2",
+   "directory": "pool/main/p/python-temperusb",
+   "homepage": "https://github.com/padelt/temper-python",
+   "orig": {
+    "name": "python-temperusb_1.6.1.orig.tar.gz",
+    "sha256": "705c54d050e68c791941b28199b6571072631d3ee1c17f429a4d0b1ed04e1c9f",
+    "size": 32944
+   },
+   "debian": {
+    "name": "python-temperusb_1.6.1-2.debian.tar.xz",
+    "sha256": "44ebd273eca51d0c066ccf80f6295a131d1fa56b32a44e368378032f9e755058",
+    "size": 2276
+   }
+  },
+  {
+   "name": "pymonoprice",
+   "version": "0.6.1-2",
+   "directory": "pool/main/p/pymonoprice",
+   "homepage": "https://github.com/etsinko/pymonoprice",
+   "orig": {
+    "name": "pymonoprice_0.6.1.orig.tar.xz",
+    "sha256": "6ff1761826ab93b970ff187db6c582d8f2ffcfe01964d25d519a4f913fd851a5",
+    "size": 11732
+   },
+   "debian": {
+    "name": "pymonoprice_0.6.1-2.debian.tar.xz",
+    "sha256": "4b9db031d16ab8b8a3dc3653bf84c9ce40c459fa57cd0e128d42909a0a24f6d8",
+    "size": 3536
+   }
+  },
+  {
+   "name": "pilkit",
+   "version": "3.0-2",
+   "directory": "pool/main/p/pilkit",
+   "homepage": "https://github.com/matthewwithanm/pilkit",
+   "orig": {
+    "name": "pilkit_3.0.orig.tar.gz",
+    "sha256": "f6719e8cc0482e5447f5cb94f18b949d8e604ea9673a9b019c74d41b779e4eab",
+    "size": 402342
+   },
+   "debian": {
+    "name": "pilkit_3.0-2.debian.tar.xz",
+    "sha256": "0e585f1b49cd0fa5d9946f62fb2f3e00b62210fb9988d03c4c69900b2312d6ea",
+    "size": 124044
+   }
+  },
+  {
+   "name": "sphinxcontrib-jsmath",
+   "version": "2.0.0-1",
+   "directory": "pool/main/s/sphinxcontrib-jsmath",
+   "homepage": "https://github.com/sphinx-doc/sphinxcontrib-jsmath",
+   "orig": {
+    "name": "sphinxcontrib-jsmath_2.0.0.orig.tar.gz",
+    "sha256": "01b44124a34d0d101a4a8b5264be7b0e909c75af3ef84b28bd60ec804889475e",
+    "size": 16262
+   },
+   "debian": {
+    "name": "sphinxcontrib-jsmath_2.0.0-1.debian.tar.xz",
+    "sha256": "3e81c01b26702bf36b2f8b6def7cf94494959dc37175cf2134d1b259a799596e",
+    "size": 3860
+   }
+  },
+  {
+   "name": "python-rpaths",
+   "version": "1.0.0-2",
+   "directory": "pool/main/p/python-rpaths",
+   "homepage": "https://github.com/remram44/rpaths/",
+   "orig": {
+    "name": "python-rpaths_1.0.0.orig.tar.gz",
+    "sha256": "dd7418b2c837e1b4eb5c5490465d5f282645143e4638c809ddd250dc33395641",
+    "size": 25714
+   },
+   "debian": {
+    "name": "python-rpaths_1.0.0-2.debian.tar.xz",
+    "sha256": "625a6d03d46ae8370fb4ca25245e3787b9e4b621397645a664cf109aebb0920a",
+    "size": 3624
+   }
+  },
+  {
+   "name": "python-ayla-iot-unofficial",
+   "version": "1.5.2-1",
+   "directory": "pool/main/p/python-ayla-iot-unofficial",
+   "homepage": "https://github.com/rewardone/ayla-iot-unofficial",
+   "orig": {
+    "name": "python-ayla-iot-unofficial_1.5.2.orig.tar.xz",
+    "sha256": "a8876ac061942e089f7cddde7059ad083b3286650d936f15aab54a3ea8435399",
+    "size": 20204
+   },
+   "debian": {
+    "name": "python-ayla-iot-unofficial_1.5.2-1.debian.tar.xz",
+    "sha256": "29141c0dda46ac58b02c9df56af2f71c1e04d8dd9e0aa86e44f26a5737fa7c0f",
+    "size": 3260
+   }
+  },
+  {
+   "name": "coherent.licensed",
+   "version": "0.5.2-2",
+   "directory": "pool/main/c/coherent.licensed",
+   "homepage": "https://github.com/coherent-oss/coherent.licensed",
+   "orig": {
+    "name": "coherent.licensed_0.5.2.orig.tar.gz",
+    "sha256": "d8071403ce742d3ac3592ddc4fb7057a46caffb415b928b4d52802e5f208416d",
+    "size": 3475
+   },
+   "debian": {
+    "name": "coherent.licensed_0.5.2-2.debian.tar.xz",
+    "sha256": "2629157690546af4f90e75b44a5f67a3419d4b913ca20ba7cef2ed7568c7eaf5",
+    "size": 1972
+   }
+  },
+  {
+   "name": "python-amcrest",
+   "version": "1.9.9-2",
+   "directory": "pool/main/p/python-amcrest",
+   "homepage": "https://github.com/tchellomello/python-amcrest",
+   "orig": {
+    "name": "python-amcrest_1.9.9.orig.tar.xz",
+    "sha256": "1992aa20590b2748d924a56b5a929bd6c6a3afc52b007225a7f964bbb95b50dc",
+    "size": 451040
+   },
+   "debian": {
+    "name": "python-amcrest_1.9.9-2.debian.tar.xz",
+    "sha256": "926909ee5d034a9b473aa4f547d581bf6715908c701a6bb3ddd4eb0849c6a4f2",
+    "size": 3364
+   }
+  },
+  {
+   "name": "python-aiovlc",
+   "version": "0.4.2-5",
+   "directory": "pool/main/p/python-aiovlc",
+   "homepage": "https://github.com/MartinHjelmare/aiovlc",
+   "orig": {
+    "name": "python-aiovlc_0.4.2.orig.tar.xz",
+    "sha256": "75f5bebb7d7d3f817335301de17a51bd4c673d14b9645daff0cacc5baef06a42",
+    "size": 63708
+   },
+   "debian": {
+    "name": "python-aiovlc_0.4.2-5.debian.tar.xz",
+    "sha256": "63089456556f0776c149d2a0d6db94345d0fc808a1f2330d3f31d57d7b258d4c",
+    "size": 2492
+   }
+  },
+  {
+   "name": "spotifyaio",
+   "version": "2.0.2-1",
+   "directory": "pool/main/s/spotifyaio",
+   "homepage": "https://github.com/joostlek/python-spotify",
+   "orig": {
+    "name": "spotifyaio_2.0.2.orig.tar.gz",
+    "sha256": "c4dd39286a4cdad1e485254e142e6bf02033e1ac11d5b6f48d3a2d73a51705a7",
+    "size": 494199
+   },
+   "debian": {
+    "name": "spotifyaio_2.0.2-1.debian.tar.xz",
+    "sha256": "6591531621c0489eb328c61b6c63d73ff60e2c9a875a6ad3e50ace463047ff1b",
+    "size": 2584
+   }
+  },
+  {
+   "name": "python-keycloak",
+   "version": "5.7.0+dfsg-1",
+   "directory": "pool/main/p/python-keycloak",
+   "homepage": "https://github.com/marcospereirampj/python-keycloak",
+   "orig": {
+    "name": "python-keycloak_5.7.0+dfsg.orig.tar.xz",
+    "sha256": "9bde310d24f0860e9f736b3393b2d4859c0186f7d228a764478ecf145d0179c1",
+    "size": 118920
+   },
+   "debian": {
+    "name": "python-keycloak_5.7.0+dfsg-1.debian.tar.xz",
+    "sha256": "9405ee9efa41ed5b04d36fbcb7c91437a17efb182c79aa93a6e5d27eb3af1f0c",
+    "size": 3724
+   }
+  },
+  {
+   "name": "python-async-timeout",
+   "version": "5.0.1-4",
+   "directory": "pool/main/p/python-async-timeout",
+   "homepage": "https://github.com/aio-libs-abandoned/async_timeout/",
+   "orig": {
+    "name": "python-async-timeout_5.0.1.orig.tar.gz",
+    "sha256": "928c37731c8d24daa04ec421b0a1c60d5e52e6aa4dc02d3febc17efd66a26861",
+    "size": 13703
+   },
+   "debian": {
+    "name": "python-async-timeout_5.0.1-4.debian.tar.xz",
+    "sha256": "deab6dd436d20c2bce2bbce0ca23a1947751dab3660c68ba1fac22fdd80d0e35",
+    "size": 2700
+   }
+  },
+  {
+   "name": "pytest-mpi",
+   "version": "0.6-9",
+   "directory": "pool/main/p/pytest-mpi",
+   "homepage": "https://github.com/aragilar/pytest-mpi",
+   "orig": {
+    "name": "pytest-mpi_0.6.orig.tar.gz",
+    "sha256": "55e9ca9d360cc7525042cf6b5a77f40ec702f7afcde8dbef27dcf69e4cc43f2d",
+    "size": 41645
+   },
+   "debian": {
+    "name": "pytest-mpi_0.6-9.debian.tar.xz",
+    "sha256": "13605b8dca76d59f8882098439ce7297ec6e90404387216591a26c9b15693ca4",
+    "size": 7408
+   }
+  },
+  {
+   "name": "python-vttmisc",
+   "version": "0.0.5-1",
+   "directory": "pool/main/p/python-vttmisc",
+   "homepage": "https://github.com/aaronbell/vttmisc",
+   "orig": {
+    "name": "python-vttmisc_0.0.5.orig.tar.xz",
+    "sha256": "135ae4965a2a9eab5ea95f554a5172d042c7523cc1b60a8d10b09b2d17d054a3",
+    "size": 7532
+   },
+   "debian": {
+    "name": "python-vttmisc_0.0.5-1.debian.tar.xz",
+    "sha256": "4515204d7870d4838f7c7aa3c45910a52d5d42a21d52e8ebaa8c278717cd3713",
+    "size": 1696
+   }
+  },
+  {
+   "name": "oralb-ble",
+   "version": "1.1.3-1",
+   "directory": "pool/main/o/oralb-ble",
+   "homepage": "https://github.com/Bluetooth-Devices/oralb-ble",
+   "orig": {
+    "name": "oralb-ble_1.1.3.orig.tar.xz",
+    "sha256": "ebcb86987dcd4789ad9993c09f873adb9bf679e497d37d64eba03787764d1106",
+    "size": 71000
+   },
+   "debian": {
+    "name": "oralb-ble_1.1.3-1.debian.tar.xz",
+    "sha256": "25ed83dd40e947e1cb64bbc4e7783e5bd27a31032977f84c3a298b263f27a353",
+    "size": 3004
+   }
+  },
+  {
+   "name": "app-model",
+   "version": "0.5.1-4",
+   "directory": "pool/main/a/app-model",
+   "homepage": "https://github.com/pyapp-kit/app-model",
+   "orig": {
+    "name": "app-model_0.5.1.orig.tar.gz",
+    "sha256": "9303bc27e13823beddbe78ae261de9469ec72c41eb7fc450c5ab14d55a298adf",
+    "size": 121988
+   },
+   "debian": {
+    "name": "app-model_0.5.1-4.debian.tar.xz",
+    "sha256": "5959cb810eef674e600cd7d3c60045510284807bb038934ad4322fe0b35e21f8",
+    "size": 3948
+   }
+  },
+  {
+   "name": "pypjlink2",
+   "version": "1.2.2-3",
+   "directory": "pool/main/p/pypjlink2",
+   "homepage": "https://github.com/benoitlouy/pypjlink",
+   "orig": {
+    "name": "pypjlink2_1.2.2.orig.tar.gz",
+    "sha256": "1f499891de7cd857d4088c0215509626a0776883fe160da42a52bdf15b653879",
+    "size": 12497
+   },
+   "debian": {
+    "name": "pypjlink2_1.2.2-3.debian.tar.xz",
+    "sha256": "67b9d8cb89eb2acf9cfb44bc94a098c87c198f7a9c4d57452ca91297d0eae6bf",
+    "size": 2652
+   }
+  },
+  {
+   "name": "asdf-coordinates-schemas",
+   "version": "0.5.1-1",
+   "directory": "pool/main/a/asdf-coordinates-schemas",
+   "homepage": "https://github.com/asdf-format/asdf-coordinates-schemas",
+   "orig": {
+    "name": "asdf-coordinates-schemas_0.5.1.orig.tar.gz",
+    "sha256": "bdeda38837c3dd75b504ee0138311ddb3ef5cf06d0e3c8f9c51776cec62395c5",
+    "size": 156483
+   },
+   "debian": {
+    "name": "asdf-coordinates-schemas_0.5.1-1.debian.tar.xz",
+    "sha256": "d55b145bb11a5adea97177f6f2d880642cd2647f0553b98faf07e3a212223de6",
+    "size": 3996
+   }
+  },
+  {
+   "name": "jupyter-notebook",
+   "version": "7.4.7-3",
+   "directory": "pool/main/j/jupyter-notebook",
+   "homepage": "https://github.com/jupyter/notebook",
+   "orig": {
+    "name": "jupyter-notebook_7.4.7.orig.tar.gz",
+    "sha256": "1f97e5236e86edb55938440c4b77272678675c027f7bfc7f5472b84e76a114db",
+    "size": 4951131
+   },
+   "debian": {
+    "name": "jupyter-notebook_7.4.7-3.debian.tar.xz",
+    "sha256": "c43083bcdacbaa688930a313214c1ce577dcce00e72bae6257dea656da75afc6",
+    "size": 13928
+   }
+  },
+  {
+   "name": "zwave-me-ws",
+   "version": "0.4.3-2",
+   "directory": "pool/main/z/zwave-me-ws",
+   "homepage": "https://github.com/Z-Wave-Me/zwave-me-ws",
+   "orig": {
+    "name": "zwave-me-ws_0.4.3.orig.tar.gz",
+    "sha256": "9cd1aa100a374d860c47e29206692e3a613ccbad2e0389ab81c2861e859e1950",
+    "size": 11150
+   },
+   "debian": {
+    "name": "zwave-me-ws_0.4.3-2.debian.tar.xz",
+    "sha256": "d61a35a291dc8235779b957979dab01f52eec398fa6e796c63c281a93049ea32",
+    "size": 2228
+   }
+  },
+  {
+   "name": "sentence-stream",
+   "version": "1.3.0-1",
+   "directory": "pool/main/s/sentence-stream",
+   "homepage": "https://github.com/OHF-Voice/sentence-stream",
+   "orig": {
+    "name": "sentence-stream_1.3.0.orig.tar.gz",
+    "sha256": "6d65a44828ad7c28de65ea7d01941e103e6d3f375d5e17f82f23e539d3b7de9f",
+    "size": 15055
+   },
+   "debian": {
+    "name": "sentence-stream_1.3.0-1.debian.tar.xz",
+    "sha256": "b5184c51180a9f2b9f84b16f12c9247f16c7ec593f8ab5040ebb5776eea35418",
+    "size": 2096
+   }
+  },
+  {
+   "name": "bandit",
+   "version": "1.9.4-1",
+   "directory": "pool/main/b/bandit",
+   "homepage": "https://github.com/PyCQA/bandit",
+   "orig": {
+    "name": "bandit_1.9.4.orig.tar.xz",
+    "sha256": "fd8150992874e3a59e11ed17d855b6bf9d676617bce9330090750ccecbf1402c",
+    "size": 3817000
+   },
+   "debian": {
+    "name": "bandit_1.9.4-1.debian.tar.xz",
+    "sha256": "43f9a3c8f0c9845efc4d5c79007f05526db6c2dae692aeddb240dacbbd6cef12",
+    "size": 4812
+   }
+  },
+  {
+   "name": "python-ghdiff",
+   "version": "0.4-4",
+   "directory": "pool/main/p/python-ghdiff",
+   "homepage": "https://github.com/kilink/ghdiff",
+   "orig": {
+    "name": "python-ghdiff_0.4.orig.tar.gz",
+    "sha256": "13cf6a4fa6d7b7137e0734c69ed22ff1ca76108350ce8cb03d0124ac4584ad9e",
+    "size": 5730
+   },
+   "debian": {
+    "name": "python-ghdiff_0.4-4.debian.tar.xz",
+    "sha256": "b9e13bae094c35d6a28fe7b451560a0c09d51cc02742db8ce34835f153be4927",
+    "size": 2696
+   }
+  },
+  {
+   "name": "colorspacious",
+   "version": "1.1.2-6",
+   "directory": "pool/main/c/colorspacious",
+   "homepage": "https://github.com/njsmith/colorspacious",
+   "orig": {
+    "name": "colorspacious_1.1.2.orig.tar.gz",
+    "sha256": "5e9072e8cdca889dac445c35c9362a22ccf758e97b00b79ff0d5a7ba3e11b618",
+    "size": 688573
+   },
+   "debian": {
+    "name": "colorspacious_1.1.2-6.debian.tar.xz",
+    "sha256": "9c72bf39cea1a0b20a4c4df2e27d56201c5a8b72b4805de14b0aab3e458a0116",
+    "size": 6292
+   }
+  },
+  {
+   "name": "yalexs-ble",
+   "version": "7.2.2-1",
+   "directory": "pool/main/y/yalexs-ble",
+   "homepage": "https://github.com/bdraco/yalexs-ble",
+   "orig": {
+    "name": "yalexs-ble_7.2.2.orig.tar.xz",
+    "sha256": "1953a31d73ec9b4c4166647741325da45c08e82073967e647c174b95bb97c763",
+    "size": 149904
+   },
+   "debian": {
+    "name": "yalexs-ble_7.2.2-1.debian.tar.xz",
+    "sha256": "1c0538a2d84e0ea925bbcb9304b19114e9745de29ef59773144620879872e978",
+    "size": 2968
+   }
+  },
+  {
+   "name": "smart-open",
+   "version": "7.5.1-2",
+   "directory": "pool/main/s/smart-open",
+   "homepage": "https://github.com/piskvorky/smart_open",
+   "orig": {
+    "name": "smart-open_7.5.1.orig.tar.gz",
+    "sha256": "3a3b055eef57586b2512d598ea472a95fb135d830ef92578bbc1e5cbbb122741",
+    "size": 150076
+   },
+   "debian": {
+    "name": "smart-open_7.5.1-2.debian.tar.xz",
+    "sha256": "e45b0adae4454c5a84be415dfcb255f533e1fda24b3137dfabd2c7cd9d560c34",
+    "size": 5544
+   }
+  },
+  {
+   "name": "python-pecan",
+   "version": "1.8.0-3",
+   "directory": "pool/main/p/python-pecan",
+   "homepage": "https://github.com/pecan/pecan",
+   "orig": {
+    "name": "python-pecan_1.8.0.orig.tar.xz",
+    "sha256": "b7aba03cf6a4f9fd15359af65483dcc9e65148fd299bcabeaf41830ae8559d8d",
+    "size": 137452
+   },
+   "debian": {
+    "name": "python-pecan_1.8.0-3.debian.tar.xz",
+    "sha256": "9cc168c89f7ac418a2c1eb3da83a79b1887111f555b2c6ef980b57179afbd673",
+    "size": 6868
+   }
+  },
+  {
+   "name": "open-garage",
+   "version": "0.3.1-1",
+   "directory": "pool/main/o/open-garage",
+   "homepage": "https://github.com/Danielhiversen/pyOpenGarage",
+   "orig": {
+    "name": "open-garage_0.3.1.orig.tar.gz",
+    "sha256": "d8f6f1f8d8d0bc7f21617539783d910b9220a47528a5e7133add8e7e495274fc",
+    "size": 21338
+   },
+   "debian": {
+    "name": "open-garage_0.3.1-1.debian.tar.xz",
+    "sha256": "8cdc56e0e383b895d078ab08c8353c4f101f604d5fd7bdff44cf4bf17a4332f3",
+    "size": 2592
+   }
+  },
+  {
+   "name": "python-lsp-rope",
+   "version": "0.1.17-1",
+   "directory": "pool/main/p/python-lsp-rope",
+   "homepage": "https://github.com/python-rope/pylsp-rope",
+   "orig": {
+    "name": "python-lsp-rope_0.1.17.orig.tar.gz",
+    "sha256": "a10109539d7ae2ede55355b95409ddc70b8721d9c41c25bf760e9a67e6a377c8",
+    "size": 19803
+   },
+   "debian": {
+    "name": "python-lsp-rope_0.1.17-1.debian.tar.xz",
+    "sha256": "5c22f47d0a84c9d4746514a93ad14ce0a5f3a5b71fe850da08616c79399a1b3d",
+    "size": 2152
+   }
+  },
+  {
+   "name": "python-undetected-chromedriver",
+   "version": "3.5.5-4",
+   "directory": "pool/main/p/python-undetected-chromedriver",
+   "homepage": "https://github.com/ultrafunkamsterdam/undetected-chromedriver",
+   "orig": {
+    "name": "python-undetected-chromedriver_3.5.5.orig.tar.gz",
+    "sha256": "9f945e1435005247abe17de316bcfda85b284a4177fd5f25167c78ced33b65ec",
+    "size": 65409
+   },
+   "debian": {
+    "name": "python-undetected-chromedriver_3.5.5-4.debian.tar.xz",
+    "sha256": "55fa5aaf7428341001d6db78b696c867c4dd17af0a828ce76e644379482652cf",
+    "size": 2304
+   }
+  },
+  {
+   "name": "colorcet",
+   "version": "3.1.0-3",
+   "directory": "pool/main/c/colorcet",
+   "homepage": "https://github.com/holoviz/colorcet",
+   "orig": {
+    "name": "colorcet_3.1.0.orig.tar.gz",
+    "sha256": "810b53ba732b439c37c15eed122069d38e77b44aa69ca099442121b57d167e38",
+    "size": 2186509
+   },
+   "debian": {
+    "name": "colorcet_3.1.0-3.debian.tar.xz",
+    "sha256": "4801878cac3d8b4b87960d8d68d65f94935e4ac23cba4dd81efd4603a1086e28",
+    "size": 8016
+   }
+  },
+  {
+   "name": "power",
+   "version": "1.4+dfsg-6",
+   "directory": "pool/main/p/power",
+   "homepage": "https://github.com/Kentzo/Power",
+   "orig": {
+    "name": "power_1.4+dfsg.orig.tar.gz",
+    "sha256": "e4fd9114c07bd60186a8266c822ae25db0255f32975a9a80b6a4f1ec6650eeec",
+    "size": 9295
+   },
+   "debian": {
+    "name": "power_1.4+dfsg-6.debian.tar.xz",
+    "sha256": "0582aa2286842e9ab3571ae8d812eac24eee45b7682ed2f9556538a9e355f87c",
+    "size": 2524
+   }
+  },
+  {
+   "name": "libbytesize",
+   "version": "2.12-3",
+   "directory": "pool/main/libb/libbytesize",
+   "homepage": "https://github.com/storaged-project/libbytesize",
+   "orig": {
+    "name": "libbytesize_2.12.orig.tar.gz",
+    "sha256": "e8b39afc6580f5777c9b1c8488e21fcbb60a3effdac7399eef0236185639bc41",
+    "size": 98132
+   },
+   "debian": {
+    "name": "libbytesize_2.12-3.debian.tar.xz",
+    "sha256": "1f269b8e9ed5f3d16f5be4146cacf9f0edf626e13650f3e6ad49894ed7f75130",
+    "size": 5984
+   }
+  },
+  {
+   "name": "python-rt",
+   "version": "3.8.1-1",
+   "directory": "pool/main/p/python-rt",
+   "homepage": "https://github.com/CZ-NIC/python-rt",
+   "orig": {
+    "name": "python-rt_3.8.1.orig.tar.gz",
+    "sha256": "ec184c9e0893984f978f521991cb1a179353379ef837d1dc2a727b956fdc6395",
+    "size": 61662
+   },
+   "debian": {
+    "name": "python-rt_3.8.1-1.debian.tar.xz",
+    "sha256": "c25d741bc48ef6d370eb62ac909c426672f759e6fc4ff5c021111bf02354d3cf",
+    "size": 10112
+   }
+  },
+  {
+   "name": "pyelectra",
+   "version": "1.2.9-1",
+   "directory": "pool/main/p/pyelectra",
+   "homepage": "https://github.com/jafar-atili/pyelectra",
+   "orig": {
+    "name": "pyelectra_1.2.9.orig.tar.xz",
+    "sha256": "007e49e1e14fd587e3444b5f6e7de587e823b838d011dc165dd925239eae03aa",
+    "size": 18752
+   },
+   "debian": {
+    "name": "pyelectra_1.2.9-1.debian.tar.xz",
+    "sha256": "019c83cc083acfe226faab9d0846613171c4da0bb0a88855415a82447429527a",
+    "size": 2120
+   }
+  },
+  {
+   "name": "python-locationsharinglib",
+   "version": "5.0.3-2",
+   "directory": "pool/main/p/python-locationsharinglib",
+   "homepage": "https://github.com/costastf/locationsharinglib",
+   "orig": {
+    "name": "python-locationsharinglib_5.0.3.orig.tar.xz",
+    "sha256": "f86bab6541fa60a2b7d3c85311afd0936189b3b396a143f8e5df77fce35652f3",
+    "size": 55904
+   },
+   "debian": {
+    "name": "python-locationsharinglib_5.0.3-2.debian.tar.xz",
+    "sha256": "e32f593fd5b92567ee54496c732a89544eee83ba502851196da64a9795293db3",
+    "size": 3492
+   }
+  },
+  {
+   "name": "zigpy-znp",
+   "version": "1.1.1+dfsg-1",
+   "directory": "pool/main/z/zigpy-znp",
+   "homepage": "https://github.com/zigpy/zigpy-znp",
+   "orig": {
+    "name": "zigpy-znp_1.1.1+dfsg.orig.tar.xz",
+    "sha256": "84090af52880a9127dd886118dec3a5a9fa5a84b8eb5bba45ae48838b632d8bf",
+    "size": 127388
+   },
+   "debian": {
+    "name": "zigpy-znp_1.1.1+dfsg-1.debian.tar.xz",
+    "sha256": "73be18f07af704b33c019f7d61838c5187fa0d48570da71534985a3507d42e24",
+    "size": 3256
+   }
+  },
+  {
+   "name": "python-kdcproxy",
+   "version": "1.0.0-2.1",
+   "directory": "pool/main/p/python-kdcproxy",
+   "homepage": "https://github.com/latchset/kdcproxy",
+   "orig": {
+    "name": "python-kdcproxy_1.0.0.orig.tar.gz",
+    "sha256": "035685a1c2bb681b601ba1eeb74faa340511ecb027cb61708299846c5d2d1dd7",
+    "size": 18364
+   },
+   "debian": {
+    "name": "python-kdcproxy_1.0.0-2.1.debian.tar.xz",
+    "sha256": "8f6c26e37f2ca6c283946488fe37da8483a7434909e37d0adbd9a9f974a0374e",
+    "size": 2748
+   }
+  },
+  {
+   "name": "pylint-flask",
+   "version": "0.6-2",
+   "directory": "pool/main/p/pylint-flask",
+   "homepage": "https://github.com/jschaf/pylint-flask",
+   "orig": {
+    "name": "pylint-flask_0.6.orig.tar.gz",
+    "sha256": "f4d97de2216bf7bfce07c9c08b166e978fe9f2725de2a50a9845a97de7e31517",
+    "size": 9964
+   },
+   "debian": {
+    "name": "pylint-flask_0.6-2.debian.tar.xz",
+    "sha256": "0265b79b3be995f8f228dce5a0f64ceabd4c1c3e4d9671f2c6b68266a581e2c9",
+    "size": 3016
+   }
+  },
+  {
+   "name": "libnbd",
+   "version": "1.24.4-1",
+   "directory": "pool/main/libn/libnbd",
+   "homepage": "https://github.com/libguestfs/libnbd",
+   "orig": {
+    "name": "libnbd_1.24.4.orig.tar.gz",
+    "sha256": "19dc521f2b8142ecd45d3009e191b60b76105b1c522b03ce0582adf74864b83b",
+    "size": 1621753
+   },
+   "debian": {
+    "name": "libnbd_1.24.4-1.debian.tar.xz",
+    "sha256": "9548ade76a4b3589437db09dc04f0bad6368fac03a4a3008e7ac6146b6a1fadd",
+    "size": 85868
+   }
+  },
+  {
+   "name": "django-polymorphic",
+   "version": "4.11.7-2",
+   "directory": "pool/main/d/django-polymorphic",
+   "homepage": "https://github.com/django-polymorphic/django-polymorphic",
+   "orig": {
+    "name": "django-polymorphic_4.11.7.orig.tar.gz",
+    "sha256": "fafdd8eb34c9b91cab28a26377ddd26a0ad06c24f763c2520082160d05dc76c9",
+    "size": 424316
+   },
+   "debian": {
+    "name": "django-polymorphic_4.11.7-2.debian.tar.xz",
+    "sha256": "31e20ed27d703a63d3c9daa32949d5e4731dae6a0505a90b39c2fa511bfd2ccf",
+    "size": 9992
+   }
+  },
+  {
+   "name": "python-samsungctl",
+   "version": "0.7.1-1.1",
+   "directory": "pool/main/p/python-samsungctl",
+   "homepage": "https://github.com/Ape/samsungctl",
+   "orig": {
+    "name": "python-samsungctl_0.7.1.orig.tar.xz",
+    "sha256": "7faf1a3f5c526e3e74021c9cfd4017fa180115bc3136be791545d850614fcf56",
+    "size": 7244
+   },
+   "debian": {
+    "name": "python-samsungctl_0.7.1-1.1.debian.tar.xz",
+    "sha256": "e3f8d61c7536a319a125056a6dff514a1c0837fff149c85aafc141d221deb614",
+    "size": 2020
+   }
+  },
+  {
+   "name": "python-firehose",
+   "version": "0.5-4",
+   "directory": "pool/main/p/python-firehose",
+   "homepage": "https://github.com/fedora-static-analysis/firehose",
+   "orig": {
+    "name": "python-firehose_0.5.orig.tar.gz",
+    "sha256": "cde91df156f8725a3d29a3cd153767a64f71c3903af98d29ae2a06f3cebb2b99",
+    "size": 96966
+   },
+   "debian": {
+    "name": "python-firehose_0.5-4.debian.tar.xz",
+    "sha256": "bf867841b65f4c6935cb90729e2dd0a5aa732a102625d5a24704e99464230d74",
+    "size": 6128
+   }
+  },
+  {
+   "name": "python-btsocket",
+   "version": "0.3.0-1",
+   "directory": "pool/main/p/python-btsocket",
+   "homepage": "https://github.com/ukBaz/python-btsocket",
+   "orig": {
+    "name": "python-btsocket_0.3.0.orig.tar.gz",
+    "sha256": "032588ff427b7a6bdc57ed5d1adbad3690b7915d7b0884fb2a7d3d12d5dbcaf2",
+    "size": 20306
+   },
+   "debian": {
+    "name": "python-btsocket_0.3.0-1.debian.tar.xz",
+    "sha256": "51a87c6bcd846ca94fa7fbc6d3ff0a8df68c58ddade7e71f3462d2b0905fe3d6",
+    "size": 2568
+   }
+  },
+  {
+   "name": "python-wsproto",
+   "version": "1.3.2-3",
+   "directory": "pool/main/p/python-wsproto",
+   "homepage": "https://github.com/python-hyper/wsproto",
+   "orig": {
+    "name": "python-wsproto_1.3.2.orig.tar.gz",
+    "sha256": "b86885dcf294e15204919950f666e06ffc6c7c114ca900b060d6e16293528294",
+    "size": 50116
+   },
+   "debian": {
+    "name": "python-wsproto_1.3.2-3.debian.tar.xz",
+    "sha256": "a27dcd454586db7241e7a9c34eb55336f6230584c419a074cfea515d673e8543",
+    "size": 3744
+   }
+  },
+  {
+   "name": "python-phone-modem",
+   "version": "0.1.2-4",
+   "directory": "pool/main/p/python-phone-modem",
+   "homepage": "https://github.com/tkdrob/phone_modem",
+   "orig": {
+    "name": "python-phone-modem_0.1.2.orig.tar.gz",
+    "sha256": "ecd6a12bd97aecc753fdd0d55ecabecb4678719c59fd6516da43e91385b3ea3d",
+    "size": 4894
+   },
+   "debian": {
+    "name": "python-phone-modem_0.1.2-4.debian.tar.xz",
+    "sha256": "e73455579f8c15f62308c8520f69770a2ba49b3b00c1cc2faec6b44ee3b8d255",
+    "size": 2504
+   }
+  },
+  {
+   "name": "python-pint",
+   "version": "0.26.1-1",
+   "directory": "pool/main/p/python-pint",
+   "homepage": "https://github.com/hgrecco/pint",
+   "orig": {
+    "name": "python-pint_0.26.1.orig.tar.gz",
+    "sha256": "e400faab6b14281d100fb25ca05e3286ebd3622dfdb285099820264f0d6aa64e",
+    "size": 372740
+   },
+   "debian": {
+    "name": "python-pint_0.26.1-1.debian.tar.xz",
+    "sha256": "fab3cb724d4ab2cd6a2b5f3ff4cdcbc3e6e385a73f13726517e7f613199691c9",
+    "size": 8816
+   }
+  },
+  {
+   "name": "mistune",
+   "version": "3.4.0-1",
+   "directory": "pool/main/m/mistune",
+   "homepage": "https://github.com/lepture/mistune",
+   "orig": {
+    "name": "mistune_3.4.0.orig.tar.gz",
+    "sha256": "a030cbe778c087bf45ae05a2c8c4f5d66dc3979a2cadbe5828d7a04473e8bb39",
+    "size": 223249
+   },
+   "debian": {
+    "name": "mistune_3.4.0-1.debian.tar.xz",
+    "sha256": "93b58ed0ed6bfa89cc128c16c9828d33c45697b9e167fa6286756a0f4e0ed575",
+    "size": 3708
+   }
+  },
+  {
+   "name": "jupyter-console",
+   "version": "6.6.3-4",
+   "directory": "pool/main/j/jupyter-console",
+   "homepage": "https://github.com/jupyter/jupyter_console",
+   "orig": {
+    "name": "jupyter-console_6.6.3.orig.tar.gz",
+    "sha256": "202690f07159986bf1ac905fef6c4903be75d854334081d59a015383972ae904",
+    "size": 34096
+   },
+   "debian": {
+    "name": "jupyter-console_6.6.3-4.debian.tar.xz",
+    "sha256": "de2bd6993f8fc3a7131f6c3b0f4559805caa64445614227d4c208d224e24c924",
+    "size": 5224
+   }
+  },
+  {
+   "name": "python-securesystemslib",
+   "version": "1.4.0-1",
+   "directory": "pool/main/p/python-securesystemslib",
+   "homepage": "https://github.com/secure-systems-lab/securesystemslib",
+   "orig": {
+    "name": "python-securesystemslib_1.4.0.orig.tar.xz",
+    "sha256": "1667a195746aa9878a178fbf4038b0653f5fcfd0bbb8bd044ad85d435ee40679",
+    "size": 817168
+   },
+   "debian": {
+    "name": "python-securesystemslib_1.4.0-1.debian.tar.xz",
+    "sha256": "96f05055ec9ab89171f30e5076f5dd7d3698900fcc22353f4e813c711cd416ab",
+    "size": 5632
+   }
+  },
+  {
+   "name": "rfc3339-validator",
+   "version": "0.1.4-2",
+   "directory": "pool/main/r/rfc3339-validator",
+   "homepage": "https://github.com/naimetti/rfc3339-validator",
+   "orig": {
+    "name": "rfc3339-validator_0.1.4.orig.tar.gz",
+    "sha256": "992d8b410dbf7c498e9bf24303f013f29bb76b97fc509e8fb5a9222a58a593a4",
+    "size": 7340
+   },
+   "debian": {
+    "name": "rfc3339-validator_0.1.4-2.debian.tar.xz",
+    "sha256": "93cabd937c76a9c070b475e2661afdb4fc68127f8ef13ced85565153174c7b62",
+    "size": 2924
+   }
+  },
+  {
+   "name": "aioacaia",
+   "version": "0.2.3-1",
+   "directory": "pool/main/a/aioacaia",
+   "homepage": "https://github.com/zweckj/aioacaia",
+   "orig": {
+    "name": "aioacaia_0.2.3.orig.tar.xz",
+    "sha256": "01d7925bf69033080795f63816fb2a229327e0dc143a11a0a5363a7bdc42291d",
+    "size": 58536
+   },
+   "debian": {
+    "name": "aioacaia_0.2.3-1.debian.tar.xz",
+    "sha256": "a106849d3062e1d6665f0e9252a25db1ce9182167674234dad8b79b934a82a13",
+    "size": 12728
+   }
+  },
+  {
+   "name": "python-auto-pytabs",
+   "version": "0.4.0-4",
+   "directory": "pool/main/p/python-auto-pytabs",
+   "homepage": "https://github.com/provinzkraut/AutoPyTabs",
+   "orig": {
+    "name": "python-auto-pytabs_0.4.0.orig.tar.gz",
+    "sha256": "ed00c2f88240aa321b438062f0d845c8f9047b19b47d2bc96c574f7a340fc54c",
+    "size": 44950
+   },
+   "debian": {
+    "name": "python-auto-pytabs_0.4.0-4.debian.tar.xz",
+    "sha256": "02d9e56b95910f440ffad0a472f09e32cb273bd891cf8f4eab5b810d33fb9521",
+    "size": 5104
+   }
+  },
+  {
+   "name": "python-syncedlyrics",
+   "version": "1.0.1-2",
+   "directory": "pool/main/p/python-syncedlyrics",
+   "homepage": "https://github.com/moehmeni/syncedlyrics",
+   "orig": {
+    "name": "python-syncedlyrics_1.0.1.orig.tar.gz",
+    "sha256": "e9e36b8bab2d79428cb85b54a939f56d0d6210444b501b6861ffdf2266626840",
+    "size": 28140
+   },
+   "debian": {
+    "name": "python-syncedlyrics_1.0.1-2.debian.tar.xz",
+    "sha256": "cd5f5bb5b7575cb7315f232645366549e089608fde5a3a9c6f3a018f731d699b",
+    "size": 2868
+   }
+  },
+  {
+   "name": "python-qpageview",
+   "version": "1.0.3-1",
+   "directory": "pool/main/p/python-qpageview",
+   "homepage": "https://github.com/frescobaldi/qpageview",
+   "orig": {
+    "name": "python-qpageview_1.0.3.orig.tar.gz",
+    "sha256": "0034b5483abc44d358e47a746714533fdffadde2b864d1ce49aa1e652cc64ae2",
+    "size": 135497
+   },
+   "debian": {
+    "name": "python-qpageview_1.0.3-1.debian.tar.xz",
+    "sha256": "45ca5c2deafc2651e375dcae326d82aba412b89831669bda36de89eab5c2b6d4",
+    "size": 2620
+   }
+  },
+  {
+   "name": "geneagrapher",
+   "version": "2.0.0-2",
+   "directory": "pool/main/g/geneagrapher",
+   "homepage": "https://github.com/davidalber/Geneagrapher",
+   "orig": {
+    "name": "geneagrapher_2.0.0.orig.tar.gz",
+    "sha256": "83c07c1f2d3168bc3c431c63dc65717c83239fdda2b1dc1a7cce99f972a9cfaf",
+    "size": 652885
+   },
+   "debian": {
+    "name": "geneagrapher_2.0.0-2.debian.tar.xz",
+    "sha256": "48e4aac282a4ed14ddf108b9e19a5389166d071f7cf8043cc83aaefca9425522",
+    "size": 5920
+   }
+  },
+  {
+   "name": "python-hdf5plugin",
+   "version": "7.1.0-2",
+   "directory": "pool/main/p/python-hdf5plugin",
+   "homepage": "https://github.com/silx-kit/hdf5plugin",
+   "orig": {
+    "name": "python-hdf5plugin_7.1.0.orig.tar.xz",
+    "sha256": "4b5c5a4faff677e93ff5c24066ffa3173cc78014ad8e9ef08a584754165e6190",
+    "size": 5607968
+   },
+   "debian": {
+    "name": "python-hdf5plugin_7.1.0-2.debian.tar.xz",
+    "sha256": "f9e28d18c22ea1f03d3c6d4ec90b4f7e168df02a716ebb8a2401dedb92132bc8",
+    "size": 10640
+   }
+  },
+  {
+   "name": "defcon",
+   "version": "0.12.2-2",
+   "directory": "pool/main/d/defcon",
+   "homepage": "https://github.com/robotools/defcon",
+   "orig": {
+    "name": "defcon_0.12.2.orig.tar.gz",
+    "sha256": "1f3403bd298f4a5f5470e40220e7895e804ef341ec18e8d4ae4bda3ad1c11f30",
+    "size": 426687
+   },
+   "debian": {
+    "name": "defcon_0.12.2-2.debian.tar.xz",
+    "sha256": "b0215390dfd295815743b5ff4ecb61f21514b119464b8562b001b8a8e327f742",
+    "size": 4596
+   }
+  },
+  {
+   "name": "python-xapp",
+   "version": "3.0.3-1",
+   "directory": "pool/main/p/python-xapp",
+   "homepage": "https://github.com/linuxmint/python-xapp/",
+   "orig": {
+    "name": "python-xapp_3.0.3.orig.tar.gz",
+    "sha256": "032de6b2478bc259e9addb3f0dea7ed5726c05859890609633e3965ec13edccd",
+    "size": 41373
+   },
+   "debian": {
+    "name": "python-xapp_3.0.3-1.debian.tar.xz",
+    "sha256": "371dfc1f5ef99974b227082b013fd7f56964df915e1a306a6a613d429280ff9b",
+    "size": 3292
+   }
+  },
+  {
+   "name": "jinja2-time",
+   "version": "0.2.0-6",
+   "directory": "pool/main/j/jinja2-time",
+   "homepage": "https://github.com/hackebrot/jinja2-time",
+   "orig": {
+    "name": "jinja2-time_0.2.0.orig.tar.gz",
+    "sha256": "d14eaa4d315e7688daa4969f616f226614350c48730bfa1692d2caebd8c90d40",
+    "size": 5701
+   },
+   "debian": {
+    "name": "jinja2-time_0.2.0-6.debian.tar.xz",
+    "sha256": "63c32046bbea7212e277c5b1a85360ec1baf99dace138b1b2c532b6a2ae48edd",
+    "size": 5148
+   }
+  },
+  {
+   "name": "python-ewokscore",
+   "version": "4.0.1-3",
+   "directory": "pool/main/p/python-ewokscore",
+   "homepage": "https://github.com/ewoks-kit/ewokscore/",
+   "orig": {
+    "name": "python-ewokscore_4.0.1.orig.tar.bz2",
+    "sha256": "242bf7cc14daa2b7f1c25e6651f20005007919bb6aa36ba745978640650605c3",
+    "size": 74254
+   },
+   "debian": {
+    "name": "python-ewokscore_4.0.1-3.debian.tar.xz",
+    "sha256": "e291643933620be9372e3b18aca97f180cd21019b1b100db681b3466343988f4",
+    "size": 3196
+   }
+  },
+  {
+   "name": "python-idna",
+   "version": "3.20-1",
+   "directory": "pool/main/p/python-idna",
+   "homepage": "https://github.com/kjd/idna",
+   "orig": {
+    "name": "python-idna_3.20.orig.tar.gz",
+    "sha256": "baf330969764e0d6678854b97813c0080a1e08a73b27c70ae28a7ee84f992bb9",
+    "size": 251747
+   },
+   "debian": {
+    "name": "python-idna_3.20-1.debian.tar.xz",
+    "sha256": "4d5588ad8c471a3d9caeed1e5051a8a0ccff41b0c34ce0984428d8f401bfa79e",
+    "size": 5816
+   }
+  },
+  {
+   "name": "python-jsonrpc-base",
+   "version": "2.2.0-2",
+   "directory": "pool/main/p/python-jsonrpc-base",
+   "homepage": "https://github.com/emlove/jsonrpc-base",
+   "orig": {
+    "name": "python-jsonrpc-base_2.2.0.orig.tar.gz",
+    "sha256": "14bd992f943dc1685801389744ffa3ee4a841e4ba0290fd301a9dcc10050942a",
+    "size": 8876
+   },
+   "debian": {
+    "name": "python-jsonrpc-base_2.2.0-2.debian.tar.xz",
+    "sha256": "ea58b270e4c2a66c110146b61f72204e5f157746bc23c80e34a76d2d8d3fa190",
+    "size": 2612
+   }
+  },
+  {
+   "name": "pyina",
+   "version": "0.3.1-1",
+   "directory": "pool/main/p/pyina",
+   "homepage": "https://github.com/uqfoundation/pyina",
+   "orig": {
+    "name": "pyina_0.3.1.orig.tar.gz",
+    "sha256": "e9eb1073c242dfdcac7461ef87329ab43d00e23c19cb6a741b65b188db40eaab",
+    "size": 124273
+   },
+   "debian": {
+    "name": "pyina_0.3.1-1.debian.tar.xz",
+    "sha256": "2d966effebd579878f6eda4ad9417f89a9dcd952c40441a71e7ebb30e3cd3e10",
+    "size": 3900
+   }
+  },
+  {
+   "name": "python-pythonjsonlogger",
+   "version": "3.3.0-1",
+   "directory": "pool/main/p/python-pythonjsonlogger",
+   "homepage": "https://github.com/nhairs/python-json-logger",
+   "orig": {
+    "name": "python-pythonjsonlogger_3.3.0.orig.tar.gz",
+    "sha256": "51bd150f502a25e54c30c563c2bf1e620463c8881b2900b585e3f0fa735dd6fa",
+    "size": 32210
+   },
+   "debian": {
+    "name": "python-pythonjsonlogger_3.3.0-1.debian.tar.xz",
+    "sha256": "f8cc798b16bbb9147f0b6e88f32897688e7421491b50c61cc77077f873eee3d2",
+    "size": 2964
+   }
+  },
+  {
+   "name": "python-friendly-styles",
+   "version": "0.2+git20250605.bc0abfe-2",
+   "directory": "pool/main/p/python-friendly-styles",
+   "homepage": "https://github.com/friendly-traceback/friendly_styles",
+   "orig": {
+    "name": "python-friendly-styles_0.2+git20250605.bc0abfe.orig.tar.xz",
+    "sha256": "228673ab12b9a294856bf148101bbecd82b8fecec983f661aa77c39635792ed4",
+    "size": 54484
+   },
+   "debian": {
+    "name": "python-friendly-styles_0.2+git20250605.bc0abfe-2.debian.tar.xz",
+    "sha256": "1591c00de6ec2a4b2e14670133bbc3b600c7778767171718a0751895fa5ab735",
+    "size": 2840
+   }
+  },
+  {
+   "name": "python-stubserver",
+   "version": "1.1-4",
+   "directory": "pool/main/p/python-stubserver",
+   "homepage": "https://github.com/tarttelin/Python-Stub-Server",
+   "orig": {
+    "name": "python-stubserver_1.1.orig.tar.gz",
+    "sha256": "8fd47bc29bdbd3b16e37912122913bc5349fdba02789064de222e9c4c8cd60a0",
+    "size": 5895
+   },
+   "debian": {
+    "name": "python-stubserver_1.1-4.debian.tar.xz",
+    "sha256": "b043cf4528fdcc0135f50f6e9c30accae74a61f6e242a07de681098d453842e2",
+    "size": 5984
+   }
+  },
+  {
+   "name": "ipython",
+   "version": "9.11.0-3",
+   "directory": "pool/main/i/ipython",
+   "homepage": "https://github.com/ipython/ipython",
+   "orig": {
+    "name": "ipython_9.11.0.orig.tar.gz",
+    "sha256": "aa12370d979663407e57e602223a2d382879e264c0ed76c928f22965dd3f755f",
+    "size": 4429709
+   },
+   "debian": {
+    "name": "ipython_9.11.0-3.debian.tar.xz",
+    "sha256": "786223bd9f6dc55823de322ac73b34992dfa671929c3406dbcfc2dec89d67eca",
+    "size": 10296
+   }
+  },
+  {
+   "name": "python-django-tasks",
+   "version": "0.12.0-2",
+   "directory": "pool/main/p/python-django-tasks",
+   "homepage": "https://github.com/RealOrangeOne/django-tasks",
+   "orig": {
+    "name": "python-django-tasks_0.12.0.orig.tar.gz",
+    "sha256": "164939658b6fb86a046ed61e3054a6825daaef1aea7757664cbe5515dcbd17fd",
+    "size": 21645
+   },
+   "debian": {
+    "name": "python-django-tasks_0.12.0-2.debian.tar.xz",
+    "sha256": "0a8184acdf78c5d99f1200e6957cd659e1aa496cfbc8ef980cee8ecfe63f80f5",
+    "size": 2804
+   }
+  },
+  {
+   "name": "coreapi",
+   "version": "2.3.3-9",
+   "directory": "pool/main/c/coreapi",
+   "homepage": "https://github.com/core-api/python-client",
+   "orig": {
+    "name": "coreapi_2.3.3.orig.tar.gz",
+    "sha256": "9e2281621899422f7c84bf0ceda48971141bae6c6ef96a0984fda2ddfb514917",
+    "size": 19106
+   },
+   "debian": {
+    "name": "coreapi_2.3.3-9.debian.tar.xz",
+    "sha256": "08eb1960c05096c6a9ab007d3de03149393ef4ac354c22fd083e5b284fcf865e",
+    "size": 3176
+   }
+  },
+  {
+   "name": "sphinxcontrib-openapi",
+   "version": "0.8.4-5",
+   "directory": "pool/main/s/sphinxcontrib-openapi",
+   "homepage": "https://github.com/sphinx-contrib/openapi",
+   "orig": {
+    "name": "sphinxcontrib-openapi_0.8.4.orig.tar.gz",
+    "sha256": "3b2147bd3f232441805a09a00fb1fecd61489d1561427201ddf360a9403a0e1b",
+    "size": 68820
+   },
+   "debian": {
+    "name": "sphinxcontrib-openapi_0.8.4-5.debian.tar.xz",
+    "sha256": "ea0a758e5b054b3188b74b56c8dfc0a4d3708a69124eab75bd668ee7693ffe71",
+    "size": 4240
+   }
+  },
+  {
+   "name": "python-txrequests",
+   "version": "0.9.6-4",
+   "directory": "pool/main/p/python-txrequests",
+   "homepage": "https://github.com/tardyp/txrequests",
+   "orig": {
+    "name": "python-txrequests_0.9.6.orig.tar.xz",
+    "sha256": "c5a4beebf3d61b8e707ec595ce5ad5e76b442fba1a1e0597976ca8bcf8f780b2",
+    "size": 4560
+   },
+   "debian": {
+    "name": "python-txrequests_0.9.6-4.debian.tar.xz",
+    "sha256": "99129fd7ed055ae9475d29f95670b2c88cc1fd424ea7444719561dc02f0a38b6",
+    "size": 2900
+   }
+  },
+  {
+   "name": "django-polymodels",
+   "version": "1.8.1-1",
+   "directory": "pool/main/d/django-polymodels",
+   "homepage": "https://github.com/charettes/django-polymodels",
+   "orig": {
+    "name": "django-polymodels_1.8.1.orig.tar.gz",
+    "sha256": "1aad18d1f7a243add7ac653fc4a5b2f8ad42a4a551190c2aba29b32a02a1b58a",
+    "size": 16316
+   },
+   "debian": {
+    "name": "django-polymodels_1.8.1-1.debian.tar.xz",
+    "sha256": "7f5568c1bd69c58af6d17e8b23627945039272bfd950ec5c959bf55aeb8120aa",
+    "size": 2268
+   }
+  },
+  {
+   "name": "pysodium",
+   "version": "0.7.18-3",
+   "directory": "pool/main/p/pysodium",
+   "homepage": "https://github.com/stef/pysodium",
+   "orig": {
+    "name": "pysodium_0.7.18.orig.tar.gz",
+    "sha256": "781ada024456ac74c411193b82d94018c85c94130ea01a22dbec48b8ff458b07",
+    "size": 26876
+   },
+   "debian": {
+    "name": "pysodium_0.7.18-3.debian.tar.xz",
+    "sha256": "59f364df818286b2c68a9669e56859890dc7a47baffc38366a8b42b3efe23834",
+    "size": 6336
+   }
+  },
+  {
+   "name": "python-django-crispy-forms-foundation",
+   "version": "1.1.0+ds-3",
+   "directory": "pool/main/p/python-django-crispy-forms-foundation",
+   "homepage": "https://github.com/sveetch/crispy-forms-foundation",
+   "orig": {
+    "name": "python-django-crispy-forms-foundation_1.1.0+ds.orig.tar.gz",
+    "sha256": "b62a3fc967d82bdff24be331c2bc6371c0bfefda3dc3bbfbbfdd0d1670c9a964",
+    "size": 121502
+   },
+   "debian": {
+    "name": "python-django-crispy-forms-foundation_1.1.0+ds-3.debian.tar.xz",
+    "sha256": "800fda3d850e16923f760fc155245a280d9f8d67eec72d7adb4036e6c10b5aff",
+    "size": 5264
+   }
+  },
+  {
+   "name": "pynobo",
+   "version": "1.9.0-3",
+   "directory": "pool/main/p/pynobo",
+   "homepage": "https://github.com/echoromeo/pynobo",
+   "orig": {
+    "name": "pynobo_1.9.0.orig.tar.xz",
+    "sha256": "e6fae30361493b3da0aeaf737178be7bc7906d282efb3e43c3c6c2c8ea27cc43",
+    "size": 34008
+   },
+   "debian": {
+    "name": "pynobo_1.9.0-3.debian.tar.xz",
+    "sha256": "d0f94577a6c765b770ddc80be0c28554a4d0302c9c78382047b13301c98ec21b",
+    "size": 2384
+   }
+  },
+  {
+   "name": "python-rxv",
+   "version": "0.7.0-2",
+   "directory": "pool/main/p/python-rxv",
+   "homepage": "https://github.com/wuub/rxv",
+   "orig": {
+    "name": "python-rxv_0.7.0.orig.tar.xz",
+    "sha256": "c406908a8a90c851bdd6278df9f4e0c4a574a038505742ec25533785e99a52ba",
+    "size": 37788
+   },
+   "debian": {
+    "name": "python-rxv_0.7.0-2.debian.tar.xz",
+    "sha256": "b72c2132067943e7c03e9646cf6b9d4edeaa688a598431f49662e964d7d07678",
+    "size": 2484
+   }
+  },
+  {
+   "name": "pyfastx",
+   "version": "2.3.0-1",
+   "directory": "pool/main/p/pyfastx",
+   "homepage": "https://github.com/lmdu/pyfastx",
+   "orig": {
+    "name": "pyfastx_2.3.0.orig.tar.xz",
+    "sha256": "1d251aa5ff0601116f451defcda175d3f46e835091187cbe23734c74cc2cc8c4",
+    "size": 230696
+   },
+   "debian": {
+    "name": "pyfastx_2.3.0-1.debian.tar.xz",
+    "sha256": "d86e4b346213a9c2afb32c8fe1c1a6f8826b3dc8009cf662f42379741c1a1fe6",
+    "size": 7868
+   }
+  },
+  {
+   "name": "pysmarlaapi",
+   "version": "1.0.2-2",
+   "directory": "pool/main/p/pysmarlaapi",
+   "homepage": "https://github.com/Explicatis-GmbH/pysmarlaapi",
+   "orig": {
+    "name": "pysmarlaapi_1.0.2.orig.tar.xz",
+    "sha256": "16822f70923a69de65b91b3b6681f4339f7842c5808b39d098dae3d426bcd90c",
+    "size": 13500
+   },
+   "debian": {
+    "name": "pysmarlaapi_1.0.2-2.debian.tar.xz",
+    "sha256": "aabeeba81ee6075da6eca325c3996807996f6a3f54686eb90d4e37a86bb3bf55",
+    "size": 2312
+   }
+  },
+  {
+   "name": "elasticsearch-curator",
+   "version": "9.0.0-1",
+   "directory": "pool/main/e/elasticsearch-curator",
+   "homepage": "https://github.com/elasticsearch/curator",
+   "orig": {
+    "name": "elasticsearch-curator_9.0.0.orig.tar.gz",
+    "sha256": "9db42435f2e7de872abaf14eec018dbdfddf42fd748457dd99d162a24cdb7ea5",
+    "size": 328067
+   },
+   "debian": {
+    "name": "elasticsearch-curator_9.0.0-1.debian.tar.xz",
+    "sha256": "0192ac3e90b231baea94a7dfe2dc257cbb860a94f7a5c93a4beee48a4acfdb1e",
+    "size": 7364
+   }
+  },
+  {
+   "name": "python-cotyledon",
+   "version": "2.2.0-3",
+   "directory": "pool/main/p/python-cotyledon",
+   "homepage": "https://github.com/sileht/cotyledon",
+   "orig": {
+    "name": "python-cotyledon_2.2.0.orig.tar.xz",
+    "sha256": "b167506ec10583edcc7f09c2059507d4b0a072bf466527a31e1fa1e145102333",
+    "size": 23180
+   },
+   "debian": {
+    "name": "python-cotyledon_2.2.0-3.debian.tar.xz",
+    "sha256": "fb0151e06694f5a72b7a6332a0eb2a82765bbb811728e6e1a38f18e2b7f19151",
+    "size": 3840
+   }
+  },
+  {
+   "name": "python-repoze.sphinx.autointerface",
+   "version": "1.1.0-1",
+   "directory": "pool/main/p/python-repoze.sphinx.autointerface",
+   "homepage": "https://github.com/repoze/repoze.sphinx.autointerface",
+   "orig": {
+    "name": "python-repoze.sphinx.autointerface_1.1.0.orig.tar.gz",
+    "sha256": "210ff74c011f1ddeafb74391fc249fc738c5b0b9c8572b0609263ee6908ec443",
+    "size": 11204
+   },
+   "debian": {
+    "name": "python-repoze.sphinx.autointerface_1.1.0-1.debian.tar.xz",
+    "sha256": "dd72c7ffc28b0054947b27fe2d51903ea778013dd793412ce19b05a17ead2697",
+    "size": 3720
+   }
+  },
+  {
+   "name": "anymarkup-core",
+   "version": "0.8.1-3",
+   "directory": "pool/main/a/anymarkup-core",
+   "homepage": "https://github.com/bkabrda/anymarkup-core",
+   "orig": {
+    "name": "anymarkup-core_0.8.1.orig.tar.gz",
+    "sha256": "603351ba6b38270f518389dc9c3f3bf0738f186ad6ec51aeb6f403bc497fb308",
+    "size": 11571
+   },
+   "debian": {
+    "name": "anymarkup-core_0.8.1-3.debian.tar.xz",
+    "sha256": "de4eec754258abb727a331c9627811d91347bb002263f9a688272985d90afcc2",
+    "size": 2644
+   }
+  },
+  {
+   "name": "python-booleanoperations",
+   "version": "0.10.0-2",
+   "directory": "pool/main/p/python-booleanoperations",
+   "homepage": "https://github.com/typemytype/booleanOperations",
+   "orig": {
+    "name": "python-booleanoperations_0.10.0.orig.tar.gz",
+    "sha256": "2dadb0c1b1133315a49ce0300483068b2a6e74fa56183198dcd927e7b52ec199",
+    "size": 163148
+   },
+   "debian": {
+    "name": "python-booleanoperations_0.10.0-2.debian.tar.xz",
+    "sha256": "cf694f4ea07c0774654b555e8c57933f76e959456bff053dfea03e4cf53ebf31",
+    "size": 3268
+   }
+  },
+  {
+   "name": "python-pyopen-wakeword",
+   "version": "1.1.0+dfsg-2",
+   "directory": "pool/main/p/python-pyopen-wakeword",
+   "homepage": "https://github.com/rhasspy/pyopen-wakeword",
+   "orig": {
+    "name": "python-pyopen-wakeword_1.1.0+dfsg.orig.tar.xz",
+    "sha256": "d2e37992b161cd4cf6b527118c9c2085179f1df5b0406d4b7ff6f6c7b95d3ded",
+    "size": 5430936
+   },
+   "debian": {
+    "name": "python-pyopen-wakeword_1.1.0+dfsg-2.debian.tar.xz",
+    "sha256": "73c30b667c41b0efefad023f8f8d62a1b217c59ad098aec5968a941ae1800643",
+    "size": 3824
+   }
+  },
+  {
+   "name": "lenovolegionlinux",
+   "version": "0.1.2+ds-1",
+   "directory": "pool/main/l/lenovolegionlinux",
+   "homepage": "https://github.com/johnfanv2/LenovoLegionLinux",
+   "orig": {
+    "name": "lenovolegionlinux_0.1.2+ds.orig.tar.xz",
+    "sha256": "3ce92bbb56f26febffa2edae7f8e6a1544c030a5f472836e010624cac5f4d62f",
+    "size": 1082840
+   },
+   "debian": {
+    "name": "lenovolegionlinux_0.1.2+ds-1.debian.tar.xz",
+    "sha256": "3903c9e8ead1a2776027b0e6d2f36784f2f70ac672dd57912629cc6a53135249",
+    "size": 12080
+   }
+  },
+  {
+   "name": "python-tmdbsimple",
+   "version": "2.9.8-1",
+   "directory": "pool/main/p/python-tmdbsimple",
+   "homepage": "https://github.com/celiao/tmdbsimple/",
+   "orig": {
+    "name": "python-tmdbsimple_2.9.8.orig.tar.gz",
+    "sha256": "0e6011d77c7df8e10461d398e842fcc36e6aa0c48f0c27f42b4c581de2f4958c",
+    "size": 40242
+   },
+   "debian": {
+    "name": "python-tmdbsimple_2.9.8-1.debian.tar.xz",
+    "sha256": "e278cd9c56c2bbd3130f83d4db658567c63d883b1ed30c8365a5a18287bf909e",
+    "size": 2884
+   }
+  },
+  {
+   "name": "pako",
+   "version": "0.3.1-2.1",
+   "directory": "pool/main/p/pako",
+   "homepage": "https://github.com/MycroftAI/pako",
+   "orig": {
+    "name": "pako_0.3.1.orig.tar.xz",
+    "sha256": "7adbed90881f6272b599fd69a7468e14711286dea165490596b84ba67ae33f3d",
+    "size": 50476
+   },
+   "debian": {
+    "name": "pako_0.3.1-2.1.debian.tar.xz",
+    "sha256": "b18c7dfc180d48723828af7fefa5c2dd098fb993f6f9f5f3daf07b332ed34312",
+    "size": 3220
+   }
+  },
+  {
+   "name": "python-tempita",
+   "version": "0.6.0-1",
+   "directory": "pool/main/p/python-tempita",
+   "homepage": "https://github.com/TurboGears/tempita",
+   "orig": {
+    "name": "python-tempita_0.6.0.orig.tar.gz",
+    "sha256": "76e15de0137e5011c22949cc15a5161f623fe6a31655751c6d765db6bbac27b6",
+    "size": 19205
+   },
+   "debian": {
+    "name": "python-tempita_0.6.0-1.debian.tar.xz",
+    "sha256": "d215cd542e4c17aad9dc0bd4e82a635c65a10306deda2f02a909d5f16ac0b0de",
+    "size": 6556
+   }
+  },
+  {
+   "name": "python-pepsickle",
+   "version": "0.2.2-1",
+   "directory": "pool/main/p/python-pepsickle",
+   "homepage": "https://github.com/pdxgx/pepsickle",
+   "orig": {
+    "name": "python-pepsickle_0.2.2.orig.tar.gz",
+    "sha256": "e785d8fde2b7007827e7b44f53680d2c59b023261b52538b3b59a115d9e58104",
+    "size": 1130813
+   },
+   "debian": {
+    "name": "python-pepsickle_0.2.2-1.debian.tar.xz",
+    "sha256": "3e392d022d1b8113f40bbb6bee24a65c401d711584fc9423faf61e3381327c28",
+    "size": 8808
+   }
+  },
+  {
+   "name": "jsonargparse",
+   "version": "4.52.0-2",
+   "directory": "pool/main/j/jsonargparse",
+   "homepage": "https://github.com/mauvilsa/jsonargparse/",
+   "orig": {
+    "name": "jsonargparse_4.52.0.orig.tar.gz",
+    "sha256": "103168510fab9d45a980fe7560dcbf20d1cce38320a43904583d23869af3bee1",
+    "size": 164776
+   },
+   "debian": {
+    "name": "jsonargparse_4.52.0-2.debian.tar.xz",
+    "sha256": "d6551184255ab6a17ea907355e038d172aa202b7c45701cba90f8a064178c0c3",
+    "size": 2900
+   }
+  },
+  {
+   "name": "pycares",
+   "version": "5.0.1-3",
+   "directory": "pool/main/p/pycares",
+   "homepage": "https://github.com/saghul/pycares",
+   "orig": {
+    "name": "pycares_5.0.1.orig.tar.gz",
+    "sha256": "5a3c249c830432631439815f9a818463416f2a8cbdb1e988e78757de9ae75081",
+    "size": 652222
+   },
+   "debian": {
+    "name": "pycares_5.0.1-3.debian.tar.xz",
+    "sha256": "ca64201f988d447b487b7b91bfe827bc840cf29593c917bdf67bb750e97f0542",
+    "size": 7996
+   }
+  },
+  {
+   "name": "python-trie",
+   "version": "0.4.0+ds-2",
+   "directory": "pool/main/p/python-trie",
+   "homepage": "https://github.com/gsakkis/pytrie",
+   "orig": {
+    "name": "python-trie_0.4.0+ds.orig.tar.xz",
+    "sha256": "29422403cafbf04e8671ddec390cd9636c34f17c681688896cac79df79c4d04b",
+    "size": 11456
+   },
+   "debian": {
+    "name": "python-trie_0.4.0+ds-2.debian.tar.xz",
+    "sha256": "825b7c163cc9335240fdfbfd8e149e63ebbecdd25315d494851349815d16e2e7",
+    "size": 4264
+   }
+  },
+  {
+   "name": "python-tinycss2",
+   "version": "1.5.1-5",
+   "directory": "pool/main/p/python-tinycss2",
+   "homepage": "https://github.com/Kozea/tinycss2/",
+   "orig": {
+    "name": "python-tinycss2_1.5.1.orig.tar.gz",
+    "sha256": "d339d2b616ba90ccce58da8495a78f46e55d4d25f9fd71dfd526f07e7d53f957",
+    "size": 88195
+   },
+   "debian": {
+    "name": "python-tinycss2_1.5.1-5.debian.tar.xz",
+    "sha256": "c5c565ad3195ca557573aba64916d4aa3523cafa20e96c8876b56611ced77b00",
+    "size": 8112
+   }
+  },
+  {
+   "name": "flexit-bacnet",
+   "version": "2.2.3-1",
+   "directory": "pool/main/f/flexit-bacnet",
+   "homepage": "https://github.com/piotrbulinski/flexit_bacnet",
+   "orig": {
+    "name": "flexit-bacnet_2.2.3.orig.tar.gz",
+    "sha256": "7cd608d2bc1272b124db941406c9a4442ad463d534e5fa47ead7c5a99664d082",
+    "size": 27299
+   },
+   "debian": {
+    "name": "flexit-bacnet_2.2.3-1.debian.tar.xz",
+    "sha256": "82417a09c09cb7aca799c826acef54f9272531c617e1be60460595041f09a44c",
+    "size": 2096
+   }
+  },
+  {
+   "name": "jsonpickle",
+   "version": "4.0.2+dfsg-4",
+   "directory": "pool/main/j/jsonpickle",
+   "homepage": "https://github.com/jsonpickle/jsonpickle",
+   "orig": {
+    "name": "jsonpickle_4.0.2+dfsg.orig.tar.xz",
+    "sha256": "8941463a6709ed242c7297cbdd3c9241d351eab165debb9ff24047ee61994285",
+    "size": 173976
+   },
+   "debian": {
+    "name": "jsonpickle_4.0.2+dfsg-4.debian.tar.xz",
+    "sha256": "338ac0e5d9c22a69ecdea17d504bfb4d3a955052fe9254c4c7333fdd771755e2",
+    "size": 7692
+   }
+  },
+  {
+   "name": "python-googleapis-common-protos",
+   "version": "1.75.0-1",
+   "directory": "pool/main/p/python-googleapis-common-protos",
+   "homepage": "https://github.com/googleapis/google-cloud-python/tree/main/packages/googleapis-common-protos",
+   "orig": {
+    "name": "python-googleapis-common-protos_1.75.0.orig.tar.gz",
+    "sha256": "53a062ff3c32552fbd62c11fe23768b78e4ddf0494d5e5fd97d3f4689c75fbbd",
+    "size": 151035
+   },
+   "debian": {
+    "name": "python-googleapis-common-protos_1.75.0-1.debian.tar.xz",
+    "sha256": "ad10e64f4d6ae829fd79abeb09783ea76f78765d06aea269e77fa5b60cb9eac8",
+    "size": 2240
+   }
+  },
+  {
+   "name": "python-mhctools",
+   "version": "3.48.1-1",
+   "directory": "pool/main/p/python-mhctools",
+   "homepage": "https://github.com/openvax/mhctools",
+   "orig": {
+    "name": "python-mhctools_3.48.1.orig.tar.gz",
+    "sha256": "652b59acf393c439f29175687fc8fa7f6cf37d431172897c4bc73b59c6d38f13",
+    "size": 199858574
+   },
+   "debian": {
+    "name": "python-mhctools_3.48.1-1.debian.tar.xz",
+    "sha256": "297c3c8fdcbd577c70377e1f3be8baf858808391baa0904f09e8984f53f2cad5",
+    "size": 5996
+   }
+  },
+  {
+   "name": "cinder",
+   "version": "2:29.0.0-3",
+   "directory": "pool/main/c/cinder",
+   "homepage": "https://github.com/openstack/cinder",
+   "orig": {
+    "name": "cinder_29.0.0.orig.tar.xz",
+    "sha256": "8de8382790c170fdf1c53276897c06e19485d8827b6229d421cd5d52f2690b8a",
+    "size": 4604512
+   },
+   "debian": {
+    "name": "cinder_29.0.0-3.debian.tar.xz",
+    "sha256": "e2724ac775b7c985460d376ec6c04d12693fe631d59e639b2939ff4cd05613b7",
+    "size": 48448
+   }
+  },
+  {
+   "name": "python-rioxarray",
+   "version": "0.23.0-6",
+   "directory": "pool/main/p/python-rioxarray",
+   "homepage": "https://github.com/corteva/rioxarray",
+   "orig": {
+    "name": "python-rioxarray_0.23.0.orig.tar.gz",
+    "sha256": "ae43b78d29c61950a6cfe1d39881ca5a0a38b743b5d97eb120a9c89fe2629662",
+    "size": 4742301
+   },
+   "debian": {
+    "name": "python-rioxarray_0.23.0-6.debian.tar.xz",
+    "sha256": "606c9340568fafc69a7b0dfab97370de3cab67757939a72f9e06085fe8ed3428",
+    "size": 5904
+   }
+  },
+  {
+   "name": "python-annotated-types",
+   "version": "0.8.0-1",
+   "directory": "pool/main/p/python-annotated-types",
+   "homepage": "https://github.com/annotated-types/annotated-types",
+   "orig": {
+    "name": "python-annotated-types_0.8.0.orig.tar.gz",
+    "sha256": "4d038ad7abecc913fdf426d1b28ce60c4fb129c65ed33863515dfd1975e97dce",
+    "size": 15093
+   },
+   "debian": {
+    "name": "python-annotated-types_0.8.0-1.debian.tar.xz",
+    "sha256": "ab7a9aedb39c1bcccf3a16655e682e1b59da784bf38df51c2bddb69c31cfade5",
+    "size": 2984
+   }
+  },
+  {
+   "name": "netgen",
+   "version": "6.2.2606+dfsg1-3",
+   "directory": "pool/main/n/netgen",
+   "homepage": "https://github.com/NGSolve/netgen",
+   "orig": {
+    "name": "netgen_6.2.2606+dfsg1.orig.tar.xz",
+    "sha256": "e74c32a846daec653b388c161bf4c5fa673165ae963f4ba88f99321dad5bdebd",
+    "size": 2202564
+   },
+   "debian": {
+    "name": "netgen_6.2.2606+dfsg1-3.debian.tar.xz",
+    "sha256": "dc0bd581287ab6add158222e7e708e4c46009f6149ab6435ca19342701d4efd9",
+    "size": 25596
+   }
+  },
+  {
+   "name": "sphinx-jinja2-compat",
+   "version": "0.4.1-1",
+   "directory": "pool/main/s/sphinx-jinja2-compat",
+   "homepage": "https://github.com/sphinx-toolbox/sphinx-jinja2-compat",
+   "orig": {
+    "name": "sphinx-jinja2-compat_0.4.1.orig.tar.gz",
+    "sha256": "08c24dfd57d2ff7180083d9dc5a75a456e347dd41ccc31204d59bda6cd7acc82",
+    "size": 22743
+   },
+   "debian": {
+    "name": "sphinx-jinja2-compat_0.4.1-1.debian.tar.xz",
+    "sha256": "27c0959c36298810b83d9d795304f6fc0278e3d74ae3da16e2449fe43eccc760",
+    "size": 3156
+   }
+  },
+  {
+   "name": "python-kgb",
+   "version": "7.3-1",
+   "directory": "pool/main/p/python-kgb",
+   "homepage": "https://github.com/beanbaginc/kgb",
+   "orig": {
+    "name": "python-kgb_7.3.orig.tar.gz",
+    "sha256": "b8af7e79cb8b0df5a2ec596010b8e5d014845cfaa9203577b85b99d4df192927",
+    "size": 62922
+   },
+   "debian": {
+    "name": "python-kgb_7.3-1.debian.tar.xz",
+    "sha256": "6a85188f53d24f8fdeabd7f286dfc4776e8f8bb2b91a0a0c706a8a9017cd32ed",
+    "size": 2476
+   }
+  },
+  {
+   "name": "pyopenuv",
+   "version": "2023.12.0-2",
+   "directory": "pool/main/p/pyopenuv",
+   "homepage": "https://github.com/bachya/pyopenuv",
+   "orig": {
+    "name": "pyopenuv_2023.12.0.orig.tar.gz",
+    "sha256": "bd3b105681df8222b0ae92b1e4e1f9fc9af67369812ca475462b3cc9d9022f15",
+    "size": 53796
+   },
+   "debian": {
+    "name": "pyopenuv_2023.12.0-2.debian.tar.xz",
+    "sha256": "27d0a7615653c9dd29107a77c036d5eafec6ee5eb682f6b068a52b4f2dbd7838",
+    "size": 2396
+   }
+  },
+  {
+   "name": "pygubu",
+   "version": "0.37-1",
+   "directory": "pool/main/p/pygubu",
+   "homepage": "https://github.com/alejandroautalan/pygubu",
+   "orig": {
+    "name": "pygubu_0.37.orig.tar.gz",
+    "sha256": "153d97f541839c94059f6c6b720735e1fe8b526ffeb608676043e7d1bc957ea7",
+    "size": 170435
+   },
+   "debian": {
+    "name": "pygubu_0.37-1.debian.tar.xz",
+    "sha256": "670a1f162d5321716f081533b512c3a85816ae1bde44d9c6c600edaf7c294367",
+    "size": 3640
+   }
+  },
+  {
+   "name": "pysilfont",
+   "version": "1.8.0-5",
+   "directory": "pool/main/p/pysilfont",
+   "homepage": "https://github.com/silnrsi/pysilfont",
+   "orig": {
+    "name": "pysilfont_1.8.0.orig.tar.xz",
+    "sha256": "aa5d7383a966ff38f0d357154db96bd2b52e7223faf89818f542e0029050ff80",
+    "size": 442556
+   },
+   "debian": {
+    "name": "pysilfont_1.8.0-5.debian.tar.xz",
+    "sha256": "e08b96524b6bf9d327a2efc3cfa420dc64c3650c1dfddf55bfe272e09b498ea4",
+    "size": 2840
+   }
+  },
+  {
+   "name": "cyborg",
+   "version": "17.0.0-4",
+   "directory": "pool/main/c/cyborg",
+   "homepage": "https://github.com/openstack/cyborg",
+   "orig": {
+    "name": "cyborg_17.0.0.orig.tar.xz",
+    "sha256": "f86697dfe2592e6cd3459ad225299a36fe7b4d78fcb766f08a5bf2f2dc5e6560",
+    "size": 438276
+   },
+   "debian": {
+    "name": "cyborg_17.0.0-4.debian.tar.xz",
+    "sha256": "f4909d530de54a4543743be6a3184eea58eced2e74ec9595224f8e3919f95896",
+    "size": 8688
+   }
+  },
+  {
+   "name": "astropy-iers-data",
+   "version": "0.2026.9.21.0.56.25-1",
+   "directory": "pool/main/a/astropy-iers-data",
+   "homepage": "https://github.com/astropy/astropy-iers-data",
+   "orig": {
+    "name": "astropy-iers-data_0.2026.9.21.0.56.25.orig.tar.gz",
+    "sha256": "9dc720f6f06020d8b0009629ab3d0a145e1b744b45293ad40b3762187082ebdb",
+    "size": 2006794
+   },
+   "debian": {
+    "name": "astropy-iers-data_0.2026.9.21.0.56.25-1.debian.tar.xz",
+    "sha256": "3f6f5a1090caeed80c6cc6e8c43caacb5dbce92ed0edd9d2314bc494be61dd1a",
+    "size": 3016
+   }
+  },
+  {
+   "name": "python-geojson",
+   "version": "3.3.0-1",
+   "directory": "pool/main/p/python-geojson",
+   "homepage": "https://github.com/jazzband/geojson",
+   "orig": {
+    "name": "python-geojson_3.3.0.orig.tar.gz",
+    "sha256": "aea34d7a6798df63eb76e17c64815b45527723b90dd42667d924c87dfe13070a",
+    "size": 22934
+   },
+   "debian": {
+    "name": "python-geojson_3.3.0-1.debian.tar.xz",
+    "sha256": "e724db37b85d2084a24bde3f6a6844819e2ea90b59782cf7b31ce81216f787bb",
+    "size": 4648
+   }
+  },
+  {
+   "name": "python-roundrobin",
+   "version": "0.1.0-2",
+   "directory": "pool/main/p/python-roundrobin",
+   "homepage": "https://github.com/linnik/roundrobin",
+   "orig": {
+    "name": "python-roundrobin_0.1.0.orig.tar.xz",
+    "sha256": "5af8f473c5fdb8cbd70ef1aaea66605f48462aed9a6c5b2cd6010ec07837fc74",
+    "size": 10996
+   },
+   "debian": {
+    "name": "python-roundrobin_0.1.0-2.debian.tar.xz",
+    "sha256": "228987ef289b332d22f1e4256b445ae5253b04a7113932f8403444ba031bcb92",
+    "size": 2888
+   }
+  },
+  {
+   "name": "python-connio",
+   "version": "0.2.0-3",
+   "directory": "pool/main/p/python-connio",
+   "homepage": "https://github.com/tiagocoutinho/connio",
+   "orig": {
+    "name": "python-connio_0.2.0.orig.tar.gz",
+    "sha256": "7b698c67dfa20a6b693120d99e8913967f1d635a06c21dd24838896a6b77de44",
+    "size": 2824
+   },
+   "debian": {
+    "name": "python-connio_0.2.0-3.debian.tar.xz",
+    "sha256": "f9fe424e9f40a12630e5684d1e748873fe3e9719404e2aea12dfc92920082e7f",
+    "size": 2176
+   }
+  },
+  {
+   "name": "ecmwf-api-client",
+   "version": "1.7.0-1",
+   "directory": "pool/main/e/ecmwf-api-client",
+   "homepage": "https://github.com/ecmwf/ecmwf-api-client",
+   "orig": {
+    "name": "ecmwf-api-client_1.7.0.orig.tar.gz",
+    "sha256": "c12615b8c81a08147c5538a9edb54bb3adf60e84cbf6dc9814e2a8c3fdea23ee",
+    "size": 12839
+   },
+   "debian": {
+    "name": "ecmwf-api-client_1.7.0-1.debian.tar.xz",
+    "sha256": "c88550affba01c90843fe5dc3c5110ae97b33c23974a8e4e0a26c3f93c470e8f",
+    "size": 3112
+   }
+  },
+  {
+   "name": "python-ofxparse",
+   "version": "0.21-5",
+   "directory": "pool/main/p/python-ofxparse",
+   "homepage": "https://github.com/jseutter/ofxparse",
+   "orig": {
+    "name": "python-ofxparse_0.21.orig.tar.gz",
+    "sha256": "057ab68d31270dece4d1a47662096aa76341968aaee145ffc711cb44cbd5c4a7",
+    "size": 53837
+   },
+   "debian": {
+    "name": "python-ofxparse_0.21-5.debian.tar.xz",
+    "sha256": "001acd00ea54ada0f8a60d3dc253c8fa32f0db4ae0acd354f79db408a1806521",
+    "size": 6756
+   }
+  },
+  {
+   "name": "python-mceliece",
+   "version": "0~20241009.2-1",
+   "directory": "pool/main/p/python-mceliece",
+   "homepage": "https://github.com/janmojzis/python-mceliece",
+   "orig": {
+    "name": "python-mceliece_0~20241009.2.orig.tar.xz",
+    "sha256": "8f97a3bf112646009d4f8687a8c226ef5004970104dc5474811c2cf105275645",
+    "size": 3708
+   },
+   "debian": {
+    "name": "python-mceliece_0~20241009.2-1.debian.tar.xz",
+    "sha256": "64d469bcba685038ac04faddf9702dd9f773af4d0157982b28a32652e7cc9adc",
+    "size": 8820
+   }
+  },
+  {
+   "name": "python-sybil",
+   "version": "10.1.0-1",
+   "directory": "pool/main/p/python-sybil",
+   "homepage": "https://github.com/simplistix/sybil/",
+   "orig": {
+    "name": "python-sybil_10.1.0.orig.tar.gz",
+    "sha256": "49e77ed16e7f00fa717994ddc55374122461269fdc4ae94efd37ef7557e9855f",
+    "size": 85432
+   },
+   "debian": {
+    "name": "python-sybil_10.1.0-1.debian.tar.xz",
+    "sha256": "5fa0ade55b53aa1582e4e6277bd3bb62cb89248ec31ba93a8674235cb38b212a",
+    "size": 4624
+   }
+  },
+  {
+   "name": "python-pandas-flavor",
+   "version": "0.7.0-1",
+   "directory": "pool/main/p/python-pandas-flavor",
+   "homepage": "https://github.com/pyjanitor-devs/pandas_flavor",
+   "orig": {
+    "name": "python-pandas-flavor_0.7.0.orig.tar.gz",
+    "sha256": "62229706013bbcda96b7e0ba73d3a3ae45a9728b37279d3506b1515d0059b413",
+    "size": 57785
+   },
+   "debian": {
+    "name": "python-pandas-flavor_0.7.0-1.debian.tar.xz",
+    "sha256": "2a73e033c3deb3d65f26f685f046a26d42259b6553cc9f7be38dae99642e09f4",
+    "size": 2384
+   }
+  },
+  {
+   "name": "python-calmjs.types",
+   "version": "1.0.1-8",
+   "directory": "pool/main/p/python-calmjs.types",
+   "homepage": "https://github.com/calmjs/calmjs.types",
+   "orig": {
+    "name": "python-calmjs.types_1.0.1.orig.tar.xz",
+    "sha256": "74611ac72d2025d4f90e02db62a3ef80623b11fa7645fb4dcbb8676d4b9f3480",
+    "size": 3808
+   },
+   "debian": {
+    "name": "python-calmjs.types_1.0.1-8.debian.tar.xz",
+    "sha256": "dbf6af4ee698a83ff0452239aeef9b0c04dbb464a46dbd0fb52fca643f7b30f1",
+    "size": 3308
+   }
+  },
+  {
+   "name": "python-bumble",
+   "version": "0.0.236-1",
+   "directory": "pool/main/p/python-bumble",
+   "homepage": "https://github.com/google/bumble",
+   "orig": {
+    "name": "python-bumble_0.0.236.orig.tar.xz",
+    "sha256": "4e478518eb035a25226d95ff039d3edfbe71d94b6fc48034b63307a0004953b2",
+    "size": 1892324
+   },
+   "debian": {
+    "name": "python-bumble_0.0.236-1.debian.tar.xz",
+    "sha256": "bd44c451fc38b572101f74459659a9e236287d313298e88455a43410bff65aad",
+    "size": 4776
+   }
+  },
+  {
+   "name": "python-xstatic-lodash",
+   "version": "4.16.4.1-7",
+   "directory": "pool/main/p/python-xstatic-lodash",
+   "homepage": "https://github.com/lodash/lodash",
+   "orig": {
+    "name": "python-xstatic-lodash_4.16.4.1.orig.tar.xz",
+    "sha256": "524f1c619ae02a1c41cb0e2694fbac5d7e03b3d2fab06bf0fb33d34dc3efa857",
+    "size": 118840
+   },
+   "debian": {
+    "name": "python-xstatic-lodash_4.16.4.1-7.debian.tar.xz",
+    "sha256": "68dddfa1643c4cfd93d8e22c39c63915b304ce63bd25fb58b6b49055f7bbf3c4",
+    "size": 2948
+   }
+  },
+  {
+   "name": "pyroon",
+   "version": "0.1.6-3",
+   "directory": "pool/main/p/pyroon",
+   "homepage": "https://github.com/pavoni/pyroon",
+   "orig": {
+    "name": "pyroon_0.1.6.orig.tar.gz",
+    "sha256": "93c17bfe063b82c537c114b8a1eae69bfe88746ab4048a46be3f9744581eebb4",
+    "size": 52622
+   },
+   "debian": {
+    "name": "pyroon_0.1.6-3.debian.tar.xz",
+    "sha256": "86801569874c8018fec587f1f952c8c97ae752f6b723ebcef50d51aac71cc90b",
+    "size": 2040
+   }
+  },
+  {
+   "name": "terminado",
+   "version": "0.18.1-3",
+   "directory": "pool/main/t/terminado",
+   "homepage": "https://github.com/jupyter/terminado",
+   "orig": {
+    "name": "terminado_0.18.1.orig.tar.gz",
+    "sha256": "947efce0638656de7522e7f150c76ec42c031653a8bbec80a8141f0021043737",
+    "size": 32367
+   },
+   "debian": {
+    "name": "terminado_0.18.1-3.debian.tar.xz",
+    "sha256": "7eef53d61c16905e08ca3ad17993d346c0f017286a353161ca4d53ee18537a2a",
+    "size": 4008
+   }
+  },
+  {
+   "name": "python-proton-core",
+   "version": "0.7.0-1",
+   "directory": "pool/main/p/python-proton-core",
+   "homepage": "https://github.com/ProtonVPN/python-proton-core",
+   "orig": {
+    "name": "python-proton-core_0.7.0.orig.tar.gz",
+    "sha256": "7b917102785e85ed3960afc1813fb7e87de6742db3eb77153cc6b3dafa68cca7",
+    "size": 78329
+   },
+   "debian": {
+    "name": "python-proton-core_0.7.0-1.debian.tar.xz",
+    "sha256": "30892616297a75046263ec0a16ae0cd1f43cfa50ba168d76ed8343be77132638",
+    "size": 4316
+   }
+  },
+  {
+   "name": "jdcal",
+   "version": "1.4.1-1",
+   "directory": "pool/main/j/jdcal",
+   "homepage": "https://github.com/phn/jdcal",
+   "orig": {
+    "name": "jdcal_1.4.1.orig.tar.gz",
+    "sha256": "15d03654f15affcd587328464eb0dcf6825234f7cc40096f509939b1e9780b55",
+    "size": 8043
+   },
+   "debian": {
+    "name": "jdcal_1.4.1-1.debian.tar.xz",
+    "sha256": "53d526e5cc0943f2c71f661978cece43f2505cd396b0daa9ca70884ace1db7b4",
+    "size": 2548
+   }
+  },
+  {
+   "name": "flask-rebar",
+   "version": "3.4.0-2",
+   "directory": "pool/main/f/flask-rebar",
+   "homepage": "https://github.com/plangrid/flask-rebar",
+   "orig": {
+    "name": "flask-rebar_3.4.0.orig.tar.gz",
+    "sha256": "723473c6ba3fba71e3ff1fee15163b921598ca4a4123de03fd0af07dbea6be6a",
+    "size": 3261639
+   },
+   "debian": {
+    "name": "flask-rebar_3.4.0-2.debian.tar.xz",
+    "sha256": "d2ec4e8d1a6af9912eeaee7b0df5e4ffb45cb3fa84f28a441d4be6bc922bc000",
+    "size": 4195300
+   }
+  },
+  {
+   "name": "zope.security",
+   "version": "8.4-1",
+   "directory": "pool/main/z/zope.security",
+   "homepage": "https://github.com/zopefoundation/zope.security",
+   "orig": {
+    "name": "zope.security_8.4.orig.tar.gz",
+    "sha256": "917b33a868bd63f57f6edbb63d73dec71b5ae5ce528976ac10e3df2bde92da0d",
+    "size": 126517
+   },
+   "debian": {
+    "name": "zope.security_8.4-1.debian.tar.xz",
+    "sha256": "770f669ea83078950b5641c8d0b3f6552102c18851682b7a32d257da072cf917",
+    "size": 5312
+   }
+  },
+  {
+   "name": "libfshfs",
+   "version": "20260130-1",
+   "directory": "pool/main/libf/libfshfs",
+   "homepage": "https://github.com/libyal/libfshfs",
+   "orig": {
+    "name": "libfshfs_20260130.orig.tar.gz",
+    "sha256": "1d82c19fdbabd2442b37423e847e9a235e402436c1d2444b6920ab1f11912ef6",
+    "size": 1986111
+   },
+   "debian": {
+    "name": "libfshfs_20260130-1.debian.tar.xz",
+    "sha256": "7d970ff573d0c7d5b4d9c90a735f4384d09e3eb9f5bcf6ca3ecd25bc2cb95b83",
+    "size": 5108
+   }
+  },
+  {
+   "name": "pyprosegur",
+   "version": "0.0.14-1",
+   "directory": "pool/main/p/pyprosegur",
+   "homepage": "https://github.com/dgomes/pyprosegur",
+   "orig": {
+    "name": "pyprosegur_0.0.14.orig.tar.gz",
+    "sha256": "f2b4c5b1ff95d1f3a75096e837c6c13c6f0be5265e7b70571e9beea129a51add",
+    "size": 7726
+   },
+   "debian": {
+    "name": "pyprosegur_0.0.14-1.debian.tar.xz",
+    "sha256": "e1b996523a4f3adf21719d0cf34eba696407ca3fece616b5f5b85e1ee8386946",
+    "size": 2068
+   }
+  },
+  {
+   "name": "python-serialx",
+   "version": "1.14.0+dfsg-2",
+   "directory": "pool/main/p/python-serialx",
+   "homepage": "https://github.com/puddly/serialx",
+   "orig": {
+    "name": "python-serialx_1.14.0+dfsg.orig.tar.xz",
+    "sha256": "c288f198b952c5acbd7def913b6d9f123a50d31d2787c4ca2d0dabf297d4dfe1",
+    "size": 310676
+   },
+   "debian": {
+    "name": "python-serialx_1.14.0+dfsg-2.debian.tar.xz",
+    "sha256": "97e010f210de99f7557d68349efc20e7a21be48e51f5e1b1c55f391e3affe47c",
+    "size": 4668
+   }
+  },
+  {
+   "name": "python-bincopy",
+   "version": "20.1.1+dfsg1-1",
+   "directory": "pool/main/p/python-bincopy",
+   "homepage": "https://github.com/eerimoq/bincopy",
+   "orig": {
+    "name": "python-bincopy_20.1.1+dfsg1.orig.tar.xz",
+    "sha256": "e620968aef5e8337f38a878dc6edaaf94acc025872d3523bfa21d77747e61f58",
+    "size": 17204
+   },
+   "debian": {
+    "name": "python-bincopy_20.1.1+dfsg1-1.debian.tar.xz",
+    "sha256": "c9bc3bec05176b271105e82c7953a3f48c969f92054b90f14009cfe1f3ae5d59",
+    "size": 2196
+   }
+  },
+  {
+   "name": "python-imagesize",
+   "version": "2.0.1-1",
+   "directory": "pool/main/p/python-imagesize",
+   "homepage": "https://github.com/shibukawa/imagesize_py",
+   "orig": {
+    "name": "python-imagesize_2.0.1.orig.tar.gz",
+    "sha256": "b2ba6a4dea487a7ebcd53248d3476aca449d30db12a2dde5e0c5ca9624fd77e5",
+    "size": 1883774
+   },
+   "debian": {
+    "name": "python-imagesize_2.0.1-1.debian.tar.xz",
+    "sha256": "265d8d8d8824bc96b5ffbd39f9d98086cb65a8efe7bd9b730491779818e023f4",
+    "size": 2864
+   }
+  },
+  {
+   "name": "knitpy",
+   "version": "0.1.1+git20210425-1",
+   "directory": "pool/main/k/knitpy",
+   "homepage": "https://github.com/janschulz/knitpy",
+   "orig": {
+    "name": "knitpy_0.1.1+git20210425.orig.tar.xz",
+    "sha256": "de4f6062753d96412d43ec977a9d370b3fb8fc265626f6b21f0fcc57dc1eaa16",
+    "size": 282916
+   },
+   "debian": {
+    "name": "knitpy_0.1.1+git20210425-1.debian.tar.xz",
+    "sha256": "07e0b43256144dc0421f09bec2ad507a4d6dfbcb0f5ff2e765c5798e23ae453d",
+    "size": 6960
+   }
+  },
+  {
+   "name": "minimap2",
+   "version": "2.27+dfsg-1",
+   "directory": "pool/main/m/minimap2",
+   "homepage": "https://github.com/lh3/minimap2",
+   "orig": {
+    "name": "minimap2_2.27+dfsg.orig.tar.xz",
+    "sha256": "3ee11256b940a750072baa0f70e32187f61613f83d3936eb0a5eaedff1cf16df",
+    "size": 200448
+   },
+   "debian": {
+    "name": "minimap2_2.27+dfsg-1.debian.tar.xz",
+    "sha256": "45d509d32766d87c4ca3c8ed7310e2758794418e0c53918fda09f45f8cac5826",
+    "size": 11544
+   }
+  },
+  {
+   "name": "python-anycrc",
+   "version": "1.3.6-2",
+   "directory": "pool/main/p/python-anycrc",
+   "homepage": "https://github.com/marzooqy/anycrc",
+   "orig": {
+    "name": "python-anycrc_1.3.6.orig.tar.xz",
+    "sha256": "303bb34b8f9b60f6f63f12a5a1ab43af9faa799568d37b9f5c5dd3d7952933a3",
+    "size": 13836
+   },
+   "debian": {
+    "name": "python-anycrc_1.3.6-2.debian.tar.xz",
+    "sha256": "d00cbda3f4a01619ea31ea4449b22bf7a8af67ba987d08fc411999e0413e4fd1",
+    "size": 2120
+   }
+  },
+  {
+   "name": "libbde",
+   "version": "20240502-2",
+   "directory": "pool/main/libb/libbde",
+   "homepage": "https://github.com/libyal/libbde",
+   "orig": {
+    "name": "libbde_20240502.orig.tar.gz",
+    "sha256": "2daeabcc139fc812170e7efcbd76fc194b7c8e0424ceca8cdfc91167bb77169d",
+    "size": 1744192
+   },
+   "debian": {
+    "name": "libbde_20240502-2.debian.tar.xz",
+    "sha256": "19646f4a9c24f7e5c4d5cba9a1402ba5fb1755d4509481ae7715306ea5567113",
+    "size": 5680
+   }
+  },
+  {
+   "name": "python-asteval",
+   "version": "1.0.6-2",
+   "directory": "pool/main/p/python-asteval",
+   "homepage": "https://github.com/newville/asteval",
+   "orig": {
+    "name": "python-asteval_1.0.6.orig.tar.gz",
+    "sha256": "204d8c2017db316d13a974a58181e538192675149c28d0bb3289f8118476170c",
+    "size": 47849
+   },
+   "debian": {
+    "name": "python-asteval_1.0.6-2.debian.tar.xz",
+    "sha256": "1995df4d8220eff57255dff3f06edefae0d8f1b2aa89aafb0eba4dc861aa1e57",
+    "size": 4064
+   }
+  },
+  {
+   "name": "django-cte",
+   "version": "4.0.0-1",
+   "directory": "pool/main/d/django-cte",
+   "homepage": "https://github.com/dimagi/django-cte",
+   "orig": {
+    "name": "django-cte_4.0.0.orig.tar.gz",
+    "sha256": "9bacd2e74886eaf960f0eed9bf46767dd9ecf85572f77d2e98d72a9a107846a2",
+    "size": 53341
+   },
+   "debian": {
+    "name": "django-cte_4.0.0-1.debian.tar.xz",
+    "sha256": "e8399242b63725ea9006538a4f476230ae70d6a5eb457fb79caf3bdc556404c6",
+    "size": 2812
+   }
+  },
+  {
+   "name": "python-pygerrit2",
+   "version": "2.0.4-3",
+   "directory": "pool/main/p/python-pygerrit2",
+   "homepage": "https://github.com/dpursehouse/pygerrit2",
+   "orig": {
+    "name": "python-pygerrit2_2.0.4.orig.tar.gz",
+    "sha256": "d9834be5a9d55c47a28983f7f9953dead5b620c9ff8819d490556df604f498cd",
+    "size": 19810
+   },
+   "debian": {
+    "name": "python-pygerrit2_2.0.4-3.debian.tar.xz",
+    "sha256": "353fea87f15e598b27f185e569175deb210f089ab2ed7a2fac089854ccb52f55",
+    "size": 2348
+   }
+  },
+  {
+   "name": "python-podman",
+   "version": "5.4.0.1-4",
+   "directory": "pool/main/p/python-podman",
+   "homepage": "https://github.com/containers/podman-py",
+   "orig": {
+    "name": "python-podman_5.4.0.1.orig.tar.gz",
+    "sha256": "aab5c8aaa194dedcec749817d2c267b78a572195abf98d54caaed39024a468b6",
+    "size": 174543
+   },
+   "debian": {
+    "name": "python-podman_5.4.0.1-4.debian.tar.xz",
+    "sha256": "436e72c38e1ee3a6fe8a0dfb04c923f1b5da17c9a4ef81cc2f4627abe62db0f6",
+    "size": 5528
+   }
+  },
+  {
+   "name": "python-docx",
+   "version": "1.2.0+dfsg-4",
+   "directory": "pool/main/p/python-docx",
+   "homepage": "https://github.com/python-openxml/python-docx",
+   "orig": {
+    "name": "python-docx_1.2.0+dfsg.orig.tar.xz",
+    "sha256": "d8b8c5d8eea1f2537c26068d04ab5554d53a21f446ced7e0b05a124bab40c6d4",
+    "size": 1255792
+   },
+   "debian": {
+    "name": "python-docx_1.2.0+dfsg-4.debian.tar.xz",
+    "sha256": "b6e9cb531c6eed6b712de647d39c9a1998716813ad386f4dc9e82a3a5f54392f",
+    "size": 8648
+   }
+  },
+  {
+   "name": "python-aiohttp-retry",
+   "version": "2.8.3-2",
+   "directory": "pool/main/p/python-aiohttp-retry",
+   "homepage": "https://github.com/inyutin/aiohttp_retry",
+   "orig": {
+    "name": "python-aiohttp-retry_2.8.3.orig.tar.gz",
+    "sha256": "f277c54cd6311fae7b3d8d7d213824c090b5585cc0e588e1ae3042dd804e7167",
+    "size": 11867
+   },
+   "debian": {
+    "name": "python-aiohttp-retry_2.8.3-2.debian.tar.xz",
+    "sha256": "2439272bfa13b03c2880e69aadf400224b99c9dcb4161fcaa30e4ec565b59406",
+    "size": 2196
+   }
+  },
+  {
+   "name": "pymap3d",
+   "version": "3.2.0-3",
+   "directory": "pool/main/p/pymap3d",
+   "homepage": "https://github.com/geospace-code/pymap3d",
+   "orig": {
+    "name": "pymap3d_3.2.0.orig.tar.gz",
+    "sha256": "8b96bd66c5d8d729b8edcd8edc43760e8160119d5933b9e83b386cf83fb7c262",
+    "size": 55207
+   },
+   "debian": {
+    "name": "pymap3d_3.2.0-3.debian.tar.xz",
+    "sha256": "e5688cedc1bea7e45e04286a69a6609e7fe97e499a5d9ee8e0c6f51e1dd50891",
+    "size": 4564
+   }
+  },
+  {
+   "name": "aws-crt-python",
+   "version": "0.37.0+dfsg-1",
+   "directory": "pool/main/a/aws-crt-python",
+   "homepage": "https://github.com/awslabs/aws-crt-python",
+   "orig": {
+    "name": "aws-crt-python_0.37.0+dfsg.orig.tar.gz",
+    "sha256": "35942cd81170b5d0e77ca15baa3c61dea3bb28825d7f311b35138d09a0d960a6",
+    "size": 10559826
+   },
+   "debian": {
+    "name": "aws-crt-python_0.37.0+dfsg-1.debian.tar.xz",
+    "sha256": "05bf51a2211f39fed9a140ef1d4f2536d585daeb11b4ae4a0ed54f34a0f4b371",
+    "size": 6004
+   }
+  },
+  {
+   "name": "pyipp",
+   "version": "0.17.2-2",
+   "directory": "pool/main/p/pyipp",
+   "homepage": "https://github.com/ctalkington/python-ipp",
+   "orig": {
+    "name": "pyipp_0.17.2.orig.tar.gz",
+    "sha256": "282f7c739d98021094b4c5a7024ed3428579ea7deeba1b54110c4b17dd70d3ad",
+    "size": 115294
+   },
+   "debian": {
+    "name": "pyipp_0.17.2-2.debian.tar.xz",
+    "sha256": "c0672d767ec9212ff4bab5199ab479367ea2ed650e3bece5629a46f878e295ce",
+    "size": 2592
+   }
+  },
+  {
+   "name": "python-django-storages",
+   "version": "1.14.6-1",
+   "directory": "pool/main/p/python-django-storages",
+   "homepage": "https://github.com/jschneier/django-storages/",
+   "orig": {
+    "name": "python-django-storages_1.14.6.orig.tar.gz",
+    "sha256": "e745687b4f39373592d2823a6e22278af458ded1587f1df5976ebd99f7607f99",
+    "size": 214539
+   },
+   "debian": {
+    "name": "python-django-storages_1.14.6-1.debian.tar.xz",
+    "sha256": "078949afa2f26d38718165751baf1fe266d07a4b9acde3de8045c5fae33fe339",
+    "size": 6096
+   }
+  },
+  {
+   "name": "python-pycdlib",
+   "version": "1.14.0+ds1-2",
+   "directory": "pool/main/p/python-pycdlib",
+   "homepage": "http://github.com/clalancette/pycdlib",
+   "orig": {
+    "name": "python-pycdlib_1.14.0+ds1.orig.tar.xz",
+    "sha256": "ba93beb58a3212e1522a1ce8dd914742e2cfc63c46bc1667b91955b2a61c574f",
+    "size": 1724388
+   },
+   "debian": {
+    "name": "python-pycdlib_1.14.0+ds1-2.debian.tar.xz",
+    "sha256": "c2200c037ed46c8f0ff81b2916fc50ab9df81cdbace8bdf764c5579531cd40c9",
+    "size": 20276
+   }
+  },
+  {
+   "name": "pytest-codeblocks",
+   "version": "0.17.0-3",
+   "directory": "pool/main/p/pytest-codeblocks",
+   "homepage": "https://github.com/nschloe/pytest-codeblocks",
+   "orig": {
+    "name": "pytest-codeblocks_0.17.0.orig.tar.gz",
+    "sha256": "19f3d295278711999289bcdc164bfcfc03fa53e2dcc73db892183750169b28c8",
+    "size": 9104
+   },
+   "debian": {
+    "name": "pytest-codeblocks_0.17.0-3.debian.tar.xz",
+    "sha256": "c0348ed0dbf844d32133949566c48c624bb66affc439962e913c63e6abcc5f3a",
+    "size": 2964
+   }
+  },
+  {
+   "name": "python-absl",
+   "version": "2.1.0-1",
+   "directory": "pool/main/p/python-absl",
+   "homepage": "https://github.com/abseil/abseil-py",
+   "orig": {
+    "name": "python-absl_2.1.0.orig.tar.gz",
+    "sha256": "8a3d0830e4eb4f66c4fa907c06edf6ce1c719ced811a12e26d9d3162f8471758",
+    "size": 235261
+   },
+   "debian": {
+    "name": "python-absl_2.1.0-1.debian.tar.xz",
+    "sha256": "fb9822c789663ab03fd1a0a983a116c13f797a462c68f911604b9170eb698820",
+    "size": 2664
+   }
+  },
+  {
+   "name": "flask-paranoid",
+   "version": "0.3.0-1",
+   "directory": "pool/main/f/flask-paranoid",
+   "homepage": "https://github.com/miguelgrinberg/flask-paranoid/",
+   "orig": {
+    "name": "flask-paranoid_0.3.0.orig.tar.gz",
+    "sha256": "cab9f54e382707c31eb5ad58e1ce3b371ecd0d5d4f3385f9cf01bd13a2e1d9ec",
+    "size": 102495
+   },
+   "debian": {
+    "name": "flask-paranoid_0.3.0-1.debian.tar.xz",
+    "sha256": "653da3c3fbf5e38ffe433b423ba8c14678983fb8909eef86daedf713f6998a74",
+    "size": 2752
+   }
+  },
+  {
+   "name": "aio-eapi",
+   "version": "0.6.3-10",
+   "directory": "pool/main/a/aio-eapi",
+   "homepage": "https://github.com/jeremyschulman/aio-eapi",
+   "orig": {
+    "name": "aio-eapi_0.6.3.orig.tar.xz",
+    "sha256": "392b4ca3fd33fd492713fc1d93910f514a35c9bb461816d1d11b1ad4be37854b",
+    "size": 11480
+   },
+   "debian": {
+    "name": "aio-eapi_0.6.3-10.debian.tar.xz",
+    "sha256": "f332bd668f91a0ce6c2decb04678bbfbc4794149f73faf0d58771989a904f5d5",
+    "size": 1672
+   }
+  },
+  {
+   "name": "python-typing-inspection",
+   "version": "0.4.4-1",
+   "directory": "pool/main/p/python-typing-inspection",
+   "homepage": "https://github.com/pydantic/typing-inspection",
+   "orig": {
+    "name": "python-typing-inspection_0.4.4.orig.tar.gz",
+    "sha256": "547274fa6b0a561ccf549cc9524b999a578e737d015d8709d021f9d0d13bea47",
+    "size": 76928
+   },
+   "debian": {
+    "name": "python-typing-inspection_0.4.4-1.debian.tar.xz",
+    "sha256": "640f1d90597522bac7df8b9069a546239da374195a31df0486fdd0ab72e6f1c0",
+    "size": 2460
+   }
+  },
+  {
+   "name": "hyperlink",
+   "version": "21.0.0-7",
+   "directory": "pool/main/h/hyperlink",
+   "homepage": "https://github.com/python-hyper/hyperlink",
+   "orig": {
+    "name": "hyperlink_21.0.0.orig.tar.gz",
+    "sha256": "427af957daa58bc909471c6c40f74c5450fa123dd093fc53efd2e91d2705a56b",
+    "size": 140743
+   },
+   "debian": {
+    "name": "hyperlink_21.0.0-7.debian.tar.xz",
+    "sha256": "e104186e4b0dbe72b0383158409e19e2f957716627eac86c93b7221d9d5578de",
+    "size": 3116
+   }
+  },
+  {
+   "name": "python-langdetect",
+   "version": "1.0.9-4",
+   "directory": "pool/main/p/python-langdetect",
+   "homepage": "https://github.com/Mimino666/langdetect",
+   "orig": {
+    "name": "python-langdetect_1.0.9.orig.tar.gz",
+    "sha256": "cbc1fef89f8d062739774bd51eda3da3274006b3661d199c2655f6b3f6d605a0",
+    "size": 981474
+   },
+   "debian": {
+    "name": "python-langdetect_1.0.9-4.debian.tar.xz",
+    "sha256": "662cb560de79e2bbce2ae88cf845f547b35f0eb685243a8442d7c4d957ed6947",
+    "size": 5260
+   }
+  },
+  {
+   "name": "python-radios",
+   "version": "2.0.1-2",
+   "directory": "pool/main/p/python-radios",
+   "homepage": "https://github.com/frenck/python-radios",
+   "orig": {
+    "name": "python-radios_2.0.1.orig.tar.xz",
+    "sha256": "f2264df2d46e953cf7561d164f07b16b0bfc31598ad430d239bd338e9898b4d4",
+    "size": 144484
+   },
+   "debian": {
+    "name": "python-radios_2.0.1-2.debian.tar.xz",
+    "sha256": "08b7233d259599ddb39e62c85a06585bac8467f0b694555554f171531889eca3",
+    "size": 4484
+   }
+  },
+  {
+   "name": "python-x-wr-timezone",
+   "version": "2.0.1-1",
+   "directory": "pool/main/p/python-x-wr-timezone",
+   "homepage": "https://github.com/niccokunzmann/x-wr-timezone",
+   "orig": {
+    "name": "python-x-wr-timezone_2.0.1.orig.tar.gz",
+    "sha256": "f999afbdc18cd82f9e19b3711848250a2e1eba1815526339b1e3646d7f0a00d3",
+    "size": 23799
+   },
+   "debian": {
+    "name": "python-x-wr-timezone_2.0.1-1.debian.tar.xz",
+    "sha256": "bfcfe050664c715c6499268eedd0a413f6158078e3eecea687a63280d9808995",
+    "size": 2068
+   }
+  },
+  {
+   "name": "tplink-omada-client",
+   "version": "1.5.13-1",
+   "directory": "pool/main/t/tplink-omada-client",
+   "homepage": "https://github.com/MarkGodwin/tplink-omada-api",
+   "orig": {
+    "name": "tplink-omada-client_1.5.13.orig.tar.xz",
+    "sha256": "08b7caf0ca96865b7e06f37f9a8fe5f2a49667fe62624a581e50ba8de58030c5",
+    "size": 89988
+   },
+   "debian": {
+    "name": "tplink-omada-client_1.5.13-1.debian.tar.xz",
+    "sha256": "9dc287e1d6070c788530b01044c224363ee1f864ae6ac4ae66e9a582b1f5ff47",
+    "size": 2728
+   }
+  },
+  {
+   "name": "aioquic",
+   "version": "1.3.0-2",
+   "directory": "pool/main/a/aioquic",
+   "homepage": "https://github.com/aiortc/aioquic",
+   "orig": {
+    "name": "aioquic_1.3.0.orig.tar.gz",
+    "sha256": "28d070b2183e3e79afa9d4e7bd558960d0d53aeb98bc0cf0a358b279ba797c92",
+    "size": 181923
+   },
+   "debian": {
+    "name": "aioquic_1.3.0-2.debian.tar.xz",
+    "sha256": "0ab247d84da1be21df2f75f6596e67cf89bec30bd748cda37c864f423ef30acc",
+    "size": 4736
+   }
+  },
+  {
+   "name": "watcher",
+   "version": "17.0.0-2",
+   "directory": "pool/main/w/watcher",
+   "homepage": "https://github.com/openstack/watcher",
+   "orig": {
+    "name": "watcher_17.0.0.orig.tar.xz",
+    "sha256": "9a83ab4f3cfc1143c02845152417e977365cb791985bda1757e5309d8e1889f2",
+    "size": 1102220
+   },
+   "debian": {
+    "name": "watcher_17.0.0-2.debian.tar.xz",
+    "sha256": "d9cc33b8dd0216dd068bd6b252efffe0bf31546bc49c2a57f3ef9066794ab0cd",
+    "size": 10436
+   }
+  },
+  {
+   "name": "python-engineio",
+   "version": "4.14.0-1",
+   "directory": "pool/main/p/python-engineio",
+   "homepage": "https://github.com/miguelgrinberg/python-engineio",
+   "orig": {
+    "name": "python-engineio_4.14.0.orig.tar.gz",
+    "sha256": "eaa1e386baf9c2c7959eef7f9d9165c5ea910c5b392f5316e78d29ed073cb43d",
+    "size": 80863
+   },
+   "debian": {
+    "name": "python-engineio_4.14.0-1.debian.tar.xz",
+    "sha256": "e660dd8a6b4c9b1587cdd3e734a0f64d9f8cbf6f47c8d48a99f7c689e438f9f5",
+    "size": 30036
+   }
+  },
+  {
+   "name": "pyqt-distutils",
+   "version": "0.7.3-3",
+   "directory": "pool/main/p/pyqt-distutils",
+   "homepage": "https://github.com/ColinDuquesnoy/pyqt_distutils",
+   "orig": {
+    "name": "pyqt-distutils_0.7.3.orig.tar.gz",
+    "sha256": "ee5b8c30d3b0a473a5c23e43b2a29ce8e47fa7b48d8dc91816953da37bc053e8",
+    "size": 7193
+   },
+   "debian": {
+    "name": "pyqt-distutils_0.7.3-3.debian.tar.xz",
+    "sha256": "c1e651284e8452f707885931bcf5894c6f8b9e4c7549300a999f0689fbd1adeb",
+    "size": 2548
+   }
+  },
+  {
+   "name": "python-deepl",
+   "version": "1.32.0-2",
+   "directory": "pool/main/p/python-deepl",
+   "homepage": "https://github.com/DeepL/deepl-python",
+   "orig": {
+    "name": "python-deepl_1.32.0.orig.tar.gz",
+    "sha256": "c9f10427f504f02fec76526e401787b847635fa546403d219a8766fcea09268c",
+    "size": 249111
+   },
+   "debian": {
+    "name": "python-deepl_1.32.0-2.debian.tar.xz",
+    "sha256": "5380c0479bcf61b485ad15bf8db86f465c378bb66968acc5d869ce21ec185b78",
+    "size": 2872
+   }
+  },
+  {
+   "name": "hickle",
+   "version": "5.0.3-3",
+   "directory": "pool/main/h/hickle",
+   "homepage": "https://github.com/telegraphic/hickle",
+   "orig": {
+    "name": "hickle_5.0.3.orig.tar.gz",
+    "sha256": "698d0dc6644d38a38eb723eeafb06688e0adffa52f73624c48cfe22f2c49f2a3",
+    "size": 120225
+   },
+   "debian": {
+    "name": "hickle_5.0.3-3.debian.tar.xz",
+    "sha256": "afb0671b8ed145a53ac401dba807a44f2055b50191f7eed70c8763e3a26aa913",
+    "size": 4980
+   }
+  },
+  {
+   "name": "python-chevron",
+   "version": "0.14.0-1",
+   "directory": "pool/main/p/python-chevron",
+   "homepage": "https://github.com/noahmorrison/chevron",
+   "orig": {
+    "name": "python-chevron_0.14.0.orig.tar.gz",
+    "sha256": "87613aafdf6d77b6a90ff073165a61ae5086e21ad49057aa0e53681601800ebf",
+    "size": 11440
+   },
+   "debian": {
+    "name": "python-chevron_0.14.0-1.debian.tar.xz",
+    "sha256": "476cd1c8966b827afe4721aa1bc01eb0a31251e83176dd3c709e66898df16268",
+    "size": 2988
+   }
+  },
+  {
+   "name": "aiopurpleair",
+   "version": "2025.08.1-1",
+   "directory": "pool/main/a/aiopurpleair",
+   "homepage": "https://github.com/bachya/aiopurpleair",
+   "orig": {
+    "name": "aiopurpleair_2025.08.1.orig.tar.gz",
+    "sha256": "4cd16fca624fec377c3f3eadc525b0b7ebfbbf4f61c0a22e301f39a21be3866d",
+    "size": 77174
+   },
+   "debian": {
+    "name": "aiopurpleair_2025.08.1-1.debian.tar.xz",
+    "sha256": "6b2d8c7f5a492ee8f45020df3eceb2cdaf31f2d32880b87f78b73b706c642d3e",
+    "size": 2308
+   }
+  },
+  {
+   "name": "python-btrfs",
+   "version": "15-1",
+   "directory": "pool/main/p/python-btrfs",
+   "homepage": "https://github.com/knorrie/python-btrfs/",
+   "orig": {
+    "name": "python-btrfs_15.orig.tar.xz",
+    "sha256": "efe600716cadcdbade8b0cd4f86f663f6a95226a1cc1deb11bd3339f514138d7",
+    "size": 77408
+   },
+   "debian": {
+    "name": "python-btrfs_15-1.debian.tar.xz",
+    "sha256": "acbf9727ec919edf96eacd60f8e00be36e5e1747ab79f89a4d2d725859385525",
+    "size": 3516
+   }
+  },
+  {
+   "name": "python-socketio",
+   "version": "5.17.0-1",
+   "directory": "pool/main/p/python-socketio",
+   "homepage": "https://github.com/miguelgrinberg/python-socketio",
+   "orig": {
+    "name": "python-socketio_5.17.0.orig.tar.gz",
+    "sha256": "c3bbfc4937dcfea7c4d1b182afa94d4a30335d153987e8f2078b344beacf95a0",
+    "size": 134574
+   },
+   "debian": {
+    "name": "python-socketio_5.17.0-1.debian.tar.xz",
+    "sha256": "7ad7475bb0525517f013776bb10c72c043a79f8f0f286011b7736a75f2e45f89",
+    "size": 35528
+   }
+  },
+  {
+   "name": "python-scpi",
+   "version": "2.4.0-2",
+   "directory": "pool/main/p/python-scpi",
+   "homepage": "https://github.com/rambo/python-scpi",
+   "orig": {
+    "name": "python-scpi_2.4.0.orig.tar.gz",
+    "sha256": "1e06d6394f3e86b7c433968349a5dc21e99329c53e83936f3abdf30437eb92c8",
+    "size": 38898
+   },
+   "debian": {
+    "name": "python-scpi_2.4.0-2.debian.tar.xz",
+    "sha256": "7095393ea3af4227f457843a211e49b85ad10bb15bd0d9deafdbf423d1ba3533",
+    "size": 2028
+   }
+  },
+  {
+   "name": "python-pyfaidx",
+   "version": "0.8.1.3-2",
+   "directory": "pool/main/p/python-pyfaidx",
+   "homepage": "https://github.com/mdshw5/pyfaidx",
+   "orig": {
+    "name": "python-pyfaidx_0.8.1.3.orig.tar.gz",
+    "sha256": "2d1bac6f3f6bbe64d42d79ad18750d0c8cfc01d65f05e6e99b1a2e1120dcaa39",
+    "size": 96521
+   },
+   "debian": {
+    "name": "python-pyfaidx_0.8.1.3-2.debian.tar.xz",
+    "sha256": "160b4900b17844dde9172055fdad54fb5301b3456dd64a731da6b1e2d7fc2222",
+    "size": 7248
+   }
+  },
+  {
+   "name": "python-ordered-set",
+   "version": "4.1.0-1",
+   "directory": "pool/main/p/python-ordered-set",
+   "homepage": "https://github.com/rspeer/ordered-set",
+   "orig": {
+    "name": "python-ordered-set_4.1.0.orig.tar.xz",
+    "sha256": "cd1a0cfa973683a3cdaf841fd4d77c05292f947bac7dff94aade999c7aab71fc",
+    "size": 10100
+   },
+   "debian": {
+    "name": "python-ordered-set_4.1.0-1.debian.tar.xz",
+    "sha256": "a513e75033a7b1f1b98478270f3de14c3bbc151b95ab2f5f6e7d15c63d4cd59e",
+    "size": 2500
+   }
+  },
+  {
+   "name": "pyte",
+   "version": "0.8.0-3",
+   "directory": "pool/main/p/pyte",
+   "homepage": "https://github.com/selectel/pyte",
+   "orig": {
+    "name": "pyte_0.8.0.orig.tar.gz",
+    "sha256": "7e71d03e972d6f262cbe8704ff70039855f05ee6f7ad9d7129df9c977b5a88c5",
+    "size": 50415
+   },
+   "debian": {
+    "name": "pyte_0.8.0-3.debian.tar.xz",
+    "sha256": "e5d66e3286d58c01c5fc9a9b12ae8edcf73c96d634fc57875c87f03d5639392d",
+    "size": 4504
+   }
+  },
+  {
+   "name": "python-colour",
+   "version": "0.1.5-6",
+   "directory": "pool/main/p/python-colour",
+   "homepage": "https://github.com/vaab/colour",
+   "orig": {
+    "name": "python-colour_0.1.5.orig.tar.gz",
+    "sha256": "b350ef5494f54cd8bd5d10e3c7161a181cd855f6949828e4d98c9a8bf2dd538f",
+    "size": 22110
+   },
+   "debian": {
+    "name": "python-colour_0.1.5-6.debian.tar.xz",
+    "sha256": "4c8ca72cb1dfac7baa0252545e6f8b0181926c04c21c211e3ad4997b3f31cde1",
+    "size": 4016
+   }
+  },
+  {
+   "name": "python-demetriek",
+   "version": "2.1.0-1",
+   "directory": "pool/main/p/python-demetriek",
+   "homepage": "https://github.com/frenck/python-demetriek",
+   "orig": {
+    "name": "python-demetriek_2.1.0.orig.tar.xz",
+    "sha256": "ff2aad9b0fddd62285a6aaee995a5a7ecfb0d72ef1588a847eb0c206b0e5c972",
+    "size": 95964
+   },
+   "debian": {
+    "name": "python-demetriek_2.1.0-1.debian.tar.xz",
+    "sha256": "19f73944b5d45ce71eff039c5bb333cdb46db2ae0b3fdb37c96f3579230dc0aa",
+    "size": 2616
+   }
+  },
+  {
+   "name": "identify",
+   "version": "2.6.20-1",
+   "directory": "pool/main/i/identify",
+   "homepage": "https://github.com/pre-commit/identify",
+   "orig": {
+    "name": "identify_2.6.20.orig.tar.xz",
+    "sha256": "f269944299a6efbe30ecbbc16f7b375cb6daa60dc17ab21d3a5452a2e4d42e9b",
+    "size": 68388
+   },
+   "debian": {
+    "name": "identify_2.6.20-1.debian.tar.xz",
+    "sha256": "d5426cc56c693b76ac76a52bcd0ca14b27cecb17d8a842f369d7137e366aa0ac",
+    "size": 3692
+   }
+  },
+  {
+   "name": "pyisy",
+   "version": "3.7.0-1",
+   "directory": "pool/main/p/pyisy",
+   "homepage": "https://github.com/automicus/PyISY",
+   "orig": {
+    "name": "pyisy_3.7.0.orig.tar.xz",
+    "sha256": "694ed95656db1794970e5941a99d99fd298628787acb96d1c9826e78523da4ff",
+    "size": 115072
+   },
+   "debian": {
+    "name": "pyisy_3.7.0-1.debian.tar.xz",
+    "sha256": "3735daa2632a31ac9f874b2ae591c10bffad0d2711c9a9879eae234809e18676",
+    "size": 3024
+   }
+  },
+  {
+   "name": "aionanoleaf2",
+   "version": "1.2.1-1",
+   "directory": "pool/main/a/aionanoleaf2",
+   "homepage": "https://github.com/loebi-ch/aionanoleaf2",
+   "orig": {
+    "name": "aionanoleaf2_1.2.1.orig.tar.xz",
+    "sha256": "838dc11222556aeb6ee433a23a5dc9c2bc318f17fc7cfcd3b50c804af15ba779",
+    "size": 50556
+   },
+   "debian": {
+    "name": "aionanoleaf2_1.2.1-1.debian.tar.xz",
+    "sha256": "4febc77bd3cfd7e1785c126ddd11532c2298b7406da08f388d11d9db5dbad58c",
+    "size": 2116
+   }
+  },
+  {
+   "name": "python-chacha20poly1305-reuseable",
+   "version": "0.13.2-2",
+   "directory": "pool/main/p/python-chacha20poly1305-reuseable",
+   "homepage": "https://github.com/bdraco/chacha20poly1305-reuseable",
+   "orig": {
+    "name": "python-chacha20poly1305-reuseable_0.13.2.orig.tar.xz",
+    "sha256": "24366fc3cedc0e1f909944e832b4bbbd9cbc2f178a515bb133c119a96a676323",
+    "size": 24168
+   },
+   "debian": {
+    "name": "python-chacha20poly1305-reuseable_0.13.2-2.debian.tar.xz",
+    "sha256": "769165c3247ecc3256922b9325a5542dd5b1b50d0d21232381e6329ec18e8eef",
+    "size": 2692
+   }
+  },
+  {
+   "name": "systembridgemodels",
+   "version": "5.1.1-2",
+   "directory": "pool/main/s/systembridgemodels",
+   "homepage": "https://github.com/timmo001/system-bridge-models",
+   "orig": {
+    "name": "systembridgemodels_5.1.1.orig.tar.gz",
+    "sha256": "857058ba2e3756bca4ef13517f0200189b0aa8e013d37e38186ef61f885b9f54",
+    "size": 38083
+   },
+   "debian": {
+    "name": "systembridgemodels_5.1.1-2.debian.tar.xz",
+    "sha256": "341b1acee12aaaa7b8bdf41a8f2a9c078d25cd9ae79da5ea77be762f0a9a3a11",
+    "size": 2640
+   }
+  },
+  {
+   "name": "pontos",
+   "version": "26.9.2-1",
+   "directory": "pool/main/p/pontos",
+   "homepage": "https://github.com/greenbone/pontos",
+   "orig": {
+    "name": "pontos_26.9.2.orig.tar.gz",
+    "sha256": "2295058a2288c838c2339e235ad0a388ff1d039d2f9c868e21262a10e469ffa1",
+    "size": 496316
+   },
+   "debian": {
+    "name": "pontos_26.9.2-1.debian.tar.xz",
+    "sha256": "fd7a6fcb783baf7a1f4dca2cdfc49d0d443cce7e37e570e57261df78a690d1a2",
+    "size": 3736
+   }
+  },
+  {
+   "name": "python-pysolr",
+   "version": "3.11.0-2",
+   "directory": "pool/main/p/python-pysolr",
+   "homepage": "https://github.com/django-haystack/pysolr",
+   "orig": {
+    "name": "python-pysolr_3.11.0.orig.tar.gz",
+    "sha256": "bbd0e7467835316880f994b55386c9bc3c146733c17d85a3fed317755976c40a",
+    "size": 63983
+   },
+   "debian": {
+    "name": "python-pysolr_3.11.0-2.debian.tar.xz",
+    "sha256": "a4e9eb05e239d12528217d4a6e9e61e6bf4b3e90c79d3d38336f9eaa07bc4764",
+    "size": 3176
+   }
+  },
+  {
+   "name": "airthings-cloud",
+   "version": "0.3.1-1",
+   "directory": "pool/main/a/airthings-cloud",
+   "homepage": "https://github.com/Danielhiversen/pyAirthings",
+   "orig": {
+    "name": "airthings-cloud_0.3.1.orig.tar.xz",
+    "sha256": "0f01c75494df1b4d67ca33a73571b37cb729aa93225167315be15be29b94f02c",
+    "size": 8152
+   },
+   "debian": {
+    "name": "airthings-cloud_0.3.1-1.debian.tar.xz",
+    "sha256": "11c1ab959d8a9d73757e25a5602e2ed61e3348f1150993ab163b832518fa39aa",
+    "size": 2640
+   }
+  },
+  {
+   "name": "python-djangorestframework-flex-fields",
+   "version": "1.0.2-4",
+   "directory": "pool/main/p/python-djangorestframework-flex-fields",
+   "homepage": "https://github.com/rsinger86/drf-flex-fields/",
+   "orig": {
+    "name": "python-djangorestframework-flex-fields_1.0.2.orig.tar.gz",
+    "sha256": "48139eeff0b1232fc05a9f353c3c2b570b225985043dedda6ab0d5e8b7a1d7af",
+    "size": 30476
+   },
+   "debian": {
+    "name": "python-djangorestframework-flex-fields_1.0.2-4.debian.tar.xz",
+    "sha256": "2e80f56651af4fe4e8b5b713a18b3bfb23ed0b6b5824e571d8960d3d8f59f209",
+    "size": 3808
+   }
+  },
+  {
+   "name": "ipykernel",
+   "version": "7.2.0-3",
+   "directory": "pool/main/i/ipykernel",
+   "homepage": "https://github.com/ipython/ipykernel",
+   "orig": {
+    "name": "ipykernel_7.2.0.orig.tar.gz",
+    "sha256": "215603e6e5ca9747ca22552bf287304e1f7bd707def6c9493cb695d9dfff4ca6",
+    "size": 178029
+   },
+   "debian": {
+    "name": "ipykernel_7.2.0-3.debian.tar.xz",
+    "sha256": "ea43a8ddaa860b7aa42f2a04353777c946012e6e95e1a09b0b446b7bc0528555",
+    "size": 6932
+   }
+  },
+  {
+   "name": "torchcodec",
+   "version": "0.14.0-1.1",
+   "directory": "pool/main/t/torchcodec",
+   "homepage": "https://github.com/pytorch/torchcodec",
+   "orig": {
+    "name": "torchcodec_0.14.0.orig.tar.gz",
+    "sha256": "340d85964f4865b16831b14923e3608866afbe6d5253b46a7c496bcdfb70bffa",
+    "size": 15793888
+   },
+   "debian": {
+    "name": "torchcodec_0.14.0-1.1.debian.tar.xz",
+    "sha256": "b2aeb86f653edb111f2d904c018059773ed5e4af7c0c020abcb9141669f81cb1",
+    "size": 6104
+   }
+  },
+  {
+   "name": "pyvesync",
+   "version": "3.4.2-1",
+   "directory": "pool/main/p/pyvesync",
+   "homepage": "https://github.com/webdjoe/pyvesync",
+   "orig": {
+    "name": "pyvesync_3.4.2.orig.tar.xz",
+    "sha256": "bb0e065d79d5d522aeb3de0e19e45e46eafd1e4210b669f60b3f8d1ee5a62e50",
+    "size": 208760
+   },
+   "debian": {
+    "name": "pyvesync_3.4.2-1.debian.tar.xz",
+    "sha256": "9be0e9070471b1933730d3fed9571d15fb68cf68482d6110bfc71ceddbbd2b3f",
+    "size": 3456
+   }
+  },
+  {
+   "name": "python-serializable",
+   "version": "1.3.1-2",
+   "directory": "pool/main/p/python-serializable",
+   "homepage": "https://github.com/openvax/serializable",
+   "orig": {
+    "name": "python-serializable_1.3.1.orig.tar.xz",
+    "sha256": "1f2f5c11a276dad27251696115fc5b714d96ef4d02dd278bee5d3f754c8d29ff",
+    "size": 27588
+   },
+   "debian": {
+    "name": "python-serializable_1.3.1-2.debian.tar.xz",
+    "sha256": "85e25defb1f1fa185027072edff20accd09a4287d55e93c59a01eee97d8fbb3b",
+    "size": 4252
+   }
+  },
+  {
+   "name": "python-p1monitor",
+   "version": "3.2.0-1",
+   "directory": "pool/main/p/python-p1monitor",
+   "homepage": "https://github.com/klaasnicolaas/python-p1monitor",
+   "orig": {
+    "name": "python-p1monitor_3.2.0.orig.tar.gz",
+    "sha256": "666974d3b20dfff82bfb86f5b1b3de7d534c1793193901ba2bcbcf27ca608843",
+    "size": 168731
+   },
+   "debian": {
+    "name": "python-p1monitor_3.2.0-1.debian.tar.xz",
+    "sha256": "236bc3495ef4dcadea4df715c08fc4f649e60393e623c3a4d613e9b4acf37e85",
+    "size": 2360
+   }
+  },
+  {
+   "name": "python-vulndb",
+   "version": "0.1.3-5",
+   "directory": "pool/main/p/python-vulndb",
+   "homepage": "https://github.com/vulndb/python-sdk/",
+   "orig": {
+    "name": "python-vulndb_0.1.3.orig.tar.gz",
+    "sha256": "3804be93a3fdfe550a7f2db06ff162ab4b622bcb9327bf4ac62737dbc9fddb8f",
+    "size": 51345
+   },
+   "debian": {
+    "name": "python-vulndb_0.1.3-5.debian.tar.xz",
+    "sha256": "7050b07d22274d09d80af2e016e3d5c721bffda67c34897b92ea6841d7beb6d2",
+    "size": 3832
+   }
+  },
+  {
+   "name": "python-testing.postgresql",
+   "version": "1.3.0-7",
+   "directory": "pool/main/p/python-testing.postgresql",
+   "homepage": "https://github.com/tk0miya/testing.postgresql",
+   "orig": {
+    "name": "python-testing.postgresql_1.3.0.orig.tar.gz",
+    "sha256": "8e1a69760369a7a8ffe63a66b6d95a5cd82db2fb976e4a8f85ffd24fbfc447d8",
+    "size": 11000
+   },
+   "debian": {
+    "name": "python-testing.postgresql_1.3.0-7.debian.tar.xz",
+    "sha256": "6c01a1db56694e7e063e3f0f28e64be887e54562988c03df6218167c27141a63",
+    "size": 4328
+   }
+  },
+  {
+   "name": "deepdish",
+   "version": "0.3.7-4",
+   "directory": "pool/main/d/deepdish",
+   "homepage": "https://github.com/uchicago-cs/deepdish",
+   "orig": {
+    "name": "deepdish_0.3.7.orig.tar.gz",
+    "sha256": "6aff3abef693cec34438f183f29d1a2d9862aba27bb959d4f24d56e007e41ff3",
+    "size": 37930
+   },
+   "debian": {
+    "name": "deepdish_0.3.7-4.debian.tar.xz",
+    "sha256": "411081799b7a5495bc77bb7e85c689ffb165d064f4586430e2ef675fa55e9308",
+    "size": 3704
+   }
+  },
+  {
+   "name": "python-dnslib",
+   "version": "0.9.25-1",
+   "directory": "pool/main/p/python-dnslib",
+   "homepage": "https://github.com/paulc/dnslib",
+   "orig": {
+    "name": "python-dnslib_0.9.25.orig.tar.gz",
+    "sha256": "687df2086e28086cb32b947dafa4c0a4e613f1429baa3be61d8b94e69418b4ef",
+    "size": 82156
+   },
+   "debian": {
+    "name": "python-dnslib_0.9.25-1.debian.tar.xz",
+    "sha256": "25fcb6e93672c5e8a376fd06c3c59db55d1c3beb42d6934f04309a2c9d9f4227",
+    "size": 3504
+   }
+  },
+  {
+   "name": "python-fonticon-fontawesome6",
+   "version": "6.4.0+ds1-4",
+   "directory": "pool/main/p/python-fonticon-fontawesome6",
+   "homepage": "https://github.com/pyapp-kit/fonticon-fontawesome6/",
+   "orig": {
+    "name": "python-fonticon-fontawesome6_6.4.0+ds1.orig.tar.xz",
+    "sha256": "e274ca485462a839aac0c73be765a442265410d3eaa9d36f32a45c87b6ad65d5",
+    "size": 18900
+   },
+   "debian": {
+    "name": "python-fonticon-fontawesome6_6.4.0+ds1-4.debian.tar.xz",
+    "sha256": "eadde4d654e3760cb0ce6c421db60af8d67dc89d7951a0106cab197ef0b2570d",
+    "size": 2732
+   }
+  },
+  {
+   "name": "python-distro",
+   "version": "1.9.0-2",
+   "directory": "pool/main/p/python-distro",
+   "homepage": "https://github.com/python-distro/distro",
+   "orig": {
+    "name": "python-distro_1.9.0.orig.tar.gz",
+    "sha256": "6ede051357868ed427ea71d16fc27f4d63cc0d9c8a32788aa11c450ecefcc76f",
+    "size": 54793
+   },
+   "debian": {
+    "name": "python-distro_1.9.0-2.debian.tar.xz",
+    "sha256": "3513d545b0e0eb5537d4f64eb5d990137a667fff66fd6fe9d44121d84b140112",
+    "size": 3700
+   }
+  },
+  {
+   "name": "pybotvac",
+   "version": "0.0.29-1",
+   "directory": "pool/main/p/pybotvac",
+   "homepage": "https://github.com/stianaske/pybotvac",
+   "orig": {
+    "name": "pybotvac_0.0.29.orig.tar.xz",
+    "sha256": "e961eb8d413c26b5b35b7f9b5b771ed59747f0eecdde5b377d43a99a36e7db7e",
+    "size": 18180
+   },
+   "debian": {
+    "name": "pybotvac_0.0.29-1.debian.tar.xz",
+    "sha256": "76ba539be639f640549049fabeab87905277bdec5c08cff195bb8ce7b4404cef",
+    "size": 2464
+   }
+  },
+  {
+   "name": "python-asusrouter",
+   "version": "1.21.3-2",
+   "directory": "pool/main/p/python-asusrouter",
+   "homepage": "https://github.com/Vaskivskyi/asusrouter",
+   "orig": {
+    "name": "python-asusrouter_1.21.3.orig.tar.xz",
+    "sha256": "bdb3b167f4a94847705e89922ea544bf32fafc464884fab06a79478625c68ce9",
+    "size": 207572
+   },
+   "debian": {
+    "name": "python-asusrouter_1.21.3-2.debian.tar.xz",
+    "sha256": "8a8778f8fef6c63d09bc6b623a5643d16bcf56761bcc103b0a2b7f5ecc1b5225",
+    "size": 2884
+   }
+  },
+  {
+   "name": "python-lsp-isort",
+   "version": "0.2.2+really+0.1-1",
+   "directory": "pool/main/p/python-lsp-isort",
+   "homepage": "https://github.com/chantera/python-lsp-isort",
+   "orig": {
+    "name": "python-lsp-isort_0.2.2+really+0.1.orig.tar.gz",
+    "sha256": "11ef4c43a1a765805d854038ea52dd01b3586b7da1cd9038c225c5507992f9a7",
+    "size": 5065
+   },
+   "debian": {
+    "name": "python-lsp-isort_0.2.2+really+0.1-1.debian.tar.xz",
+    "sha256": "227265cc71e83f2ccc4f8db5b732222841351d3b06748ffc5f11b71b39029e42",
+    "size": 2160
+   }
+  },
+  {
+   "name": "scikit-fmm",
+   "version": "2025.06.23-1",
+   "directory": "pool/main/s/scikit-fmm",
+   "homepage": "https://github.com/scikit-fmm/scikit-fmm/",
+   "orig": {
+    "name": "scikit-fmm_2025.06.23.orig.tar.gz",
+    "sha256": "e4ca2813caf4e87158211a673a4f263e4a67ebbe12bdcd7570cc7a7846888cea",
+    "size": 461414
+   },
+   "debian": {
+    "name": "scikit-fmm_2025.06.23-1.debian.tar.xz",
+    "sha256": "5cc57582420604dc27719852a267d0b6b555e80ece762e0268f3b253924cbe97",
+    "size": 4164
+   }
+  },
+  {
+   "name": "kerchunk",
+   "version": "0.2.10-3",
+   "directory": "pool/main/k/kerchunk",
+   "homepage": "https://github.com/fsspec/kerchunk",
+   "orig": {
+    "name": "kerchunk_0.2.10.orig.tar.gz",
+    "sha256": "cc1b646580d5dca57d76af3415b47af9cf891fc92ed33e658d4322cdb354d542",
+    "size": 124793625
+   },
+   "debian": {
+    "name": "kerchunk_0.2.10-3.debian.tar.xz",
+    "sha256": "a674750fc3d148eeca8728b9ebb5b2f5591d6379b1412aad6df2ab33f6cf6e64",
+    "size": 8404
+   }
+  },
+  {
+   "name": "python-mastodon",
+   "version": "2.2.2-1",
+   "directory": "pool/main/p/python-mastodon",
+   "homepage": "https://github.com/halcy/Mastodon.py",
+   "orig": {
+    "name": "python-mastodon_2.2.2.orig.tar.xz",
+    "sha256": "34241321eddfb1fefc4191c33167150ea1c82e167a1b1d70cf87b47991ed6392",
+    "size": 8375812
+   },
+   "debian": {
+    "name": "python-mastodon_2.2.2-1.debian.tar.xz",
+    "sha256": "8916ebc5097d74979c79cea63336e8052f8f043c49db649636fc5f15fe40c87b",
+    "size": 3824
+   }
+  },
+  {
+   "name": "python-django-extensions",
+   "version": "4.1-2",
+   "directory": "pool/main/p/python-django-extensions",
+   "homepage": "https://github.com/django-extensions/django-extensions",
+   "orig": {
+    "name": "python-django-extensions_4.1.orig.tar.gz",
+    "sha256": "b9b96448ce52456750f63703ad99d3d7ca95c9649fccae2ad5f97903a27bdb8d",
+    "size": 271999
+   },
+   "debian": {
+    "name": "python-django-extensions_4.1-2.debian.tar.xz",
+    "sha256": "90eca9fd8d77c923fa6da2fbd2c4659ff205d6e1161e029ab81285da635d3d1c",
+    "size": 393568
+   }
+  },
+  {
+   "name": "python-numpysane",
+   "version": "0.45-1",
+   "directory": "pool/main/p/python-numpysane",
+   "homepage": "https://github.com/dkogan/numpysane",
+   "orig": {
+    "name": "python-numpysane_0.45.orig.tar.xz",
+    "sha256": "02c09b4408385356fec59d8b0f1d7890cef831668a80d58d97455754b346f1f0",
+    "size": 66988
+   },
+   "debian": {
+    "name": "python-numpysane_0.45-1.debian.tar.xz",
+    "sha256": "5eed60b840561e6b1ab59c0a8152d9006ce65387a9dc9aa5f06170e10fd7e56d",
+    "size": 3600
+   }
+  },
+  {
+   "name": "python-requests-ntlm",
+   "version": "1.3.0-1",
+   "directory": "pool/main/p/python-requests-ntlm",
+   "homepage": "https://github.com/requests/requests-ntlm",
+   "orig": {
+    "name": "python-requests-ntlm_1.3.0.orig.tar.gz",
+    "sha256": "b29cc2462623dffdf9b88c43e180ccb735b4007228a542220e882c58ae56c668",
+    "size": 16112
+   },
+   "debian": {
+    "name": "python-requests-ntlm_1.3.0-1.debian.tar.xz",
+    "sha256": "58c06187b0dbd3c3e365fcdf4d1adcb39b0c7da3a047816fa9585e19303ea0b7",
+    "size": 2404
+   }
+  },
+  {
+   "name": "iaqualink",
+   "version": "0.7.0-2",
+   "directory": "pool/main/i/iaqualink",
+   "homepage": "https://github.com/flz/iaqualink-py",
+   "orig": {
+    "name": "iaqualink_0.7.0.orig.tar.xz",
+    "sha256": "14e3286ec34d39cff38b487f94effd0e2c5ced51ebfa2e4f28b368e36a26351b",
+    "size": 79196
+   },
+   "debian": {
+    "name": "iaqualink_0.7.0-2.debian.tar.xz",
+    "sha256": "49a8e7804c76c22fcbd2801a7a6fafde537e84913eff322daccf58eaa9280749",
+    "size": 2732
+   }
+  },
+  {
+   "name": "python-betterproto",
+   "version": "2.0.0b7-2",
+   "directory": "pool/main/p/python-betterproto",
+   "homepage": "https://github.com/danielgtaylor/python-betterproto",
+   "orig": {
+    "name": "python-betterproto_2.0.0b7.orig.tar.gz",
+    "sha256": "1b1458ca5278d519bcd62556a4c236f998a91d503f0f71c67b0b954747052af2",
+    "size": 101447
+   },
+   "debian": {
+    "name": "python-betterproto_2.0.0b7-2.debian.tar.xz",
+    "sha256": "78d5ad434557e0e9054d7f702b59f5e2a20b9e952d78d8e179412998120983d5",
+    "size": 2660
+   }
+  },
+  {
+   "name": "python-ldapdomaindump",
+   "version": "0.9.4-2",
+   "directory": "pool/main/p/python-ldapdomaindump",
+   "homepage": "https://github.com/dirkjanm/ldapdomaindump",
+   "orig": {
+    "name": "python-ldapdomaindump_0.9.4.orig.tar.gz",
+    "sha256": "43a0822c96d06b8f7a3e3f044deb1591344c84d273c9d7f5815347c88af300fa",
+    "size": 18249
+   },
+   "debian": {
+    "name": "python-ldapdomaindump_0.9.4-2.debian.tar.xz",
+    "sha256": "4caf859f60ba6b65060f175bc83d3f68e5e00c3331c81271d57dd88a4f76f882",
+    "size": 5316
+   }
+  },
+  {
+   "name": "zxcvbn-python",
+   "version": "4.5.0-2",
+   "directory": "pool/main/z/zxcvbn-python",
+   "homepage": "https://github.com/dwolfhub/zxcvbn-python/tree/master",
+   "orig": {
+    "name": "zxcvbn-python_4.5.0.orig.tar.xz",
+    "sha256": "31a13b7bcc3af2e14273c4de3c427eb02a866336ba2670480af739f1c98403b0",
+    "size": 7054588
+   },
+   "debian": {
+    "name": "zxcvbn-python_4.5.0-2.debian.tar.xz",
+    "sha256": "d66fdc7eecea698426e0228fe19881538de299d921ad097ba84d262c4f893d37",
+    "size": 3400
+   }
+  },
+  {
+   "name": "networking-baremetal",
+   "version": "8.1.0-2",
+   "directory": "pool/main/n/networking-baremetal",
+   "homepage": "https://github.com/openstack/networking-baremetal",
+   "orig": {
+    "name": "networking-baremetal_8.1.0.orig.tar.xz",
+    "sha256": "cd762177a041062fcd92e8f8a15a876a415daca0706994636ff3a43ae3e0fd31",
+    "size": 129488
+   },
+   "debian": {
+    "name": "networking-baremetal_8.1.0-2.debian.tar.xz",
+    "sha256": "9beb3117553b292dda4303d643ffc175c418e46bbc57fe66f19fd6a0e31f35a4",
+    "size": 4720
+   }
+  },
+  {
+   "name": "voluptuous-openapi",
+   "version": "0.3.0-1",
+   "directory": "pool/main/v/voluptuous-openapi",
+   "homepage": "https://github.com/home-assistant-libs/voluptuous-openapi",
+   "orig": {
+    "name": "voluptuous-openapi_0.3.0.orig.tar.gz",
+    "sha256": "913f41a94deda1ae2f4012580d9d7d2f55548cec9d017c1e8a97dc1ec4a64429",
+    "size": 18087
+   },
+   "debian": {
+    "name": "voluptuous-openapi_0.3.0-1.debian.tar.xz",
+    "sha256": "6ad053e61e266dd4be765777bd405c69b4a45e6df932eeeedeb03b6c7c6905df",
+    "size": 2280
+   }
+  },
+  {
+   "name": "dotty-dict",
+   "version": "1.3.1-2",
+   "directory": "pool/main/d/dotty-dict",
+   "homepage": "https://github.com/pawelzny/dotty_dict",
+   "orig": {
+    "name": "dotty-dict_1.3.1.orig.tar.gz",
+    "sha256": "3b76d595da87033e17ed88194693af6c6ef9d71e7137247bbce701d336eb559c",
+    "size": 41014
+   },
+   "debian": {
+    "name": "dotty-dict_1.3.1-2.debian.tar.xz",
+    "sha256": "060ed8e03e7a8b7c1f5af7d14349475eeb7b79fdbae4211b973e7a6381686f47",
+    "size": 3548
+   }
+  },
+  {
+   "name": "python-nanoemoji",
+   "version": "0.16.0-4",
+   "directory": "pool/main/p/python-nanoemoji",
+   "homepage": "https://github.com/googlefonts/nanoemoji",
+   "orig": {
+    "name": "python-nanoemoji_0.16.0.orig.tar.gz",
+    "sha256": "ae04470c0192e1b7b670c5f131304944e579f2d8b8e6ce0fad656f60a2bfef8b",
+    "size": 155531
+   },
+   "debian": {
+    "name": "python-nanoemoji_0.16.0-4.debian.tar.xz",
+    "sha256": "68e93b88e48fac4c30dbb5986e5ec717c89f294d199709da3af5033e0350d5ad",
+    "size": 9044
+   }
+  }
+ ]
+}
