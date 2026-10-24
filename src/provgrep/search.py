@@ -98,6 +98,11 @@ def terms(text: str) -> list[str]:
     return out
 
 
+def licenses_of(text: str) -> str | list[str]:
+    """The licenses filter as people write it: "permissive", "any", or SPDX ids, comma-separated."""
+    return text if text in ("permissive", "any") else text.split(",")
+
+
 def identifiers(text: str) -> set[str]:
     """Every identifier in a text, whole, as terms() keeps it: lower-cased and without
     underscores (`parse_rtp_header` and `parseRtpHeader` are both parsertpheader)."""

@@ -78,7 +78,10 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--limit", type=int, default=10)
     p.add_argument("--json", action="store_true")
 
-    p = commands.add_parser("serve", help="serve the HTTP API over an index")
+    p = commands.add_parser("mcp", help="serve the search as MCP tools over stdio")
+    p.add_argument("--index", type=Path, default=Path("index/github"))
+
+    p = commands.add_parser("serve", help="serve the website, its API and MCP over an index")
     p.add_argument("--index", type=Path, default=Path("index/github"))
     p.add_argument("--host", default="127.0.0.1")
     p.add_argument("--port", type=int, default=8000)
@@ -110,15 +113,12 @@ def main(argv: list[str] | None = None) -> int:
         if manifest["failed"]:
             print(f"failed: {len(manifest['failed'])} (listed in the manifest)")
     elif args.command == "search":
-        from provgrep.search import Index
+        from provgrep.search import Index, licenses_of
 
-        licenses = (
-            args.license if args.license in ("permissive", "any") else args.license.split(",")
-        )
         page = Index(args.index).search(
             args.query,
             languages=args.language,
-            licenses=licenses,
+            licenses=licenses_of(args.license),
             levels=args.level,
             require=args.require,
             limit=args.limit,
@@ -127,6 +127,11 @@ def main(argv: list[str] | None = None) -> int:
             print(json.dumps(asdict(page), indent=1))
         else:
             _print_page(page)
+    elif args.command == "mcp":
+        from provgrep.mcp_server import server
+        from provgrep.search import Index
+
+        server(Index(args.index)).run("stdio")
     elif args.command == "serve":
         from provgrep.server import serve
 

@@ -6,6 +6,7 @@
         license: "permissive" (default), "any", or SPDX ids, comma-separated
         level: A, B, C or X, repeated; require: an identifier the code must contain, repeated
     GET /api/snippets/{id}
+    POST /mcp                                           the same search as MCP tools
 
 Pages are rendered on the server, so a search is a link that works without JavaScript; the
 script only fetches the same results as you type. The whole query is in the URL, and every
@@ -13,6 +14,8 @@ request only reads the index: replicas of the server can serve the same index di
 """
 
 import re
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
 from dataclasses import asdict
 from pathlib import Path
 from typing import Any
@@ -27,7 +30,8 @@ from starlette.staticfiles import StaticFiles
 from starlette.templating import Jinja2Templates
 
 from provgrep.attribution import reuse_snippet
-from provgrep.search import Index, Page, Result, query_terms, terms
+from provgrep.mcp_server import server as mcp_server
+from provgrep.search import Index, Page, Result, licenses_of, query_terms, terms
 
 PAGE_SIZE = 10
 MAX_PAGE = 20  # deeper than this, refine the query
@@ -100,10 +104,7 @@ def app(index: Index) -> Starlette:
         """The query a request asks for, as the page shows it, and its page of results."""
         license = params.get("license", "permissive")
         allowed = params.get("allowed", "")
-        if license == "allowed":
-            licenses: str | list[str] = allowed.split(",")
-        else:
-            licenses = license if license in ("permissive", "any") else license.split(",")
+        licenses = allowed.split(",") if license == "allowed" else licenses_of(license)
         page = int(params.get("page", "1"))
         if not 1 <= page <= MAX_PAGE:
             raise ValueError(f"page goes from 1 to {MAX_PAGE}")
@@ -173,14 +174,27 @@ def app(index: Index) -> Starlette:
             return JSONResponse({"error": "no such snippet"}, status_code=404)
         return JSONResponse(asdict(found))
 
+    mcp = mcp_server(index)
+    # Stateless and plain JSON: any replica answers any request, as it does pages.
+    mcp_app = mcp.streamable_http_app(
+        streamable_http_path="/", stateless_http=True, json_response=True
+    )
+
+    @asynccontextmanager
+    async def lifespan(_: Starlette) -> AsyncIterator[None]:
+        async with mcp.session_manager.run():  # a mounted app's own lifespan does not run
+            yield
+
     return Starlette(
         routes=[
             Route("/", home),
             Route("/s/{id}", snippet_page),
             Route("/api/search", api_search),
             Route("/api/snippets/{id}", api_snippet),
+            Mount("/mcp", app=mcp_app),
             Mount("/static", StaticFiles(directory=_HERE / "static"), name="static"),
-        ]
+        ],
+        lifespan=lifespan,
     )
 
 
