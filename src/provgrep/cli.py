@@ -5,6 +5,7 @@ import json
 import os
 from dataclasses import asdict
 from pathlib import Path
+from typing import Any
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -48,6 +49,33 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--count", type=int, default=500, help="repositories per language")
     p.add_argument("--out", type=Path, default=Path("corpus/github.json"))
 
+    p = commands.add_parser("build", help="build the search index of a pinned corpus")
+    p.add_argument("--corpus", type=Path, default=Path("corpus/github.json"))
+    p.add_argument("--out", type=Path, default=Path("index/github"))
+    p.add_argument("--jobs", type=int, default=4, help="repositories staged at once (default: 4)")
+    p.add_argument("--limit", type=int, help="only the first N repositories of each language")
+
+    p = commands.add_parser("search", help="search the index")
+    p.add_argument("query")
+    p.add_argument("--index", type=Path, default=Path("index/github"))
+    p.add_argument("--language", action="append", default=[], help="repeat for several")
+    p.add_argument(
+        "--license",
+        default="permissive",
+        help='"permissive" (default), "any", or the SPDX ids allowed, comma-separated',
+    )
+    p.add_argument("--level", action="append", default=[], help="A, B, C or X; repeat")
+    p.add_argument(
+        "--require", action="append", default=[], help="an identifier the code must contain"
+    )
+    p.add_argument("--limit", type=int, default=10)
+    p.add_argument("--json", action="store_true")
+
+    p = commands.add_parser("serve", help="serve the HTTP API over an index")
+    p.add_argument("--index", type=Path, default=Path("index/github"))
+    p.add_argument("--host", default="127.0.0.1")
+    p.add_argument("--port", type=int, default=8000)
+
     args = parser.parse_args(argv)
     if args.command == "license":
         from provgrep.licenses import resolve_tree
@@ -67,6 +95,35 @@ def main(argv: list[str] | None = None) -> int:
             parser.error("corpus needs a GitHub token in GITHUB_TOKEN (search is API-only)")
         count = github.pin(args.languages.split(","), args.count, args.out, token)
         print(f"pinned {count} repositories in {args.out}")
+    elif args.command == "build":
+        from provgrep.build import build
+
+        manifest = build(args.corpus, args.out, args.jobs, args.limit)
+        print(json.dumps(manifest["counts"], indent=1))
+        if manifest["failed"]:
+            print(f"failed: {len(manifest['failed'])} (listed in the manifest)")
+    elif args.command == "search":
+        from provgrep.search import Index
+
+        licenses = (
+            args.license if args.license in ("permissive", "any") else args.license.split(",")
+        )
+        page = Index(args.index).search(
+            args.query,
+            languages=args.language,
+            licenses=licenses,
+            levels=args.level,
+            require=args.require,
+            limit=args.limit,
+        )
+        if args.json:
+            print(json.dumps(asdict(page), indent=1))
+        else:
+            _print_page(page)
+    elif args.command == "serve":
+        from provgrep.server import serve
+
+        serve(args.index, args.host, args.port)
     elif args.command == "truth":
         from provgrep.debian import pin
 
@@ -78,3 +135,20 @@ def main(argv: list[str] | None = None) -> int:
         print((out / "summary.md").read_text(encoding="utf-8").split("\n")[2])
         print(f"details in {out}")
     return 0
+
+
+def _print_page(page: Any) -> None:
+    print(f"{page.total} snippets")
+    for r in page.results:
+        loc = r.location
+        lic = loc.license
+        print(f"\n{r.score:6.2f}  {loc.repo}  {loc.path}:{loc.start}-{loc.end}  {loc.symbol}")
+        copies = f", {r.copies} copies in {r.repos} repositories" if r.copies > 1 else ""
+        print(f"        {lic.expression or 'no license found'} (level {lic.level}){copies}")
+        for notice in lic.notices[:3]:
+            print(f"        {notice}")
+        print(f"        {loc.url}")
+        if r.code is None:
+            print("        (link only: no license that lets the code be shared)")
+        else:
+            print("\n".join("        | " + line for line in r.code.split("\n")[:12]))

@@ -9,8 +9,8 @@ search website first, with a CLI and an MCP server on the same engine.
 - A license label is a claim. Each one carries its evidence (file, scope, tool and version) and a
   confidence level whose error rate is measured against ground truth. Licenses are reported as
   detected, never as concluded.
-- Code is never shown or copied without its copyright and license notices. No license found:
-  link only.
+- Code is never shown or copied without its copyright and license notices. No license that lets
+  it be shared (none found, proprietary, source-available): link only.
 - Say "earliest observed", not "original author", unless the history proves it. Never store or
   show email addresses.
 - Every published number ships with the command and corpus version that reproduce it.
