@@ -48,6 +48,18 @@ def test_pages(index: search.Index) -> None:
         assert live.get("/mcp/").status_code == 405
 
 
+def test_mcp_behind_proxy(index: search.Index) -> None:
+    client_info = {"name": "test", "version": "0"}
+    params = {"protocolVersion": "2025-06-18", "capabilities": {}, "clientInfo": client_info}
+    initialize = {"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": params}
+    accept = {"accept": "application/json, text/event-stream"}
+    proxied = server.app(index, public="https://search.example")
+    with TestClient(proxied, base_url="https://search.example") as client:
+        assert client.post("/mcp/", json=initialize, headers=accept).status_code == 200
+    with TestClient(server.app(index), base_url="https://search.example") as client:
+        assert client.post("/mcp/", json=initialize, headers=accept).status_code == 421
+
+
 def test_attribution(index: search.Index) -> None:
     picture = index.search("picture").results[0]
     assert picture.code is not None

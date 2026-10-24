@@ -91,6 +91,7 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--index", type=Path, default=Path("index/github"))
     p.add_argument("--host", default="127.0.0.1")
     p.add_argument("--port", type=int, default=8000)
+    p.add_argument("--public", metavar="URL", help="the URL a proxy in front of it is reached at")
 
     args = parser.parse_args(argv)
     if args.command == "license":
@@ -147,7 +148,7 @@ def main(argv: list[str] | None = None) -> int:
     elif args.command == "serve":
         from provgrep.server import serve
 
-        serve(args.index, args.host, args.port)
+        serve(args.index, args.host, args.port, args.public)
     elif args.command == "truth":
         from provgrep.debian import pin
 
