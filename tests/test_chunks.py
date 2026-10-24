@@ -1,5 +1,9 @@
+import time
 from pathlib import PurePosixPath
 
+import pytest
+
+from provgrep import chunks
 from provgrep.chunks import MAX_LINES, kind, language_of, units
 
 
@@ -162,3 +166,20 @@ def test_declarations_without_a_body_are_not_units() -> None:
     assert units(java, "java") == []
     go = "package p\n\n// Implemented in assembly.\nfunc add(\n\tx int,\n\ty int,\n) int\n"
     assert units(go, "go") == []
+
+
+def test_embedded_data_is_not_code() -> None:
+    blob = "0x54, 0x42, 0x4c, 0x42, 0x00, 0x01, 0x00, 0x79, 0x6a, 0xb2, 0xc0, 0xa5,\n" * 400
+    assert kind(PurePosixPath("trust_blob.h"), blob, "cpp") == "generated"
+    floats = "static const float table[] = {\n" + "  0.25f, 0.5f, 0.75f, 1.0f,\n" * 800 + "};\n"
+    assert kind(PurePosixPath("table.c"), floats, "c") == "generated"
+    code = "int f(int x)\n{\n  return x + 1;\n}\n" * 1200
+    assert kind(PurePosixPath("f.c"), code, "c") == "code"
+
+
+def test_a_parse_past_its_deadline_gives_no_units(monkeypatch: pytest.MonkeyPatch) -> None:
+    # A bare list of bytes parsed as C++: tree-sitter's error recovery took 372 s on 793 KB.
+    monkeypatch.setattr(chunks, "PARSE_SECONDS", 0.2)
+    started = time.monotonic()
+    assert units("0x54, 0x42, 0x4c, 0x42,\n" * 20000, "cpp") == []
+    assert time.monotonic() - started < 5

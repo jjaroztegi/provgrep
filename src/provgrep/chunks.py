@@ -13,6 +13,7 @@ import bisect
 import hashlib
 import re
 import textwrap
+import time
 from collections.abc import Callable
 from dataclasses import dataclass
 from functools import cache
@@ -218,6 +219,8 @@ _GENERATED = re.compile(
     re.IGNORECASE,
 )
 _MAX_FILE = 1 << 20
+PARSE_SECONDS = 10.0
+_DATA_LINE = re.compile(r"\s*((0[xX][0-9a-fA-F]+|-?\d+(\.\d+)?[fFuUlL]*)\s*,\s*)+\S{0,20}\s*")
 # Rust test modules and C++ test namespaces: units inside them are tests.
 _TEST_SCOPES = frozenset({"test", "tests"})
 _SCOPE_NAME = re.compile(r"[*&\s]*([\w:.$]+)")
@@ -254,6 +257,8 @@ def kind(rel: PurePosixPath, text: str, language: str) -> str:
         return "generated"
     if len(text) > 4096 and len(text) > 300 * (text.count("\n") + 1):
         return "generated"  # minified: lines of hundreds of characters on average
+    if len(text) > 16384 and _data(text):
+        return "generated"  # a font, an image, a certificate store as numbers
     if dirs & _VENDORED_DIRS:
         return "vendored"
     return "code"
@@ -264,7 +269,16 @@ def units(text: str, language: str) -> list[Unit]:
     source = text.encode()
     # Rows as tree-sitter counts them: split on "\n" only, unlike str.splitlines.
     lines = text.split("\n")
-    tree = _parser(language).parse(source)  # nodes do not keep their tree alive
+    deadline = time.monotonic() + PARSE_SECONDS
+    try:
+        # A byte array in a file of its own, parsed as C++, took 372 s: what does not parse in
+        # PARSE_SECONDS is data, not code. Only parsing from a callback can be stopped.
+        tree = _parser(language).parse(
+            lambda at, _: source[at : at + (1 << 16)],
+            progress_callback=lambda *_: time.monotonic() > deadline,
+        )  # nodes do not keep their tree alive
+    except ValueError:
+        return []
     root = tree.root_node
 
     found: dict[int, tuple[Node, Node | None, Node | None]] = {}
@@ -336,6 +350,12 @@ def _without_emails_in_docs(source: bytes, docs: list[tuple[int, int, str]]) -> 
 def normalized(code: str) -> str:
     """Code with trailing spaces and blank lines left out; copies differ in those."""
     return "\n".join(s for line in textwrap.dedent(code).split("\n") if (s := line.rstrip()))
+
+
+def _data(text: str) -> bool:
+    """Whether most of the first lines are lists of numbers: an embedded binary, not code."""
+    lines = [line for line in text.split("\n", 400)[:400] if line.strip()]
+    return sum(bool(_DATA_LINE.fullmatch(line)) for line in lines) > len(lines) / 2
 
 
 def _substantive(lines: list[str]) -> int:
