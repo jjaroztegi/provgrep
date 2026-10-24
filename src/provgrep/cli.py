@@ -2,6 +2,7 @@
 
 import argparse
 import json
+import os
 from dataclasses import asdict
 from pathlib import Path
 
@@ -36,6 +37,17 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--jobs", type=int, default=4, help="packages resolved at once (default: 4)")
     p.add_argument("--out", type=Path, default=Path("results"))
 
+    p = commands.add_parser(
+        "corpus", help="pin the most-starred GitHub repositories of each language to a commit"
+    )
+    p.add_argument(
+        "--languages",
+        default="c,c++,go,java,javascript,python,rust,typescript",
+        help="GitHub language names, comma-separated",
+    )
+    p.add_argument("--count", type=int, default=500, help="repositories per language")
+    p.add_argument("--out", type=Path, default=Path("corpus/github.json"))
+
     args = parser.parse_args(argv)
     if args.command == "license":
         from provgrep.licenses import resolve_tree
@@ -47,6 +59,14 @@ def main(argv: list[str] | None = None) -> int:
             for path, r in resolved.items():
                 note = "  (evidence disagrees)" if r.conflict else ""
                 print(f"{r.level}  {r.expression or 'NOASSERTION'}  {path}{note}")
+    elif args.command == "corpus":
+        from provgrep import github
+
+        token = os.environ.get("GITHUB_TOKEN")
+        if not token:
+            parser.error("corpus needs a GitHub token in GITHUB_TOKEN (search is API-only)")
+        count = github.pin(args.languages.split(","), args.count, args.out, token)
+        print(f"pinned {count} repositories in {args.out}")
     elif args.command == "truth":
         from provgrep.debian import pin
 

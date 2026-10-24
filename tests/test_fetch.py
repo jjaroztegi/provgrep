@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from provgrep.fetch import download, unpack
+from provgrep.fetch import TooLarge, download, unpack
 
 
 def _tarball(path: Path, members: dict[str, bytes]) -> None:
@@ -37,3 +37,12 @@ def test_download_checks_the_hash(tmp_path: Path) -> None:
     with pytest.raises(OSError, match="sha256"):
         download([url], "0" * 64, tmp_path / "cache" / "other")
     assert not (tmp_path / "cache" / "other").exists()
+
+
+def test_download_refuses_a_file_over_its_limit(tmp_path: Path) -> None:
+    source = tmp_path / "big"
+    source.write_bytes(b"x" * (3 << 20))
+    dest = tmp_path / "cache" / "big"
+    with pytest.raises(TooLarge):
+        download([source.as_uri()], None, dest, max_bytes=1 << 20)
+    assert list(dest.parent.iterdir()) == []
