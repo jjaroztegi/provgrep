@@ -78,6 +78,12 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--limit", type=int, default=10)
     p.add_argument("--json", action="store_true")
 
+    p = commands.add_parser(
+        "copies", help="functions in several repositories, and their copies' licenses"
+    )
+    p.add_argument("--index", type=Path, default=Path("index/github"))
+    p.add_argument("--out", type=Path, default=Path("results"))
+
     p = commands.add_parser("mcp", help="serve the search as MCP tools over stdio")
     p.add_argument("--index", type=Path, default=Path("index/github"))
 
@@ -127,6 +133,12 @@ def main(argv: list[str] | None = None) -> int:
             print(json.dumps(asdict(page), indent=1))
         else:
             _print_page(page)
+    elif args.command == "copies":
+        from provgrep.copies import study
+
+        out = study(args.index, args.out)
+        print((out / "counts.json").read_text(encoding="utf-8"))
+        print(f"details in {out}")
     elif args.command == "mcp":
         from provgrep.mcp_server import server
         from provgrep.search import Index
