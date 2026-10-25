@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import pytest
 
 from provgrep import search
@@ -56,3 +58,25 @@ def test_snippet_lists_every_copy(index: search.Index) -> None:
     assert [c.path for c in snippet.copies] == ["third_party/x/pic.h", "src/pic.c"]
     assert [c.license.expression for c in snippet.copies] == ["BSD-3-Clause", "MIT"]
     assert index.snippet("0" * search.ID_LENGTH) is None
+
+
+def test_shards_page_as_one_index(
+    index: search.Index, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(search, "SHARD_SIZE", 1)  # a shard per snippet, up to MAX_SHARDS
+    monkeypatch.setattr(search, "CHUNK", 1)
+    sharded = tmp_path / "sharded"
+    sharded.mkdir()
+    for name in ("manifest.json", "records.sqlite"):
+        (sharded / name).symlink_to(index.path / name)
+    search.write_lexical(index.path / "records.sqlite", sharded / "lexical", jobs=2)
+    split = search.Index(sharded)
+    assert [s.num_docs for s in split._searchers] == [1, 1, 1, 1]
+    query = "fill picture render"
+    whole = split.search(query, licenses="any")
+    assert whole.total == index.search(query, licenses="any").total == 4
+    assert {r.id for r in whole.results} == {
+        r.id for r in index.search(query, licenses="any").results
+    }
+    pages = [split.search(query, licenses="any", limit=1, offset=n).results for n in range(4)]
+    assert [r.id for page in pages for r in page] == [r.id for r in whole.results]
