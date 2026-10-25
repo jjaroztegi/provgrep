@@ -11,6 +11,9 @@
     <div>
       <p class="expression">{{ lic.expression or "No license found" }}</p>
       <p class="why">{{ v.level_text }}{% if lic.conflict %} Other evidence names other licenses.{% endif %}</p>
+      {% if r.compatibility %}
+      <p class="fits">Fits a project under {{ r.compatibility.project }}, says <a href="{{ osadl }}">OSADL's matrix</a>.</p>
+      {% endif %}
     </div>
   </div>
   <aside class="details">
@@ -22,11 +25,12 @@
     {% elif lic.shareable %}
     <p class="notices none">No copyright statement in the file or its license files.</p>
     {% endif %}
-    {% if lic.evidence %}
+    {% if lic.evidence or r.compatibility %}
     <details class="evidence">
       <summary>Evidence</summary>
       <ul>
         {% for e in lic.evidence %}<li><span class="kind">{{ e.kind.replace("_", " ") }}</span> <code>{{ e.path }}</code> {{ e.expression }}</li>{% endfor %}
+        {% if r.compatibility %}<li><span class="kind">fits {{ r.compatibility.project }}</span> {{ r.compatibility.reasons|join(" ") }} ({{ r.compatibility.source }})</li>{% endif %}
       </ul>
     </details>
     {% endif %}

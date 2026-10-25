@@ -80,3 +80,20 @@ def test_shards_page_as_one_index(
     }
     pages = [split.search(query, licenses="any", limit=1, offset=n).results for n in range(4)]
     assert [r.id for page in pages for r in page] == [r.id for r in whole.results]
+
+
+def test_search_for_a_project_keeps_what_fits_it(index: search.Index) -> None:
+    # GPL-2.0-or-later code does not go into an MIT project; MIT code goes into a GPL one.
+    assert index.search("fill", licenses="any", project="mit").total == 0
+    found = index.search("fill picture", licenses="any", project="GPL-2.0-or-later").results
+    assert sorted(r.location.license.expression or "" for r in found) == [
+        "GPL-2.0-or-later",
+        "MIT",
+    ]
+    verdict = found[0].compatibility
+    assert verdict is not None
+    assert (verdict.project, verdict.answer) == ("GPL-2.0-or-later", "yes")
+    assert verdict.source.startswith("OSADL License Compatibility Matrix, 20")
+    assert index.search("fill").results == []  # without a project, no verdict and no change
+    with pytest.raises(ValueError, match="no license 'Proprietary'"):
+        index.search("fill", project="Proprietary")

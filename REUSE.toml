@@ -1,0 +1,7 @@
+version = 1
+
+[[annotations]]
+path = "src/provgrep/osadl/matrixseqexpl.json"
+precedence = "override"
+SPDX-FileCopyrightText = "2017-2024 Open Source Automation Development Lab (OSADL) eG and contributors"
+SPDX-License-Identifier = "CC-BY-4.0"

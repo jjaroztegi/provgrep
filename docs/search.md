@@ -31,6 +31,18 @@ disagreement instead of resolving it.
   way to comply with its license needs only those ids. `MIT OR GPL-3.0-only` passes for `MIT`;
   `MIT AND GPL-3.0-only` does not. Ids are compared as written: `GPL-2.0-only` and
   `GPL-2.0-or-later` are different ids. Up to 8 ids.
+- A project's license (`license=compatible&project=GPL-3.0-or-later`, `--project` in the command
+  line, `project` in MCP): the copy shown passes when the [OSADL License Compatibility
+  Matrix](https://www.osadl.org/Access-to-raw-data.oss-compliance-raw-data-access.0.html) says
+  code under its license may go into a project under that one. Each result carries OSADL's
+  explanation and the matrix's timestamp. Only a plain Yes passes. "Check dependency" does not:
+  Apache-2.0 code goes into a GPL-2.0-or-later project only if the whole is GPL-3.0-or-later.
+  Neither does a license the matrix lacks (119 are in it; CC0-1.0 and ScanCode's `LicenseRef-`
+  ones are not), so 6 to 7% of shareable code is never shown this way. An exception the matrix
+  lacks (`GPL-2.0-only WITH Linux-syscall-note`) takes its license's answer, unless that answer
+  is No, since the exception may be what lifts it. A closed-source project has no row: use
+  `permissive`. The matrix (`src/provgrep/osadl/`) is OSADL's, a project of the Open Source
+  Automation Development Lab (OSADL) eG, under CC-BY-4.0; the verdicts are its claims, not ours.
 
 The levels say where a license comes from: A, the file's own header; B, a license file and a
 manifest that agree; C, one of them, or the deeper of two that disagree; X, nothing.

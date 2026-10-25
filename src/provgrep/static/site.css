@@ -115,9 +115,10 @@ a:hover { text-decoration-thickness: 2px; }
   font: inherit;
 }
 
-.filters .allowed { display: none; }
+.filters .allowed, .filters .project { display: none; }
 .filters .allowed input { width: 19rem; max-width: 100%; }
 .search:has(option[value="allowed"]:checked) .allowed { display: flex; }
+.search:has(option[value="compatible"]:checked) .project { display: flex; }
 
 .filters button {
   border-color: var(--ink);
@@ -264,6 +265,7 @@ mark { background: var(--mark); color: inherit; border-radius: 2px; }
   overflow-wrap: anywhere;
 }
 .why { margin: 0.1rem 0 0; color: var(--ink-soft); }
+.fits { margin: 0.25rem 0 0; color: var(--ink-soft); }
 
 .notices { margin: 0; padding: 0; list-style: none; }
 .notices li + li { margin-top: 0.15rem; }

@@ -44,6 +44,10 @@ def test_pages(index: search.Index) -> None:
     assert "What should the code do" not in client.get("/", params={"partial": "1"}).text
     assert "Real code for what you want to do" in client.get("/", params={"partial": "1"}).text
     assert client.get("/", params={"q": "x", "page": "1_0"}).status_code == 400
+    fits = client.get("/", params={"q": "fill", "license": "compatible", "project": "GPL-3.0-only"})
+    assert "Fits a project under GPL-3.0-only" in fits.text
+    assert "src/fill.c" in fits.text  # GPL-2.0-or-later goes into GPL-3.0-only
+    assert client.get("/", params={"q": "fill", "license": "compatible"}).status_code == 400
     with TestClient(server.app(index)) as live:  # runs the lifespan MCP needs
         assert live.get("/mcp/").status_code == 405
 
