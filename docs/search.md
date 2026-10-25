@@ -71,6 +71,30 @@ XRenderCreatePicture` in the command line, `require=` in the API. Whole means ca
 underscores aside (`parse_rtp_header` is `parseRtpHeader`) but not a part: `wait` does not match
 `epoll_wait`.
 
+## Ordering by meaning
+
+When the index has embeddings of its code (`provgrep embed`), the first 100 results of a query
+are put in order of how close each function's code is to the query in meaning, as
+[jina-embeddings-v2-base-code](https://huggingface.co/jinaai/jina-embeddings-v2-base-code)
+embeds them; later results keep the lexical order. Lexical search still decides what is found:
+a function with none of the query's terms is not a result, however close its meaning. A
+result's score is then the cosine of its code with the query, not BM25. Only the first 512
+tokens of a long function are embedded.
+
+Embedding the 21 million functions of the full index takes about two days on one 16 GB NVIDIA
+GPU (an RTX A4000), with the CUDA build of onnxruntime in place of the CPU one:
+
+```sh
+uv sync
+uv pip uninstall onnxruntime
+uv pip install "onnxruntime-gpu[cuda,cudnn]==1.31.0"
+uv run --no-sync provgrep embed --gpu  # stopped, it goes on where it was
+```
+
+The embeddings belong to one build of the index: after a rebuild, the index does not open until
+`provgrep embed` has run again. That run takes the vectors of the code it already had, by the
+code's hash, and embeds only what is new.
+
 ## Measuring it
 
 `provgrep evaluate search` runs the suites in `truth/intents/`. An intent is a question and the
