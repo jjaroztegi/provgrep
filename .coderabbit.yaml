@@ -1,0 +1,82 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+# AGENTS.md is read as the review guidelines (a CodeRabbit default). What follows adds what a
+# reviewer of this repository must know: a license label is a claim with evidence, code is shown
+# only with its notices, and published numbers rest on pinned inputs.
+# On the Free plan a private repository gets a summary of each PR (one an hour) and no line
+# review; the CodeRabbit CLI reviews it (three an hour) and reads this file too.
+language: en-US
+tone_instructions: >-
+  Terse. Lead with the defect and what it breaks; no praise, no restating the diff.
+
+reviews:
+  profile: chill
+  high_level_summary: false # the PR body already states problem, change and verification
+  review_status: false
+  in_progress_fortune: false
+  sequence_diagrams: false
+  estimate_code_review_effort: false # one author, no reviewer to schedule
+  related_prs: false
+  suggested_labels: false
+  suggested_reviewers: false
+  auto_review:
+    auto_incremental_review: false # one an hour: the opening push, then `@coderabbitai review`
+  finishing_touches: # both go against AGENTS.md: comments say why, smallest change that works
+    docstrings:
+      enabled: false
+    unit_tests:
+      enabled: false
+  pre_merge_checks:
+    docstrings:
+      mode: "off"
+  path_filters:
+    - "!corpus/github.json" # written by `provgrep corpus`
+    - "!truth/debian-python.json" # written by `provgrep truth`
+  path_instructions:
+    - path: "**"
+      instructions: >-
+        Written to be published: flag anything that names a host, user, home directory, IP
+        address outside loopback and private test ranges, credential, or private notes.
+    - path: "src/provgrep/**"
+      instructions: >-
+        A license is reported as detected, never concluded, and keeps its evidence (file, scope,
+        tool and version) and level. Code is shown or copied only with its copyright and license
+        notices, and only under a license that lets it be shared; otherwise the result is a
+        link. Flag code that stores or shows an email address, or calls the earliest observed
+        copy the original. Paths, processes and file encodings must work on Linux and Windows.
+    - path: "truth/**"
+      instructions: >-
+        Ground truth the published error rates are measured against: a changed label, audit
+        reason or intent needs its source, and the PR must say which numbers in README.md move.
+    - path: "tests/**"
+      instructions: >-
+        One small runnable check per non-trivial behaviour; flag new fixtures, mocks or
+        helpers that only serve a test of trivial code.
+    - path: ".github/workflows/**"
+      instructions: >-
+        Actions pinned by full commit SHA with a version comment, checkout with
+        persist-credentials false, least permissions, no pull_request_target or workflow_run.
+    - path: "{README.md,docs/**}"
+      instructions: >-
+        Every number ships with the command and corpus version that reproduce it and matches
+        what that command reports. Flag text that restates the code or --help, and accounts
+        appended instead of rewritten.
+
+  tools: # ruff and mypy (pyproject.toml) are the project's checks; these would disagree
+    pylint:
+      enabled: false
+    flake8:
+      enabled: false
+    markdownlint:
+      enabled: false
+    languagetool:
+      enabled: false
+    yamllint:
+      enabled: false
+
+knowledge_base: # never draw on other repositories of the account
+  learnings:
+    scope: local
+  pull_requests:
+    scope: local
+  issues:
+    scope: local
