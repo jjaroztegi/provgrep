@@ -27,14 +27,14 @@ none. Files where both sides agree were not read. The audit, with its reasons an
 
 Two suites of intents in `truth/intents/`, each a question and the calls the code of a right
 answer contains; a result is a hit when its code has them all. Over the full index (built at
-c56ff08 from corpus/github.json, sha256 526db429d94b; searched at 9637703):
+c56ff08 from corpus/github.json, sha256 526db429d94b; searched at c33030e):
 
 | suite | licenses | intents | a hit first | a hit in the top 10 | MRR@10 | answerable from the index |
 |---|---|---:|---:|---:|---:|---:|
-| APIs: common tasks in 8 languages | any | 89 | 31 | 70 | 0.48 | 89 |
-| | permissive | 89 | 28 | 70 | 0.46 | 89 |
+| APIs: common tasks in 8 languages | any | 89 | 33 | 70 | 0.49 | 89 |
+| | permissive | 89 | 30 | 71 | 0.47 | 89 |
 | XRender: what a live session needed | any | 8 | 0 | 0 | 0.00 | 6 |
-| | permissive | 8 | 0 | 3 | 0.08 | 5 |
+| | permissive | 8 | 0 | 3 | 0.06 | 5 |
 
 The XRender questions are the ones a programmer had while writing an XRender program in C from
 scratch, live ([Tsoding Daily](https://www.youtube.com/watch?v=auzZCp45dJc)). The index answers 6
@@ -43,8 +43,8 @@ near the top. Some answers exist only under copyleft: the only three functions t
 rectangle with `XRenderFillRectangle` and an `XRenderColor` are in TigerVNC (GPL-2.0-or-later) and
 the OpenJDK (GPL-2.0 with the Classpath exception), so a project under MIT gets nothing to copy
 for that question, and is told so. Search is lexical (BM25 over identifiers split into words and
-kept whole); on the 8-core machine that built the index, a search takes 118 ms at the median and
-409 ms at the 95th percentile.
+kept whole), over 8 shards searched at once; on the 8-core machine that built the index, a search
+takes 20 ms at the median and 49 ms at the 95th percentile.
 
 ## The same code under different licenses
 

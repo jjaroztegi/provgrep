@@ -8,7 +8,7 @@ The build writes into one directory, in steps:
 2. records.sqlite: repositories, files, snippets (one per distinct normalized code) and their
    locations, in corpus order. The location shown for a snippet is its first copy outside a
    vendored directory, in the most-starred repository: the same corpus gives the same index.
-3. lexical/: the search index over the snippets (search.py).
+3. lexical/: the search index over the snippets, in shards searched at once (search.py).
 4. manifest.json: what was built from what, with which versions, and what was left out.
 """
 
@@ -100,7 +100,7 @@ def build(corpus: Path, out: Path, jobs: int, limit: int | None = None) -> dict[
 
     records = out / "records.sqlite"
     counts = _records(repos, staging, records)
-    search.write_lexical(records, out / "lexical")
+    search.write_lexical(records, out / "lexical", jobs)
 
     manifest = {
         "corpus": {

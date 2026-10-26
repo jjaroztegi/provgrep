@@ -6,6 +6,11 @@ split into words (`parseRtpHeader` and `parse_rtp_header` give parse, rtp, heade
 identifier is kept whole as well, then English stemming; BM25 ranks, with a weight per field.
 Filters (language, licenses, level) are part of the query, so they act before ranking.
 
+tantivy-py scores every document a query matches (it collects without block-max pruning), so the
+time a search takes is the number of documents it scores. Two things keep that down: a document
+must have one of the query's rarer terms (common ones only add to the score of those), and the
+index is cut into shards searched at once, each a sample of the whole so their scores compare.
+
 Code is returned with its license, evidence and notices, and not at all when no license was
 found: that rule is applied here, once, for every interface.
 """
@@ -16,6 +21,7 @@ import re
 import shutil
 import sqlite3
 from collections.abc import Sequence
+from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -32,6 +38,21 @@ MAX_ALLOWED = 8
 MAX_QUERY = 1000  # characters: a question, not a file
 MAX_REQUIRED = 8
 ID_LENGTH = 16  # hex digits of a snippet's hash that name it
+# A term in more than this share of a field's documents does not make a document match on its
+# own, as in Lucene's common terms query. At 0.01 the intent suites rank as well as with no cut,
+# and a search scores a third of the documents.
+COMMON = 0.01
+SHARD_SIZE = 1_000_000  # snippets per lexical shard, up to MAX_SHARDS
+MAX_SHARDS = 8
+CHUNK = 1000  # consecutive snippets (a few repositories) that go to the same shard
+# en_stem as tantivy defines it: the tokens the text fields hold.
+_ANALYZER = (
+    tantivy.TextAnalyzerBuilder(tantivy.Tokenizer.simple())
+    .filter(tantivy.Filter.remove_long(40))
+    .filter(tantivy.Filter.lowercase())
+    .filter(tantivy.Filter.stemmer("english"))
+    .build()
+)
 _WORD = re.compile(r"\w+")
 _ASCII_PARTS = re.compile(r"[A-Z]+(?=[A-Z][a-z])|[A-Z]?[a-z]+|[A-Z]+|[0-9]+")
 _STOP = frozenset(
@@ -213,9 +234,11 @@ class Index:
             uri=True,
             check_same_thread=False,
         )
-        self._lexical = tantivy.Index.open(str(path / "lexical"))
-        self._schema = self._lexical.schema
-        self._searcher = self._lexical.searcher()
+        shards = sorted((path / "lexical").iterdir(), key=lambda p: int(p.name))
+        self._searchers = [tantivy.Index.open(str(shard)).searcher() for shard in shards]
+        self._schema = _schema()
+        self._documents = sum(searcher.num_docs for searcher in self._searchers)
+        self._pool = ThreadPoolExecutor(len(self._searchers))  # tantivy-py releases the GIL
 
     def search(
         self,
@@ -236,10 +259,9 @@ class Index:
         if len(query) > MAX_QUERY or len(require) > MAX_REQUIRED:
             raise ValueError(f"a query has at most {MAX_QUERY} characters, {MAX_REQUIRED} required")
         languages = [language.lower() for language in languages]
-        words = query_terms(query)
         clauses = []
-        if words:
-            text = self._lexical.parse_query(" ".join(words), list(FIELDS), FIELDS)
+        text = self._text(query_terms(query))
+        if text is not None:
             clauses.append((Occur.Must, text))
         filters = []
         for identifier in require:
@@ -247,7 +269,7 @@ class Index:
             if not whole:
                 raise ValueError(f"not an identifier: {identifier!r}")
             filters.append(self._any("identifiers", whole))
-        if not words and not filters:
+        if text is None and not filters:
             return Page(0, [])
         if languages:
             filters.append(self._any("language", languages))
@@ -266,10 +288,15 @@ class Index:
         if levels:
             filters.append(self._any("level", levels))
         clauses += [(Occur.Must, Query.const_score_query(f, 0.0)) for f in filters]
-        found = self._searcher.search(Query.boolean_query(clauses), limit, True, offset=offset)
-        ranked = [(score, self._searcher.doc(address)["id"][0]) for score, address in found.hits]
+        combined = Query.boolean_query(clauses)
+        found = list(self._pool.map(lambda s: s.search(combined, offset + limit), self._searchers))
+        hits = sorted(
+            ((score, n, address) for n, shard in enumerate(found) for score, address in shard.hits),
+            key=lambda hit: -hit[0],
+        )[offset : offset + limit]
+        ranked = [(score, self._searchers[n].doc(address)["id"][0]) for score, n, address in hits]
         rows = self._rows([snippet for _, snippet in ranked])
-        total = found.count  # type: ignore[attr-defined]  # missing from tantivy's stub
+        total = sum(shard.count for shard in found)
         return Page(total, [_result(rows[snippet], score) for score, snippet in ranked])
 
     def snippet(self, id: str) -> Snippet | None:
@@ -287,6 +314,27 @@ class Index:
             (row[0],),
         ).fetchall()
         return Snippet(_result(self._rows([row[0]])[row[0]], 0.0), [_location(c) for c in copies])
+
+    def _text(self, words: list[str]) -> Query | None:
+        """The words in every field, weighted; a document must have one of the rarer ones (see
+        COMMON), unless they are all common."""
+        rare: list[tuple[Occur, Query]] = []
+        common: list[tuple[Occur, Query]] = []
+        for word in words:
+            term, _, weight = word.partition("^")
+            for token in _ANALYZER.analyze(term):
+                for field, boost in FIELDS.items():
+                    documents = sum(s.doc_freq(field, token) for s in self._searchers)
+                    if not documents:
+                        continue
+                    found = Query.term_query(self._schema, field, token, index_option="freq")
+                    clause = (Occur.Should, Query.boost_query(found, boost * float(weight or 1)))
+                    (common if documents > COMMON * self._documents else rare).append(clause)
+        if not rare or not common:
+            return Query.boolean_query(rare or common) if rare or common else None
+        return Query.boolean_query(
+            [(Occur.Must, Query.boolean_query(rare)), (Occur.Should, Query.boolean_query(common))]
+        )
 
     def _any(self, field: str, values: Sequence[str]) -> Query:
         return Query.boolean_query(
@@ -346,39 +394,58 @@ def _result(row: tuple[Any, ...], score: float) -> Result:
     return Result(hash_[:ID_LENGTH], score, language, shown, location, copies, repos, licenses)
 
 
-def write_lexical(records: Path, out: Path) -> None:
-    """Write the lexical index of every snippet in records.sqlite into out, replacing it whole."""
+def write_lexical(records: Path, out: Path, jobs: int = 1) -> None:
+    """Write the lexical index of every snippet in records.sqlite into out, replacing it whole:
+    a shard per SHARD_SIZE snippets, up to MAX_SHARDS, in parallel. The shards take CHUNK
+    snippets in turn, so that each holds a sample of every language and license, and the BM25
+    statistics each scores with are close to the whole index's."""
     part = out.with_name(out.name + ".part")
     shutil.rmtree(part, ignore_errors=True)
     part.mkdir(parents=True)
-    index = tantivy.Index(_schema(), path=str(part))
-    writer = index.writer(heap_size=1 << 30)
     db = sqlite3.connect(records)
-    rows = db.execute(
-        "SELECT s.id, s.language, s.code, s.doc, l.symbol, r.name, f.path, f.permissive,"
-        " f.level, f.choices FROM snippets s JOIN locations l ON l.id = s.location"
-        " JOIN files f ON f.id = l.file JOIN repos r ON r.id = f.repo ORDER BY s.id"
-    )
-    for snippet, language, code, doc_text, symbol, repo, path, permissive, level, choices in rows:
-        doc = tantivy.Document()
-        doc.add_unsigned("id", snippet)
-        doc.add_text("symbol", " ".join(terms(symbol)))
-        doc.add_text("doc", " ".join(terms(doc_text)))
-        doc.add_text("path", " ".join(terms(f"{repo}/{path}")))
-        doc.add_text("code", " ".join(terms(code)))
-        doc.add_text("language", language)
-        doc.add_unsigned("permissive", permissive)
-        doc.add_text("level", level)
-        for identifier in identifiers(code):
-            doc.add_text("identifiers", identifier)
-        for choice in json.loads(choices):
-            doc.add_text("license", " + ".join(sorted(spdx.lower() for spdx in choice)))
-        writer.add_document(doc)
+    last = db.execute("SELECT max(id) FROM snippets").fetchone()[0] or 0
+    db.close()
+    shards = max(1, min(MAX_SHARDS, -(-last // SHARD_SIZE)))
+    with ProcessPoolExecutor(min(jobs, shards)) as pool:
+        futures = [
+            pool.submit(_write_shard, records, part, n, shards, last, CHUNK) for n in range(shards)
+        ]
+        for future in futures:
+            future.result()
+    shutil.rmtree(out, ignore_errors=True)
+    part.replace(out)
+
+
+def _write_shard(records: Path, out: Path, n: int, shards: int, last: int, chunk: int) -> None:
+    (out / str(n)).mkdir()
+    writer = tantivy.Index(_schema(), path=str(out / str(n))).writer(heap_size=1 << 29)
+    db = sqlite3.connect(records)
+    for start in range(1 + n * chunk, last + 1, shards * chunk):
+        rows = db.execute(
+            "SELECT s.id, s.language, s.code, s.doc, l.symbol, r.name, f.path, f.permissive,"
+            " f.level, f.choices FROM snippets s JOIN locations l ON l.id = s.location"
+            " JOIN files f ON f.id = l.file JOIN repos r ON r.id = f.repo"
+            " WHERE s.id BETWEEN ? AND ?",
+            (start, start + chunk - 1),
+        )
+        for snippet, language, code, text, symbol, repo, path, permissive, level, choices in rows:
+            doc = tantivy.Document()
+            doc.add_unsigned("id", snippet)
+            doc.add_text("symbol", " ".join(terms(symbol)))
+            doc.add_text("doc", " ".join(terms(text)))
+            doc.add_text("path", " ".join(terms(f"{repo}/{path}")))
+            doc.add_text("code", " ".join(terms(code)))
+            doc.add_text("language", language)
+            doc.add_unsigned("permissive", permissive)
+            doc.add_text("level", level)
+            for identifier in identifiers(code):
+                doc.add_text("identifiers", identifier)
+            for choice in json.loads(choices):
+                doc.add_text("license", " + ".join(sorted(spdx.lower() for spdx in choice)))
+            writer.add_document(doc)
     writer.commit()
     writer.wait_merging_threads()
     db.close()
-    shutil.rmtree(out, ignore_errors=True)
-    part.replace(out)
 
 
 def _schema() -> tantivy.Schema:
