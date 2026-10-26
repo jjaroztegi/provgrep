@@ -40,6 +40,7 @@ def test_embeddings_order_results_and_outlive_a_rebuild(
     (first, *_) = ordered.search("xrender fill rectangle color", licenses="any").results
     assert first.location.path in ("src/fill.c", "fill_copy.c")
     assert 0 < first.score <= 1  # a cosine, not BM25
+    del ordered  # it maps vectors.npy, which Windows would not let the next run replace
 
     manifest.write_text(json.dumps({"built": "second"}))  # a rebuild of the same code
     with pytest.raises(ValueError, match="run provgrep embed"):

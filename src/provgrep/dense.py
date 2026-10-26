@@ -172,8 +172,9 @@ def embed(index: Path, gpu: bool) -> dict[str, Any]:
             keys[snippet] = int(hash_[:16], 16)
         if (out / "vectors.npy").exists():
             _reuse(out, vectors, keys, done)
-        for array in (vectors, keys, done):
-            array.flush()
+        vectors.flush()  # not in a loop, whose variable would keep a map open after `del`
+        keys.flush()
+        done.flush()
         run = {"started": time.time(), "reused": int(np.count_nonzero(done))}
         begun.write_text(json.dumps(run), encoding="utf-8")
     run = json.loads(begun.read_text(encoding="utf-8"))
