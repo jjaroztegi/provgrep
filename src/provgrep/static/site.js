@@ -11,6 +11,7 @@ function params() {
     if (!value || (key === "license" && value === "permissive")) query.delete(key);
   }
   if (query.get("license") !== "allowed") query.delete("allowed");
+  if (query.get("license") !== "compatible") query.delete("project");
   return query;
 }
 

@@ -12,7 +12,8 @@ must have one of the query's rarer terms (common ones only add to the score of t
 index is cut into shards searched at once, each a sample of the whole so their scores compare.
 
 Code is returned with its license, evidence and notices, and not at all when no license was
-found: that rule is applied here, once, for every interface.
+found: that rule is applied here, once, for every interface. Asked for a project's license, a
+search keeps the code OSADL's matrix says may go into it, and says why (compatibility.py).
 """
 
 import itertools
@@ -29,6 +30,9 @@ from urllib.parse import quote
 
 import tantivy
 from tantivy import Occur, Query
+
+from provgrep import compatibility
+from provgrep.compatibility import Verdict
 
 FIELDS = {"symbol": 2.0, "doc": 2.0, "path": 1.0, "code": 1.0}
 IDENTIFIER = 3.0
@@ -122,8 +126,11 @@ def terms(text: str) -> list[str]:
     return out
 
 
-def licenses_of(text: str) -> str | list[str]:
-    """The licenses filter as people write it: "permissive", "any", or SPDX ids, comma-separated."""
+def licenses_of(text: str | None, project: str | None = None) -> str | list[str]:
+    """The licenses filter as people write it: "permissive", "any", or SPDX ids, comma-separated.
+    Unsaid, it is permissive, or any when the project's license already filters."""
+    if not text:
+        return "any" if project else "permissive"
     word = text.strip().lower()
     return word if word in ("permissive", "any") else text.split(",")
 
@@ -177,6 +184,7 @@ def _split(word: str) -> list[str]:
 @dataclass(frozen=True)
 class License:
     expression: str | None  # SPDX; None when no license was found
+    choices: list[list[str]]  # the ways to comply with it, each the licenses it takes together
     permissive: bool  # whether a permissive filter lets it through (licenses.permissive)
     shareable: bool  # whether it lets the code be shown (licenses.shareable)
     level: str
@@ -209,6 +217,7 @@ class Result:
     copies: int  # locations of the same code in the corpus
     repos: int
     licenses: int  # distinct licenses among the copies
+    compatibility: Verdict | None = None  # with the project's license the search was asked for
 
 
 @dataclass(frozen=True)
@@ -239,6 +248,7 @@ class Index:
         self._schema = _schema()
         self._documents = sum(searcher.num_docs for searcher in self._searchers)
         self._pool = ThreadPoolExecutor(len(self._searchers))  # tantivy-py releases the GIL
+        self._compatible: dict[str, list[str]] = {}  # license terms, by project license
 
     def search(
         self,
@@ -246,6 +256,7 @@ class Index:
         *,
         languages: Sequence[str] = (),
         licenses: str | Sequence[str] = "permissive",
+        project: str | None = None,
         levels: Sequence[str] = (),
         require: Sequence[str] = (),
         limit: int = 10,
@@ -253,12 +264,16 @@ class Index:
     ) -> Page:
         """Snippets for a query, best first. licenses: "permissive", "any", or the SPDX ids
         allowed (a snippet passes if one way to comply with its license needs only those).
-        require: identifiers the code must contain, whole; `A|B` for either."""
+        project: the license of the project the code is for; only code OSADL's matrix says may
+        go into it passes, each result with the verdict. require: identifiers the code must
+        contain, whole; `A|B` for either."""
         if limit < 1 or offset < 0:
             raise ValueError("limit must be at least 1 and offset at least 0")
         if len(query) > MAX_QUERY or len(require) > MAX_REQUIRED:
             raise ValueError(f"a query has at most {MAX_QUERY} characters, {MAX_REQUIRED} required")
         languages = [language.lower() for language in languages]
+        if project is not None:
+            project = compatibility.project(project)
         clauses = []
         text = self._text(query_terms(query))
         if text is not None:
@@ -285,6 +300,9 @@ class Index:
                 for c in itertools.combinations(allowed, n)
             ]
             filters.append(self._any("license", combinations))
+        if project is not None:
+            fits = self._fits(project)
+            filters.append(Query.term_set_query(self._schema, "license", fits))
         if levels:
             filters.append(self._any("level", levels))
         clauses += [(Occur.Must, Query.const_score_query(f, 0.0)) for f in filters]
@@ -297,7 +315,7 @@ class Index:
         ranked = [(score, self._searchers[n].doc(address)["id"][0]) for score, n, address in hits]
         rows = self._rows([snippet for _, snippet in ranked])
         total = sum(shard.count for shard in found)
-        return Page(total, [_result(rows[snippet], score) for score, snippet in ranked])
+        return Page(total, [_result(rows[snippet], score, project) for score, snippet in ranked])
 
     def snippet(self, id: str) -> Snippet | None:
         """A snippet by its id, with every location of its code."""
@@ -336,6 +354,18 @@ class Index:
             [(Occur.Must, Query.boolean_query(rare)), (Occur.Should, Query.boolean_query(common))]
         )
 
+    def _fits(self, project: str) -> list[str]:
+        """The license terms in the index (a way to comply, its SPDX ids lower-cased, joined by
+        " + ") whose verdict for the project is yes."""
+        if project not in self._compatible:
+            indexed = {t for s in self._searchers for t, _ in s.terms_with_prefix("license", "")}
+            self._compatible[project] = sorted(
+                term
+                for term in indexed
+                if compatibility.verdict(project, [term.split(" + ")]).answer == "yes"
+            )
+        return self._compatible[project]
+
     def _any(self, field: str, values: Sequence[str]) -> Query:
         return Query.boolean_query(
             [(Occur.Should, Query.term_query(self._schema, field, v)) for v in values]
@@ -356,14 +386,14 @@ class Index:
 
 _LOCATION = (
     "r.name, r.commit_id, r.stars, f.path, l.start, l.end, l.symbol, f.vendored,"
-    " f.license, f.permissive, f.shareable, f.level, f.conflict, f.evidence, f.notices"
+    " f.license, f.choices, f.permissive, f.shareable, f.level, f.conflict, f.evidence, f.notices"
 )
-_LOCATION_COLUMNS = 15
+_LOCATION_COLUMNS = 16
 
 
 def _location(row: tuple[Any, ...]) -> Location:
     repo, commit, stars, path, start, end, symbol, vendored = row[:8]
-    expression, permissive, shareable, level, conflict, evidence, notices = row[8:_LOCATION_COLUMNS]
+    expression, choices, permissive, shareable, level, conflict, evidence, notices = row[8:16]
     return Location(
         repo,
         commit,
@@ -376,6 +406,7 @@ def _location(row: tuple[Any, ...]) -> Location:
         f"https://github.com/{repo}/blob/{commit}/{quote(path)}#L{start}-L{end}",
         License(
             expression,
+            json.loads(choices),
             bool(permissive),
             bool(shareable),
             level,
@@ -386,12 +417,15 @@ def _location(row: tuple[Any, ...]) -> Location:
     )
 
 
-def _result(row: tuple[Any, ...], score: float) -> Result:
+def _result(row: tuple[Any, ...], score: float, project: str | None = None) -> Result:
     location = _location(row[:_LOCATION_COLUMNS])
     hash_, language, code, copies, repos, licenses = row[_LOCATION_COLUMNS + 1 :]
     # No license that lets it be shared (none found means all rights reserved): linked, not shown.
     shown = code if location.license.shareable else None
-    return Result(hash_[:ID_LENGTH], score, language, shown, location, copies, repos, licenses)
+    fits = compatibility.verdict(project, location.license.choices) if project else None
+    return Result(
+        hash_[:ID_LENGTH], score, language, shown, location, copies, repos, licenses, fits
+    )
 
 
 def write_lexical(records: Path, out: Path, jobs: int = 1) -> None:

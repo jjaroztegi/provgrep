@@ -22,7 +22,8 @@ evidence for that license (level A: the file's own header; B: license file and m
 C: one source; X: none), and its copyright notices. Name the APIs you expect the code to use: an
 identifier in the query weighs more than a word, and `require` asks for it outright. Pass the
 licenses your project can take. Code no license lets be shared comes without its code, as a link.
-Licenses are as detected, not legal advice. Before pasting code, take `attribution`."""
+Give `project` your project's license to keep only code OSADL's compatibility matrix says may go
+into it. Licenses are as detected, not legal advice. Before pasting code, take `attribution`."""
 _READ_ONLY = ToolAnnotations(read_only_hint=True, open_world_hint=False)
 
 
@@ -37,9 +38,20 @@ def server(index: Index) -> MCPServer:
             Field(description="c, cpp, go, java, javascript, python, rust or typescript"),
         ] = [],  # noqa: B006 - the SDK copies defaults; this one is never mutated
         licenses: Annotated[
-            str,
-            Field(description='"permissive", "any", or the SPDX ids allowed, comma-separated'),
-        ] = "permissive",
+            str | None,
+            Field(
+                description='"permissive" (the default without project), "any", or the SPDX ids'
+                " allowed, comma-separated"
+            ),
+        ] = None,
+        project: Annotated[
+            str | None,
+            Field(
+                description="Your project's license, an SPDX id (MIT, Apache-2.0,"
+                " GPL-3.0-or-later...): only code OSADL's license compatibility matrix says may"
+                " go into it"
+            ),
+        ] = None,
         require: Annotated[
             list[str], Field(description="Identifiers the code must contain; A|B for either")
         ] = [],  # noqa: B006
@@ -52,7 +64,8 @@ def server(index: Index) -> MCPServer:
             return index.search(
                 query,
                 languages=languages,
-                licenses=licenses_of(licenses),
+                licenses=licenses_of(licenses, project),
+                project=project,
                 require=require,
                 limit=limit,
             )

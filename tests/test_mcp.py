@@ -17,6 +17,10 @@ async def test_tools(index: search.Index) -> None:
         assert result["location"]["license"]["expression"] == "MIT"
         assert "XRenderCreatePicture" in result["code"]
 
+        fits = await client.call_tool("search", {"query": "fill", "project": "GPL-3.0-or-later"})
+        (gpl,) = fits.structured_content["results"]  # licenses: any, once a project is given
+        assert gpl["compatibility"]["answer"] == "yes"
+
         copies = await client.call_tool("snippet", {"id": result["id"]})
         assert len(copies.structured_content["copies"]) == 2
 

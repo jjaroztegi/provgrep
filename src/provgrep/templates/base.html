@@ -32,11 +32,21 @@
           <option value="permissive" {% if query.license == "permissive" %}selected{% endif %}>Permissive</option>
           <option value="any" {% if query.license == "any" %}selected{% endif %}>Any</option>
           <option value="allowed" {% if query.license == "allowed" %}selected{% endif %}>Only these…</option>
+          <option value="compatible" {% if query.license == "compatible" %}selected{% endif %}>Fits my project…</option>
         </select>
       </label>
       <label class="allowed">
         <span>SPDX ids</span>
         <input type="text" name="allowed" value="{{ query.allowed or '' }}" placeholder="MIT, BSD-3-Clause, GPL-2.0-or-later" spellcheck="false">
+      </label>
+      <label class="project">
+        <span>Project license</span>
+        <select name="project">
+          {% if query.project and query.project not in projects %}<option selected>{{ query.project }}</option>{% endif %}
+          {% for spdx in projects %}
+          <option {% if query.project == spdx %}selected{% endif %}>{{ spdx }}</option>
+          {% endfor %}
+        </select>
       </label>
       <button type="submit">Search</button>
     </div>
@@ -47,6 +57,7 @@
 </main>
 <footer class="colophon">
   <p>Licenses are as detected, with their evidence. They are not legal advice.</p>
+  <p>Which licenses fit a project: the <a href="{{ osadl }}">OSADL License Compatibility Matrix</a>, by the Open Source Automation Development Lab (OSADL) eG, CC-BY-4.0.</p>
   <p><a href="https://github.com/jjaroztegi/provgrep">Source and how it is measured</a></p>
 </footer>
 </body>

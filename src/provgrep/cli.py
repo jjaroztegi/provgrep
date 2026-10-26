@@ -68,8 +68,12 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--language", action="append", default=[], help="repeat for several")
     p.add_argument(
         "--license",
-        default="permissive",
-        help='"permissive" (default), "any", or the SPDX ids allowed, comma-separated',
+        help='"permissive" (default without --project), "any", or SPDX ids, comma-separated',
+    )
+    p.add_argument(
+        "--project",
+        metavar="SPDX",
+        help="your project's license: only code OSADL's matrix says may go into it",
     )
     p.add_argument("--level", action="append", default=[], help="A, B, C or X; repeat")
     p.add_argument(
@@ -125,7 +129,8 @@ def main(argv: list[str] | None = None) -> int:
         page = Index(args.index).search(
             args.query,
             languages=args.language,
-            licenses=licenses_of(args.license),
+            licenses=licenses_of(args.license, args.project),
+            project=args.project,
             levels=args.level,
             require=args.require,
             limit=args.limit,
@@ -176,6 +181,9 @@ def _print_page(page: Any) -> None:
         print(f"\n{r.score:6.2f}  {loc.repo}  {loc.path}:{loc.start}-{loc.end}  {loc.symbol}")
         copies = f", {r.copies} copies in {r.repos} repositories" if r.copies > 1 else ""
         print(f"        {lic.expression or 'no license found'} (level {lic.level}){copies}")
+        if r.compatibility:
+            fits = r.compatibility
+            print(f"        {fits.answer} into {fits.project}: {' '.join(fits.reasons)}")
         for notice in lic.notices[:3]:
             print(f"        {notice}")
         print(f"        {loc.url}")

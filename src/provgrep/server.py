@@ -3,7 +3,8 @@
     GET /?q=...&language=c&license=permissive&page=1   the search page (partial=1: results only)
     GET /s/{id}                                         a snippet with every copy of its code
     GET /api/search?q=...&language=c&language=cpp&license=permissive&page=1
-        license: "permissive" (default), "any", or SPDX ids, comma-separated
+        license: "permissive" (default), "any", "allowed" (allowed=SPDX ids, comma-separated)
+        or "compatible" (project=SPDX id: code OSADL's matrix says may go into that project)
         level: A, B, C or X, repeated; require: an identifier the code must contain, repeated
     GET /api/snippets/{id}
     POST /mcp                                           the same search as MCP tools
@@ -30,6 +31,7 @@ from starlette.routing import Mount, Route
 from starlette.staticfiles import StaticFiles
 from starlette.templating import Jinja2Templates
 
+from provgrep import compatibility
 from provgrep.attribution import reuse_snippet
 from provgrep.mcp_server import server as mcp_server
 from provgrep.search import Index, Page, Result, licenses_of, query_terms, terms
@@ -103,12 +105,21 @@ def app(index: Index, host: str = "127.0.0.1", public: str | None = None) -> Sta
     reached at. MCP refuses requests addressed to any other host unless it listens on all of them
     (DNS rebinding protection)."""
     templates = Jinja2Templates(directory=_HERE / "templates")
+    templates.env.globals.update(projects=compatibility.PROJECTS, osadl=compatibility.SOURCE)
 
     def search(params: Any) -> tuple[dict[str, Any], Page]:
         """The query a request asks for, as the page shows it, and its page of results."""
         license = params.get("license", "permissive")
         allowed = params.get("allowed", "")
-        licenses = allowed.split(",") if license == "allowed" else licenses_of(license)
+        project = params.get("project", "") if license == "compatible" else ""
+        if license == "allowed":
+            licenses: str | list[str] = allowed.split(",")
+        elif license == "compatible":
+            if not project:
+                raise ValueError("name the license of your project")
+            licenses = "any"
+        else:
+            licenses = licenses_of(license)
         number = params.get("page", "1")
         if not number.isdigit() or not 1 <= int(number) <= MAX_PAGE:
             raise ValueError(f"page goes from 1 to {MAX_PAGE}")
@@ -118,12 +129,14 @@ def app(index: Index, host: str = "127.0.0.1", public: str | None = None) -> Sta
             "language": params.get("language", ""),
             "license": license,
             "allowed": allowed,
+            "project": project,
             "page": page,
         }
         found = index.search(
             query["q"],
             languages=[v for v in params.getlist("language") if v],  # "" is the form's "all"
             licenses=licenses,
+            project=project or None,
             levels=[v for v in params.getlist("level") if v],
             require=[v for v in params.getlist("require") if v],
             limit=PAGE_SIZE,
