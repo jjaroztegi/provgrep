@@ -47,3 +47,31 @@ def test_embeddings_order_results_and_outlive_a_rebuild(
     again = dense.embed(index.path, gpu=False)
     assert (again["new"], again["index_built"]) == (0, "second")
     assert (np.load(index.path / "dense" / "vectors.npy") == vectors).all()
+
+
+class Dies(Words):
+    """Words, but the second batch kills the run, as the GPU's driver does now and then."""
+
+    calls = 0
+
+    def __call__(self, texts: list[str]) -> Any:
+        Dies.calls += 1
+        if Dies.calls == 2:
+            raise RuntimeError("illegal instruction")
+        return super().__call__(texts)
+
+
+def test_a_resumed_run_counts_all_its_work(
+    index: search.Index, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(dense, "Encoder", Dies)
+    monkeypatch.setattr(dense, "PART", 2)  # snippets 1-2, then 3-4
+    (index.path / "manifest.json").write_text(json.dumps({"built": "first"}))
+    with pytest.raises(RuntimeError):
+        dense.embed(index.path, gpu=False)
+    assert dense.embed(index.path, gpu=False)["new"] == 4  # not the 2 of the last start
+    assert sorted(p.name for p in (index.path / "dense").iterdir()) == [
+        "dense.json",
+        "keys.npy",
+        "vectors.npy",
+    ]

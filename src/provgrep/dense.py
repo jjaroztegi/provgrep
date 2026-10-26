@@ -158,7 +158,10 @@ def embed(index: Path, gpu: bool) -> dict[str, Any]:
     db = sqlite3.connect(f"{(index / 'records.sqlite').resolve().as_uri()}?mode=ro", uri=True)
     rows = (db.execute("SELECT max(id) FROM snippets").fetchone()[0] or 0) + 1
     names = {name: out / f"{name}.part.npy" for name in ("vectors", "keys", "done")}
-    if names["done"].exists():  # an interrupted run of this build
+    # Written once the parts are ready: when the run began and how many rows it took from the
+    # last one, for a run interrupted (the GPU's driver kills one every few hours) and resumed.
+    begun = out / "run.part.json"
+    if begun.exists():
         vectors, keys, done = (np.load(path, mmap_mode="r+") for path in names.values())
     else:
         shape = (rows, MODEL.dimensions)
@@ -171,6 +174,9 @@ def embed(index: Path, gpu: bool) -> dict[str, Any]:
             _reuse(out, vectors, keys, done)
         for array in (vectors, keys, done):
             array.flush()
+        run = {"started": time.time(), "reused": int(np.count_nonzero(done))}
+        begun.write_text(json.dumps(run), encoding="utf-8")
+    run = json.loads(begun.read_text(encoding="utf-8"))
     encoder = Encoder(gpu)
     new = 0
     for start in range(1, rows, PART):
@@ -192,18 +198,20 @@ def embed(index: Path, gpu: bool) -> dict[str, Any]:
         print(
             f"[{min(start + PART, rows) - 1}/{rows - 1}] {new} embedded, {rate:.0f}/s", flush=True
         )
+    embedded = int(np.count_nonzero(done)) - run["reused"]
     del vectors, keys, done  # close the maps before their files are renamed
     names["vectors"].replace(out / "vectors.npy")
     names["keys"].replace(out / "keys.npy")
     names["done"].unlink()
+    begun.unlink()
     about = {
         "index_built": built,
         "model": {"repo": MODEL.repo, "revision": MODEL.revision},
         "embedded": datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "commit": source_commit(),
         "snippets": rows - 1,
-        "new": new,
-        "seconds": round(time.monotonic() - started),
+        "new": embedded,
+        "seconds": round(time.time() - run["started"]),  # with the time it was interrupted
     }
     (out / "dense.json").write_text(json.dumps(about, indent=1) + "\n", encoding="utf-8")
     return about
