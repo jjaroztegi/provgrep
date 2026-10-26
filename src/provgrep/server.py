@@ -19,9 +19,10 @@ from contextlib import asynccontextmanager
 from dataclasses import asdict
 from pathlib import Path
 from typing import Any
-from urllib.parse import urlencode
+from urllib.parse import urlencode, urlsplit
 
 from markupsafe import Markup, escape
+from mcp.server.transport_security import TransportSecuritySettings
 from starlette.applications import Starlette
 from starlette.requests import Request
 from starlette.responses import JSONResponse, Response
@@ -97,9 +98,10 @@ _UNMARKED = frozenset(
 )
 
 
-def app(index: Index, host: str = "127.0.0.1") -> Starlette:
-    """The site over an index. host is where it listens: MCP refuses requests addressed to other
-    hosts unless it listens on all of them (DNS rebinding protection)."""
+def app(index: Index, host: str = "127.0.0.1", public: str | None = None) -> Starlette:
+    """The site over an index. host is where it listens; public, the URL a proxy in front of it is
+    reached at. MCP refuses requests addressed to any other host unless it listens on all of them
+    (DNS rebinding protection)."""
     templates = Jinja2Templates(directory=_HERE / "templates")
 
     def search(params: Any) -> tuple[dict[str, Any], Page]:
@@ -181,9 +183,25 @@ def app(index: Index, host: str = "127.0.0.1") -> Starlette:
         return JSONResponse(asdict(found))
 
     mcp = mcp_server(index)
+    security = None  # the SDK's: localhost only when listening there, else no check
+    if public:
+        url = urlsplit(public)
+        security = TransportSecuritySettings(
+            allowed_hosts=["127.0.0.1:*", "localhost:*", "[::1]:*", url.netloc],
+            allowed_origins=[
+                "http://127.0.0.1:*",
+                "http://localhost:*",
+                "http://[::1]:*",
+                f"{url.scheme}://{url.netloc}",
+            ],
+        )
     # Stateless and plain JSON: any replica answers any request, as it does pages.
     mcp_app = mcp.streamable_http_app(
-        streamable_http_path="/", stateless_http=True, json_response=True, host=host
+        streamable_http_path="/",
+        stateless_http=True,
+        json_response=True,
+        transport_security=security,
+        host=host,
     )
 
     def no_stream(_: Request) -> Response:
@@ -253,7 +271,7 @@ def _next(request: Request, found: Page | None, page: int) -> str | None:
     return "/?" + urlencode([*kept, ("page", str(page + 1))])
 
 
-def serve(index_path: Path, host: str, port: int) -> None:
+def serve(index_path: Path, host: str, port: int, public: str | None) -> None:
     import uvicorn
 
-    uvicorn.run(app(Index(index_path), host), host=host, port=port)
+    uvicorn.run(app(Index(index_path), host, public), host=host, port=port)
