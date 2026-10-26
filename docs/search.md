@@ -81,8 +81,9 @@ a function with none of the query's terms is not a result, however close its mea
 result's score is then the cosine of its code with the query, not BM25. Only the first 512
 tokens of a long function are embedded.
 
-Embedding the 21 million functions of the full index takes about two days on one 16 GB NVIDIA
-GPU (an RTX A4000), with the CUDA build of onnxruntime in place of the CPU one:
+Embedding the 21 million functions of the full index takes about 15 hours on one 16 GB NVIDIA
+GPU (an RTX A4000, 320 to 480 functions a second), with the CUDA build of onnxruntime in place of
+the CPU one:
 
 ```sh
 uv sync
@@ -90,6 +91,12 @@ uv pip uninstall onnxruntime
 uv pip install "onnxruntime-gpu[cuda,cudnn]==1.31.0"
 uv run --no-sync provgrep embed --gpu  # stopped, it goes on where it was
 ```
+
+Under WSL, NVIDIA's driver killed the run six times in those hours, with an illegal instruction
+or a segmentation fault while copying a batch's vectors off the GPU. What it saved before a crash
+is sound (a CPU embedding of 1,600 of the functions, 600 of them from right after a crash, agrees
+with the stored vectors to a cosine of 0.998, what storing them as int8 costs), so run it again
+until it exits with 0.
 
 The embeddings belong to one build of the index: after a rebuild, the index does not open until
 `provgrep embed` has run again. That run takes the vectors of the code it already had, by the
