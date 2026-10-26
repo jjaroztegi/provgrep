@@ -6,6 +6,9 @@ split into words (`parseRtpHeader` and `parse_rtp_header` give parse, rtp, heade
 identifier is kept whole as well, then English stemming; BM25 ranks, with a weight per field.
 Filters (language, licenses, level) are part of the query, so they act before ranking.
 
+With embeddings of the code (dense.py), the first RERANK results are then ordered by meaning:
+how close each one's code is to the query.
+
 tantivy-py scores every document a query matches (it collects without block-max pruning), so the
 time a search takes is the number of documents it scores. Two things keep that down: a document
 must have one of the query's rarer terms (common ones only add to the score of those), and the
@@ -31,7 +34,7 @@ from urllib.parse import quote
 import tantivy
 from tantivy import Occur, Query
 
-from provgrep import compatibility
+from provgrep import compatibility, dense
 from provgrep.compatibility import Verdict
 
 FIELDS = {"symbol": 2.0, "doc": 2.0, "path": 1.0, "code": 1.0}
@@ -49,6 +52,7 @@ COMMON = 0.01
 SHARD_SIZE = 1_000_000  # snippets per lexical shard, up to MAX_SHARDS
 MAX_SHARDS = 8
 CHUNK = 1000  # consecutive snippets (a few repositories) that go to the same shard
+RERANK = 100  # lexical results ordered by meaning, when the index has embeddings
 # en_stem as tantivy defines it: the tokens the text fields hold.
 _ANALYZER = (
     tantivy.TextAnalyzerBuilder(tantivy.Tokenizer.simple())
@@ -210,7 +214,7 @@ class Location:
 @dataclass(frozen=True)
 class Result:
     id: str
-    score: float
+    score: float  # the cosine of its code with the query among the first RERANK, else BM25
     language: str
     code: str | None  # None when no license was found: link only
     location: Location  # where the code shown is from
@@ -249,6 +253,10 @@ class Index:
         self._documents = sum(searcher.num_docs for searcher in self._searchers)
         self._pool = ThreadPoolExecutor(len(self._searchers))  # tantivy-py releases the GIL
         self._compatible: dict[str, list[str]] = {}  # license terms, by project license
+        self.vectors = None
+        if (path / "dense" / "dense.json").exists():
+            self.vectors = dense.Vectors(path, self.manifest["built"])
+            self._encoder = dense.Encoder()
 
     def search(
         self,
@@ -307,14 +315,24 @@ class Index:
             filters.append(self._any("level", levels))
         clauses += [(Occur.Must, Query.const_score_query(f, 0.0)) for f in filters]
         combined = Query.boolean_query(clauses)
-        found = list(self._pool.map(lambda s: s.search(combined, offset + limit), self._searchers))
+        vectors = self.vectors if text is not None else None  # nothing to order by without words
+        depth = max(offset + limit, RERANK) if vectors is not None else offset + limit
+        searches = [self._pool.submit(s.search, combined, depth) for s in self._searchers]
+        # The query is embedded while the shards are searched: it needs none of their results.
+        meaning = self._encoder.query(query) if vectors is not None else None
+        found = [future.result() for future in searches]
         hits = sorted(
             ((score, n, address) for n, shard in enumerate(found) for score, address in shard.hits),
             key=lambda hit: -hit[0],
-        )[offset : offset + limit]
+        )[:depth]
         ranked = [(score, self._searchers[n].doc(address)["id"][0]) for score, n, address in hits]
+        if vectors is not None:
+            head = [snippet for _, snippet in ranked[:RERANK]]
+            cosines = vectors.similarity(meaning, head).tolist()
+            ranked = sorted(zip(cosines, head, strict=True), key=lambda h: -h[0]) + ranked[RERANK:]
+        ranked = ranked[offset : offset + limit]
         rows = self._rows([snippet for _, snippet in ranked])
-        total = sum(shard.count for shard in found)
+        total = sum(shard.count for shard in found)  # type: ignore[attr-defined]  # not in its stubs
         return Page(total, [_result(rows[snippet], score, project) for score, snippet in ranked])
 
     def snippet(self, id: str) -> Snippet | None:
