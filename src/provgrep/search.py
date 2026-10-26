@@ -317,7 +317,10 @@ class Index:
         combined = Query.boolean_query(clauses)
         vectors = self.vectors if text is not None else None  # nothing to order by without words
         depth = max(offset + limit, RERANK) if vectors is not None else offset + limit
-        found = list(self._pool.map(lambda s: s.search(combined, depth), self._searchers))
+        searches = [self._pool.submit(s.search, combined, depth) for s in self._searchers]
+        # The query is embedded while the shards are searched: it needs none of their results.
+        meaning = self._encoder.query(query) if vectors is not None else None
+        found = [future.result() for future in searches]
         hits = sorted(
             ((score, n, address) for n, shard in enumerate(found) for score, address in shard.hits),
             key=lambda hit: -hit[0],
@@ -325,11 +328,11 @@ class Index:
         ranked = [(score, self._searchers[n].doc(address)["id"][0]) for score, n, address in hits]
         if vectors is not None:
             head = [snippet for _, snippet in ranked[:RERANK]]
-            cosines = vectors.similarity(self._encoder.query(query), head).tolist()
+            cosines = vectors.similarity(meaning, head).tolist()
             ranked = sorted(zip(cosines, head, strict=True), key=lambda h: -h[0]) + ranked[RERANK:]
         ranked = ranked[offset : offset + limit]
         rows = self._rows([snippet for _, snippet in ranked])
-        total = sum(shard.count for shard in found)
+        total = sum(shard.count for shard in found)  # type: ignore[attr-defined]  # not in its stubs
         return Page(total, [_result(rows[snippet], score, project) for score, snippet in ranked])
 
     def snippet(self, id: str) -> Snippet | None:
