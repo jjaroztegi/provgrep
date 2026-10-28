@@ -199,7 +199,7 @@ def app(index: Index, host: str = "127.0.0.1", public: str | None = None) -> Sta
             return JSONResponse({"error": "no such snippet"}, status_code=404)
         return JSONResponse(asdict(found))
 
-    mcp = mcp_server(index)
+    mcp = mcp_server(index, public)
     hosts = ["127.0.0.1:*", "localhost:*", "[::1]:*"]
     origins = ["http://127.0.0.1:*", "http://localhost:*", "http://[::1]:*"]
     if public:

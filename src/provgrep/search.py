@@ -277,8 +277,10 @@ class Index:
         contain, whole; `A|B` for either."""
         if limit < 1 or offset < 0:
             raise ValueError("limit must be at least 1 and offset at least 0")
-        if len(query) > MAX_QUERY or len(require) > MAX_REQUIRED:
-            raise ValueError(f"a query has at most {MAX_QUERY} characters, {MAX_REQUIRED} required")
+        if len(query) > MAX_QUERY:
+            raise ValueError(f"a query has at most {MAX_QUERY} characters, not {len(query)}")
+        if len(require) > MAX_REQUIRED:
+            raise ValueError(f"require at most {MAX_REQUIRED} identifiers, not {len(require)}")
         languages = [language.lower() for language in languages]
         if project is not None:
             project = compatibility.project(project)
