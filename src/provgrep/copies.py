@@ -10,12 +10,13 @@ are often written alike in many projects, so the counts are given by length too.
 import json
 import sqlite3
 import time
+from compression import zstd
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 from urllib.parse import quote
 
-from provgrep import source_commit
+from provgrep import search, source_commit
 
 LENGTHS = (3, 10, 20, 40)
 EXAMPLES = 20
@@ -24,11 +25,13 @@ EXAMPLES = 20
 def study(index: Path, out_root: Path) -> Path:
     """Write results/<UTC time>-copies/: the counts, and examples of the longest disagreements."""
     started = time.monotonic()
-    db = sqlite3.connect(f"{(index / 'records.sqlite').resolve().as_uri()}?mode=ro", uri=True)
     manifest = json.loads((index / "manifest.json").read_text(encoding="utf-8"))
+    partitions = len(list((index / "partitions").iterdir()))
+    dbs = [search.connect(index, n) for n in range(partitions)]
+    zdict = search.dictionary(index)
 
     def count(where: str) -> int:
-        return int(db.execute(f"SELECT count(*) FROM snippets {where}").fetchone()[0])
+        return sum(db.execute(f"SELECT count(*) FROM snippets {where}").fetchone()[0] for db in dbs)
 
     counts: dict[str, Any] = {
         "snippets": count(""),
@@ -38,22 +41,26 @@ def study(index: Path, out_root: Path) -> Path:
     }
     # Each snippet whose copies disagree, across repositories: its lines, whether some copy is
     # permissive and some copyleft, and whether some copy is vendored.
-    rows = db.execute(
-        """SELECT s.id, length(s.code) - length(replace(s.code, char(10), '')) + 1, s.repos,
-                  max(f.permissive), max(f.shareable AND NOT f.permissive), max(f.vendored)
-           FROM snippets s JOIN locations l ON l.snippet = s.id JOIN files f ON f.id = l.file
-           WHERE s.licenses > 1 AND s.repos > 1 GROUP BY s.id"""
-    ).fetchall()
-    both = [r for r in rows if r[3] and r[4]]
+    rows = [
+        (n, snippet, zstd.decompress(code, zstd_dict=zdict).count(b"\n") + 1, *rest)
+        for n, db in enumerate(dbs)
+        for snippet, code, *rest in db.execute(
+            """SELECT s.id, s.code, s.repos, max(f.permissive),
+                      max(f.shareable AND NOT f.permissive), max(f.vendored)
+               FROM snippets s JOIN locations l ON l.snippet = s.id JOIN files f ON f.id = l.file
+               WHERE s.licenses > 1 AND s.repos > 1 GROUP BY s.id"""
+        )
+    ]
+    both = [r for r in rows if r[4] and r[5]]
     counts["permissive and copyleft, across repositories"] = {
         f"{n}+ lines": {
-            "functions": sum(r[1] >= n for r in both),
-            "with a vendored copy": sum(r[1] >= n and bool(r[5]) for r in both),
+            "functions": sum(r[2] >= n for r in both),
+            "with a vendored copy": sum(r[2] >= n and bool(r[6]) for r in both),
         }
         for n in LENGTHS
     }
-    longest = sorted((r for r in both if r[1] >= LENGTHS[-1]), key=lambda r: (-r[2], -r[1]))
-    examples = [_copies(db, r[0]) for r in longest[:EXAMPLES]]
+    longest = sorted((r for r in both if r[2] >= LENGTHS[-1]), key=lambda r: (-r[3], -r[2]))
+    examples = [_copies(dbs[r[0]], r[1]) for r in longest[:EXAMPLES]]
     run = {
         "index_built": manifest.get("built"),
         "index_commit": manifest.get("commit"),

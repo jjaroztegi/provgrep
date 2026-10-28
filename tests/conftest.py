@@ -81,9 +81,12 @@ def index(tmp_path: Path) -> search.Index:
     for repo in repos:
         with gzip.open(stage.path(staging, repo), "wt", encoding="utf-8") as f:
             f.writelines(json.dumps(line) + "\n" for line in [*files[repo.name], {"kinds": {}}])
-    counts = build._records(repos, staging, tmp_path / "records.sqlite")
+    corpus = {"repos": [asdict(repo) for repo in repos]}
+    (tmp_path / "corpus.json").write_text(json.dumps(corpus))
+    out = tmp_path / "index"
+    out.mkdir()
+    counts = build.write(repos, staging, out, jobs=1)
     assert counts["snippets"] == 4
     assert counts["snippets_whose_copies_differ_in_license"] == 1
-    search.write_lexical(tmp_path / "records.sqlite", tmp_path / "lexical")
-    (tmp_path / "manifest.json").write_text("{}")
-    return search.Index(tmp_path)
+    (out / "manifest.json").write_text(json.dumps({"built": "test", "counts": counts}))
+    return search.Index(out)

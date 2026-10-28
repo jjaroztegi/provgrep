@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from provgrep import search
+from provgrep import build, github, search
 
 
 def test_terms_keep_identifiers_whole_with_their_family_and_parts() -> None:
@@ -60,26 +60,37 @@ def test_snippet_lists_every_copy(index: search.Index) -> None:
     assert index.snippet("0" * search.ID_LENGTH) is None
 
 
-def test_shards_page_as_one_index(
+def test_partitions_page_as_one_index(
     index: search.Index, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    monkeypatch.setattr(search, "SHARD_SIZE", 1)  # a shard per snippet, up to MAX_SHARDS
-    monkeypatch.setattr(search, "CHUNK", 1)
-    sharded = tmp_path / "sharded"
-    sharded.mkdir()
-    for name in ("manifest.json", "records.sqlite"):
-        (sharded / name).symlink_to(index.path / name)
-    search.write_lexical(index.path / "records.sqlite", sharded / "lexical", jobs=2)
-    split = search.Index(sharded)
-    assert [s.num_docs for s in split._searchers] == [1, 1, 1, 1]
+    monkeypatch.setattr(build, "PARTITION_SIZE", 1)  # a partition per location
+    out = tmp_path / "cut"
+    out.mkdir()
+    (out / "manifest.json").write_bytes((index.path / "manifest.json").read_bytes())
+    repos = github.load(index.path.parent / "corpus.json")  # what the fixture staged
+    assert build.write(repos, index.path.parent / "staging", out, jobs=2)["partitions"] == 5
+    cut = search.Index(out)
+    assert sum(s.num_docs for s in cut._searchers) == 4
+    assert sum(s.num_docs > 0 for s in cut._searchers) > 1  # a search over several
     query = "fill picture render"
-    whole = split.search(query, licenses="any")
+    whole = cut.search(query, licenses="any")
     assert whole.total == index.search(query, licenses="any").total == 4
     assert {r.id for r in whole.results} == {
         r.id for r in index.search(query, licenses="any").results
     }
-    pages = [split.search(query, licenses="any", limit=1, offset=n).results for n in range(4)]
+    pages = [cut.search(query, licenses="any", limit=1, offset=n).results for n in range(4)]
     assert [r.id for page in pages for r in page] == [r.id for r in whole.results]
+    for result in whole.results:  # found in the partition its id says
+        found = cut.snippet(result.id)
+        assert found is not None
+        assert found.result.code == result.code
+
+
+def test_buckets_cut_into_partitions() -> None:
+    for partitions in (1, 3, 8, 255, 256):
+        cut = [search.buckets(n, partitions) for n in range(partitions)]
+        assert [b for r in cut for b in r] == list(range(search.BUCKETS))
+        assert all(search.partition(b, partitions) == n for n, r in enumerate(cut) for b in r)
 
 
 def test_search_for_a_project_keeps_what_fits_it(index: search.Index) -> None:

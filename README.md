@@ -37,7 +37,7 @@ c56ff08 from corpus/github.json, sha256 526db429d94b; searched at 7279b72, with 
 | | permissive | 8 | 2 | 2 | 0.25 | 5 |
 
 Search finds the functions that have the question's words (BM25 over identifiers split into words
-and kept whole, in 8 shards searched at once), then orders the first 100 by how close their code
+and kept whole, in partitions searched at once), then orders the first 100 by how close their code
 is to the question in meaning ([docs/search.md](docs/search.md#ordering-by-meaning)). Without that
 order, a hit came first for 33 and 30 of the API intents (MRR 0.49 and 0.47) and in the top 10
 for no XRender question with any license. On the 8-core machine that built the index, a search
@@ -78,6 +78,7 @@ uv run provgrep copies                      # functions whose copies disagree on
 ```
 
 `provgrep mcp` serves the same search to an agent over stdio. How results, filters and notices
-work, and what they do not say: [docs/search.md](docs/search.md).
+work, and what they do not say: [docs/search.md](docs/search.md). How an index is built, cached
+and split across machines: [docs/build.md](docs/build.md).
 
 Licenses are as detected, with their evidence. They are not legal advice.
