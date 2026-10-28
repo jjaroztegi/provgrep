@@ -1,3 +1,6 @@
+import json
+
+import pytest
 from starlette.testclient import TestClient
 
 from provgrep import search, server
@@ -49,7 +52,8 @@ def test_pages(index: search.Index) -> None:
     assert "src/fill.c" in fits.text  # GPL-2.0-or-later goes into GPL-3.0-only
     assert client.get("/", params={"q": "fill", "license": "compatible"}).status_code == 400
     with TestClient(server.app(index)) as live:  # runs the lifespan MCP needs
-        assert live.get("/mcp/").status_code == 405
+        assert live.get("/mcp").status_code == 405
+        assert live.delete("/mcp").status_code == 405
 
 
 def test_mcp_behind_proxy(index: search.Index) -> None:
@@ -57,11 +61,17 @@ def test_mcp_behind_proxy(index: search.Index) -> None:
     params = {"protocolVersion": "2025-06-18", "capabilities": {}, "clientInfo": client_info}
     initialize = {"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": params}
     accept = {"accept": "application/json, text/event-stream"}
-    proxied = server.app(index, public="https://search.example")
+    proxied = server.app(index, "0.0.0.0", public="https://search.example")
     with TestClient(proxied, base_url="https://search.example") as client:
-        assert client.post("/mcp/", json=initialize, headers=accept).status_code == 200
+        answer = client.post("/mcp", json=initialize, headers=accept)
+        assert answer.status_code == 200
+        assert "true" not in json.dumps(answer.json()["result"]["capabilities"])  # nothing changes
+        page = {**accept, "origin": "https://elsewhere.example"}  # a page's script, rebinding
+        assert client.post("/mcp", json=initialize, headers=page).status_code == 403
     with TestClient(server.app(index), base_url="https://search.example") as client:
-        assert client.post("/mcp/", json=initialize, headers=accept).status_code == 421
+        assert client.post("/mcp", json=initialize, headers=accept).status_code == 421
+    with pytest.raises(ValueError, match="--public"):
+        server.app(index, "0.0.0.0")
 
 
 def test_attribution(index: search.Index) -> None:
