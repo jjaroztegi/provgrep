@@ -89,3 +89,32 @@ def test_attribution(index: search.Index) -> None:
         r for r in index.search("fill", licenses="any").results if r.location.repo == "acme/small"
     ]
     assert reuse_snippet(unlicensed) is None
+
+
+def test_public_serving_guards(index: search.Index, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(server, "BURST", 3)
+    monkeypatch.setattr(server, "RATE", 0.001)  # none come back during the test
+    client = TestClient(server.app(index))
+    page = client.get("/", params={"q": "picture"})
+    csp = page.headers["content-security-policy"]
+    assert "script-src 'self'" in csp
+    assert "frame-ancestors 'none'" in csp
+    assert page.headers["referrer-policy"] == "no-referrer"
+    assert [client.get("/api/search", params={"q": "x"}).status_code for _ in range(3)] == [
+        200,
+        200,
+        429,  # the page above spent one
+    ]
+    busy = client.get("/", params={"q": "picture"})
+    assert busy.status_code == 429
+    assert int(busy.headers["retry-after"]) > 0
+    assert "nosniff" in busy.headers["x-content-type-options"]
+    assert client.get("/static/site.css").status_code == 200  # not a search
+    assert client.get("/healthz").json()["index_built"] is None  # the fixture's manifest is {}
+    assert client.get("/robots.txt").text.startswith("User-agent: *\nAllow: /$\nDisallow: /")
+
+
+def test_about_says_what_is_kept(index: search.Index) -> None:
+    page = TestClient(server.app(index)).get("/about").text
+    assert "keeps no log of what is searched" in page
+    assert "template=removal.yml" in page

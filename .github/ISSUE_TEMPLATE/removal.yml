@@ -1,0 +1,27 @@
+name: Removal request
+description: Leave a repository, file or function out of the index, or report personal data in a result.
+title: "Removal: "
+labels: [removal]
+body:
+  - type: input
+    id: link
+    attributes:
+      label: What to remove
+      description: The link to the result on the site, or to the repository, file or lines on GitHub.
+    validations:
+      required: true
+  - type: dropdown
+    id: scope
+    attributes:
+      label: How much
+      options:
+        - The whole repository
+        - This file
+        - This function
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Why
+      description: Optional. Do not include personal data here; this issue is public.

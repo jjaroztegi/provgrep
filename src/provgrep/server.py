@@ -8,13 +8,16 @@
         level: A, B, C or X, repeated; require: an identifier the code must contain, repeated
     GET /api/snippets/{id}
     POST /mcp                                           the same search as MCP tools
+    GET /healthz                                        which build of the index is served
 
 Pages are rendered on the server, so a search is a link that works without JavaScript; the
 script only fetches the same results as you type. The whole query is in the URL, and every
 request only reads the index: replicas of the server can serve the same index directory.
 """
 
+import math
 import re
+import time
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from dataclasses import asdict
@@ -26,10 +29,11 @@ from markupsafe import Markup, escape
 from mcp.server.transport_security import TransportSecuritySettings
 from starlette.applications import Starlette
 from starlette.requests import Request
-from starlette.responses import JSONResponse, Response
+from starlette.responses import JSONResponse, PlainTextResponse, Response
 from starlette.routing import Mount, Route
 from starlette.staticfiles import StaticFiles
 from starlette.templating import Jinja2Templates
+from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
 from provgrep import compatibility
 from provgrep.attribution import reuse_snippet
@@ -40,6 +44,24 @@ PAGE_SIZE = 10
 MAX_PAGE = 20  # deeper than this, refine the query
 MAX_CONNECTIONS = 64
 LOOPBACK = ("127.0.0.1", "localhost", "::1")
+# Searches a client may make: RATE a second, BURST at once. Typing in the search box asks for
+# results at most four times a second, and only while typing.
+RATE = 2.0
+BURST = 30
+FREE = ("/static/", "/healthz", "/robots.txt")  # paths that do not search
+_HEADERS = [
+    (name.encode(), value.encode())
+    for name, value in {
+        # Nothing but this site's own script, styles and requests: no third parties, no inline code.
+        "content-security-policy": "default-src 'none'; script-src 'self'; style-src 'self';"
+        " img-src 'self' data:; connect-src 'self'; form-action 'self'; base-uri 'none';"
+        " frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "no-referrer",  # a link to GitHub does not say what was searched
+    }.items()
+]
+# Search pages are endless, and each one runs a search: crawlers get the home page only.
+ROBOTS = "User-agent: *\nAllow: /$\nDisallow: /\n"
 LANGUAGES = {
     "c": "C",
     "cpp": "C++",
@@ -216,6 +238,19 @@ def app(index: Index, host: str = "127.0.0.1", public: str | None = None) -> Sta
         host=host,
     )
 
+    def about(request: Request) -> Response:
+        context = {"query": {"q": "", "license": "permissive"}, "languages": LANGUAGES}
+        return templates.TemplateResponse(
+            request, "about.html", {**context, "manifest": index.manifest}
+        )
+
+    def health(_: Request) -> JSONResponse:
+        built = index.manifest.get("built")
+        return JSONResponse({"index_built": built, "commit": index.manifest.get("commit")})
+
+    def robots(_: Request) -> Response:
+        return PlainTextResponse(ROBOTS)
+
     def no_stream(_: Request) -> Response:
         # Stateless: there is no stream of server messages to hold open, and no session to end.
         return Response(status_code=405, headers={"Allow": "POST"})
@@ -225,7 +260,7 @@ def app(index: Index, host: str = "127.0.0.1", public: str | None = None) -> Sta
         async with mcp.session_manager.run():  # a mounted app's own lifespan does not run
             yield
 
-    return Starlette(
+    site = Starlette(
         routes=[
             Route("/", home),
             Route("/s/{id}", snippet_page),
@@ -233,10 +268,62 @@ def app(index: Index, host: str = "127.0.0.1", public: str | None = None) -> Sta
             Route("/api/snippets/{id}", api_snippet),
             Route("/mcp", no_stream, methods=["GET", "DELETE"]),
             *mcp_app.routes,
+            Route("/about", about),
+            Route("/healthz", health),
+            Route("/robots.txt", robots),
             Mount("/static", StaticFiles(directory=_HERE / "static"), name="static"),
         ],
         lifespan=lifespan,
     )
+    site.add_middleware(Guard)
+    return site
+
+
+class Guard:
+    """Every response with headers that keep the page to this site, and searches rationed per
+    client: past its budget, a client gets 429 and when to come back. Behind a proxy the
+    client is the address the proxy forwards for (uvicorn trusts it from 127.0.0.1)."""
+
+    def __init__(self, app: ASGIApp) -> None:
+        self.app = app
+        self.rate = RATE
+        self.burst = BURST
+        self._budgets: dict[str, tuple[float, float]] = {}  # client: searches left, when
+
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        if scope["type"] != "http":
+            await self.app(scope, receive, send)
+            return
+
+        async def guarded(message: Message) -> None:
+            if message["type"] == "http.response.start":
+                message["headers"] = [*message.get("headers", []), *_HEADERS]
+            await send(message)
+
+        client = scope["client"][0] if scope.get("client") else ""
+        if not scope["path"].startswith(FREE) and (wait := self._spend(client)):
+            busy = PlainTextResponse(
+                "Too many searches at once: try again in a few seconds.",
+                status_code=429,
+                headers={"Retry-After": str(math.ceil(wait))},
+            )
+            await busy(scope, receive, guarded)
+            return
+        await self.app(scope, receive, guarded)
+
+    def _spend(self, client: str) -> float:
+        """Spend one of a client's searches: 0, or the seconds until it has one."""
+        now = time.monotonic()
+        left, then = self._budgets.get(client, (self.burst, now))
+        left = min(self.burst, left + (now - then) * self.rate)
+        if left < 1:
+            self._budgets[client] = (left, now)
+            return (1 - left) / self.rate
+        self._budgets[client] = (left - 1, now)
+        if len(self._budgets) > 100_000:  # forget clients whose budget is full again
+            full = now - self.burst / self.rate
+            self._budgets = {c: b for c, b in self._budgets.items() if b[1] > full}
+        return 0.0
 
 
 def _view(result: Result, query: str) -> dict[str, Any]:
@@ -287,5 +374,6 @@ def serve(index_path: Path, host: str, port: int, public: str | None) -> None:
     import uvicorn
 
     site = app(Index(index_path), host, public)
-    # Every search scores every shard: past this many connections, a 503 rather than a queue.
-    uvicorn.run(site, host=host, port=port, limit_concurrency=MAX_CONNECTIONS)
+    # Every search scores every partition: past this many connections, a 503 rather than a
+    # queue. No access log: a request's URL is what someone searched for.
+    uvicorn.run(site, host=host, port=port, limit_concurrency=MAX_CONNECTIONS, access_log=False)
