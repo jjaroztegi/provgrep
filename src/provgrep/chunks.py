@@ -286,13 +286,14 @@ def units(text: str, language: str) -> list[Unit]:
         node = match["unit"][0]
         if node.id not in found:
             found[node.id] = (node, _first(match, "name"), _first(match, "scope"))
-    containers = sorted(
-        (m["container"][0].start_byte, m["container"][0].end_byte, _scope_name(m["name"][0]))
-        for _, m in QueryCursor(_query(language, "containers")).matches(root)
-        if "name" in m
-    )
+    containers = []
+    for _, m in QueryCursor(_query(language, "containers")).matches(root):
+        if "name" in m:
+            box = m["container"][0]
+            containers.append((box.start_byte, box.end_byte, _scope_name(m["name"][0], source)))
+    containers.sort()
     docs = sorted(
-        (n.start_byte, n.end_byte, without_emails(_text(n)))
+        (n.start_byte, n.end_byte, without_emails(_text(n, source)))
         for n in QueryCursor(_query(language, "docs")).captures(root).get("doc", [])
     )
     doc_starts = [d[0] for d in docs]
@@ -320,7 +321,8 @@ def units(text: str, language: str) -> list[Unit]:
         hi = bisect.bisect_left(doc_starts, node.end_byte)
         doc = "\n".join(t for _, end, t in docs[lo:hi] if end <= node.end_byte)
         code = textwrap.dedent("\n".join(lines[first.start_point.row : node.end_point.row + 1]))
-        qualified = [*outer, *([_scope_name(scope)] if scope else []), _name(name, node)]
+        scoped = [_scope_name(scope, source)] if scope else []
+        qualified = [*outer, *scoped, _name(name, node, source)]
         out.append(
             Unit(
                 ".".join(qualified),
@@ -380,11 +382,11 @@ def _leading(node: Node, root: Node, lines: list[str]) -> Node:
     return first
 
 
-def _name(name: Node | None, node: Node) -> str:
+def _name(name: Node | None, node: Node, source: bytes) -> str:
     """A unit's name: the captured one, else the innermost C declarator (`Surface::draw` in
     `static int *Surface::draw(int x)`)."""
     if name is not None:
-        return " ".join(_text(name).split())
+        return " ".join(_text(name, source).split())
     current = node
     for _ in range(16):
         nxt = current.child_by_field_name("declarator") or next(
@@ -396,15 +398,15 @@ def _name(name: Node | None, node: Node) -> str:
             None,
         )
         if nxt is None:
-            return " ".join(_text(current).split())
+            return " ".join(_text(current, source).split())
         current = nxt
     return "?"
 
 
-def _scope_name(node: Node) -> str:
+def _scope_name(node: Node, source: bytes) -> str:
     """`Server` for `*Server[T]` or `Foo<T>`: what a reader calls the type."""
-    m = _SCOPE_NAME.match(_text(node))
-    return m.group(1) if m else _text(node)
+    m = _SCOPE_NAME.match(_text(node, source))
+    return m.group(1) if m else _text(node, source)
 
 
 def _first(match: dict[str, list[Node]], capture: str) -> Node | None:
@@ -412,8 +414,10 @@ def _first(match: dict[str, list[Node]], capture: str) -> Node | None:
     return nodes[0] if nodes else None
 
 
-def _text(node: Node) -> str:
-    return (node.text or b"").decode(errors="replace")
+def _text(node: Node, source: bytes) -> str:
+    # Not node.text: on a tree parsed from a callback it reads the source again through it,
+    # and py-tree-sitter 0.25 leaks what it reads (460 MB in 13,800 calls on a 60 KB file).
+    return source[node.start_byte : node.end_byte].decode(errors="replace")
 
 
 @cache
