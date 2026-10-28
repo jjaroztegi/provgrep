@@ -38,6 +38,8 @@ from provgrep.search import Index, Page, Result, licenses_of, query_terms, terms
 
 PAGE_SIZE = 10
 MAX_PAGE = 20  # deeper than this, refine the query
+MAX_CONNECTIONS = 64
+LOOPBACK = ("127.0.0.1", "localhost", "::1")
 LANGUAGES = {
     "c": "C",
     "cpp": "C++",
@@ -101,9 +103,11 @@ _UNMARKED = frozenset(
 
 
 def app(index: Index, host: str = "127.0.0.1", public: str | None = None) -> Starlette:
-    """The site over an index. host is where it listens; public, the URL a proxy in front of it is
-    reached at. MCP refuses requests addressed to any other host unless it listens on all of them
-    (DNS rebinding protection)."""
+    """The site over an index. host is where it listens; public, the URL it is reached at, through
+    a proxy or not. MCP refuses requests addressed to any other host or sent from a page of any
+    other origin (DNS rebinding protection), so listening beyond this machine needs public."""
+    if public is None and host not in LOOPBACK:
+        raise ValueError(f"listening on {host} needs the URL clients reach it at (--public)")
     templates = Jinja2Templates(directory=_HERE / "templates")
     templates.env.globals.update(projects=compatibility.PROJECTS, osadl=compatibility.SOURCE)
 
@@ -196,29 +200,24 @@ def app(index: Index, host: str = "127.0.0.1", public: str | None = None) -> Sta
         return JSONResponse(asdict(found))
 
     mcp = mcp_server(index)
-    security = None  # the SDK's: localhost only when listening there, else no check
+    hosts = ["127.0.0.1:*", "localhost:*", "[::1]:*"]
+    origins = ["http://127.0.0.1:*", "http://localhost:*", "http://[::1]:*"]
     if public:
         url = urlsplit(public)
-        security = TransportSecuritySettings(
-            allowed_hosts=["127.0.0.1:*", "localhost:*", "[::1]:*", url.netloc],
-            allowed_origins=[
-                "http://127.0.0.1:*",
-                "http://localhost:*",
-                "http://[::1]:*",
-                f"{url.scheme}://{url.netloc}",
-            ],
-        )
-    # Stateless and plain JSON: any replica answers any request, as it does pages.
+        hosts.append(url.netloc)
+        origins.append(f"{url.scheme}://{url.netloc}")
+    # Stateless and plain JSON: any replica answers any request, as it does pages. Served at
+    # /mcp itself: a redirect to /mcp/ would be to http behind a proxy, and clients refuse it.
     mcp_app = mcp.streamable_http_app(
-        streamable_http_path="/",
+        streamable_http_path="/mcp",
         stateless_http=True,
         json_response=True,
-        transport_security=security,
+        transport_security=TransportSecuritySettings(allowed_hosts=hosts, allowed_origins=origins),
         host=host,
     )
 
     def no_stream(_: Request) -> Response:
-        # Stateless: there is no stream of server messages to hold open for a GET.
+        # Stateless: there is no stream of server messages to hold open, and no session to end.
         return Response(status_code=405, headers={"Allow": "POST"})
 
     @asynccontextmanager
@@ -232,8 +231,8 @@ def app(index: Index, host: str = "127.0.0.1", public: str | None = None) -> Sta
             Route("/s/{id}", snippet_page),
             Route("/api/search", api_search),
             Route("/api/snippets/{id}", api_snippet),
-            Route("/mcp/", no_stream, methods=["GET"]),
-            Mount("/mcp", app=mcp_app),
+            Route("/mcp", no_stream, methods=["GET", "DELETE"]),
+            *mcp_app.routes,
             Mount("/static", StaticFiles(directory=_HERE / "static"), name="static"),
         ],
         lifespan=lifespan,
@@ -287,4 +286,6 @@ def _next(request: Request, found: Page | None, page: int) -> str | None:
 def serve(index_path: Path, host: str, port: int, public: str | None) -> None:
     import uvicorn
 
-    uvicorn.run(app(Index(index_path), host, public), host=host, port=port)
+    site = app(Index(index_path), host, public)
+    # Every search scores every shard: past this many connections, a 503 rather than a queue.
+    uvicorn.run(site, host=host, port=port, limit_concurrency=MAX_CONNECTIONS)

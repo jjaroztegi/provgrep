@@ -161,7 +161,10 @@ def main(argv: list[str] | None = None) -> int:
     elif args.command == "serve":
         from provgrep.server import serve
 
-        serve(args.index, args.host, args.port, args.public)
+        try:
+            serve(args.index, args.host, args.port, args.public)
+        except ValueError as e:
+            parser.error(str(e))
     elif args.command == "truth":
         from provgrep.debian import pin
 

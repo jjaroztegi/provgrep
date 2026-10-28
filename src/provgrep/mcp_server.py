@@ -28,7 +28,9 @@ _READ_ONLY = ToolAnnotations(read_only_hint=True, open_world_hint=False)
 
 
 def server(index: Index) -> MCPServer:
-    mcp = MCPServer("provgrep", instructions=INSTRUCTIONS)
+    # No subscriptions: a read-only index has nothing to notify of, and each listener would hold
+    # a stream open.
+    mcp = MCPServer("provgrep", instructions=INSTRUCTIONS, subscriptions=False)
 
     @mcp.tool(annotations=_READ_ONLY)
     def search(
