@@ -23,6 +23,9 @@ The build writes `<out>.part/`, in steps, then puts it in place of out:
    directory, in corpus order (most-starred repository first): the same corpus gives the same
    index.
 4. manifest.json: what was built from what, with which versions, and what was left out.
+
+What people asked to have removed (corpus/removed.json) is left out of every build: whole
+repositories, files or directories of one, and functions by id, wherever their code is.
 """
 
 import gzip
@@ -111,18 +114,22 @@ CREATE INDEX locations_snippet ON locations (snippet);
 """
 
 
-def build(corpus: Path, out: Path, jobs: int, limit: int | None = None) -> dict[str, Any]:
-    """Build the index of a pinned corpus into out; return the manifest. With limit, only the
-    first `limit` repositories of each language."""
+def build(
+    corpus: Path, out: Path, jobs: int, removed: Path, limit: int | None = None
+) -> dict[str, Any]:
+    """Build the index of a pinned corpus into out, without what removed lists; return the
+    manifest. With limit, only the first `limit` repositories of each language."""
     started = time.monotonic()
     commit = source_commit()  # the code that runs is the code at the start
     repos = load(corpus, limit)
+    left_out = Removed.load(removed)
+    repos = [r for r in repos if r.name.lower() not in left_out.repos]  # not even fetched
     staging, failed = stage_corpus(repos, jobs)
 
     part = out.with_name(out.name + ".part")
     shutil.rmtree(part, ignore_errors=True)
     part.mkdir(parents=True)
-    counts = write(repos, staging, part, jobs)
+    counts = write(repos, staging, part, jobs, left_out)
     manifest = {
         "corpus": {
             "path": corpus.as_posix(),
@@ -130,6 +137,9 @@ def build(corpus: Path, out: Path, jobs: int, limit: int | None = None) -> dict[
             "repos": len(repos),
             "limit_per_language": limit,
         },
+        "removed": {"path": removed.as_posix(), "sha256": sha256_of(removed)}
+        if removed.exists()
+        else None,
         "built": datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "commit": commit,
         "stage_key": staging.name,
@@ -171,11 +181,48 @@ def stage_corpus(repos: list[github.Repo], jobs: int) -> tuple[Path, dict[str, s
     return staging, stage_all(todo, staging, jobs, cache_dir() / "work")
 
 
-def write(repos: list[github.Repo], staging: Path, out: Path, jobs: int) -> dict[str, Any]:
-    """Write the sources, dictionary and partitions of the staged repositories into out; return
-    the counts."""
+@dataclass(frozen=True)
+class Removed:
+    """What the build leaves out, as asked: repositories (owner/name, lower-cased), paths in
+    one (a file, or a directory and all under it), and functions by id."""
+
+    repos: frozenset[str] = frozenset()
+    paths: dict[str, tuple[str, ...]] = field(default_factory=dict)
+    functions: frozenset[str] = frozenset()
+
+    @classmethod
+    def load(cls, path: Path) -> Removed:
+        """corpus/removed.json: {"removed": [{"repo": ..., "path": ..., "issue": ...},
+        {"function": ..., "issue": ...}]}; a missing file removes nothing."""
+        if not path.exists():
+            return cls()
+        asked = json.loads(path.read_text(encoding="utf-8"))["removed"]
+        paths: dict[str, list[str]] = {}
+        for entry in asked:
+            if "path" in entry:
+                paths.setdefault(entry["repo"].lower(), []).append(entry["path"].strip("/"))
+        return cls(
+            frozenset(e["repo"].lower() for e in asked if "repo" in e and "path" not in e),
+            {repo: tuple(prefixes) for repo, prefixes in paths.items()},
+            frozenset(e["function"] for e in asked if "function" in e),
+        )
+
+    def file(self, repo: str, path: str) -> bool:
+        return any(path == p or path.startswith(p + "/") for p in self.paths.get(repo.lower(), ()))
+
+
+NOTHING = Removed()
+
+
+def write(
+    repos: list[github.Repo], staging: Path, out: Path, jobs: int, removed: Removed = NOTHING
+) -> dict[str, Any]:
+    """Write the sources, dictionary and partitions of the staged repositories into out, without
+    what was removed; return the counts."""
     spool = out / "spool"
-    counts, sizes = _route(repos, staging, out, spool)
+    counts, sizes = _route(
+        [r for r in repos if r.name.lower() not in removed.repos], staging, out, spool, removed
+    )
     partitions = max(1, -(-sum(sizes) // PARTITION_SIZE))
     totals: Counter[str] = Counter()
     languages: Counter[str] = Counter()
@@ -201,7 +248,7 @@ def write(repos: list[github.Repo], staging: Path, out: Path, jobs: int) -> dict
 
 
 def _route(
-    repos: list[github.Repo], staging: Path, out: Path, spool: Path
+    repos: list[github.Repo], staging: Path, out: Path, spool: Path, removed: Removed
 ) -> tuple[dict[str, Any], list[int]]:
     """Write sources.sqlite and code.zdict from the staged repositories, in corpus order, and
     each file's functions to the spool of their bucket; return the counts and the locations in
@@ -217,6 +264,7 @@ def _route(
     pick = random.Random(0)
     file_id = routed = 0
     staged = 0
+    left_out: Counter[str] = Counter()
     for repo_id, repo in enumerate(repos, 1):
         staged_path = stage.path(staging, repo)
         if not staged_path.exists():
@@ -242,6 +290,9 @@ def _route(
                 if "kinds" in f:
                     kinds.update(f["kinds"])
                     continue
+                if removed.file(repo.name, f["path"]):
+                    left_out["files"] += 1
+                    continue
                 file_id += 1
                 expression = f["expression"]
                 ways = [list(c) for c in choices(expression)] if expression else []
@@ -265,6 +316,9 @@ def _route(
                 )
                 units: dict[int, list[tuple[Any, ...]]] = {}
                 for u in f["units"]:
+                    if u["hash"][: search.ID_LENGTH] in removed.functions:
+                        left_out["functions"] += 1
+                        continue
                     units.setdefault(int(u["hash"][:2], 16), []).append(
                         (u["hash"], u["code"], u["doc"], u["symbol"], u["start"], u["end"])
                     )
@@ -294,12 +348,12 @@ def _route(
     db.close()
     try:
         dictionary = zstd.train_dict(samples, DICTIONARY_SIZE).dict_content
-    except zstd.ZstdError:  # too little code to train on: compressed without one
+    except ValueError, zstd.ZstdError:  # too little code to train on: compressed without one
         pass
     else:
         (out / "code.zdict").write_bytes(dictionary)
     counts = {"repos": staged, "skipped": skipped, "files": dict(kinds), "locations": routed}
-    return counts, sizes
+    return counts | {"removed": dict(left_out)}, sizes
 
 
 @dataclass(frozen=True)
