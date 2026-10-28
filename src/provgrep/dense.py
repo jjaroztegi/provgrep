@@ -8,11 +8,13 @@ What the GPU makes is kept in the cache, apart from any index: embeddings/<model
 keys.npy, the first 8 bytes of each function's code hash, and vectors.npy, its embedding as int8
 (a unit vector times 127), one directory per run. An index takes from there the vectors of the
 code it has, and the GPU embeds only code no run has seen: a rebuild of mostly the same code
-costs minutes, not a day.
+costs minutes, not a day. An interrupted run goes on where it stopped.
 
-In the index, partitions/<n>/vectors.npy has row i for snippet i of the partition, and dense.json
-says which build of the index the rows are for: rows of another build would rank the wrong code.
-An interrupted run goes on where it stopped.
+An index holds them smaller: projected on the KEPT directions they vary most along (PCA, fitted
+once on a sample of the store, so vectors projected at any time compare), as int8. In the index,
+pca.npz is the projection, partitions/<n>/vectors.npy has row i for snippet i of the partition,
+and dense.json says which build of the index the rows are for: rows of another build would rank
+the wrong code.
 """
 
 import json
@@ -39,7 +41,11 @@ PART = 100_000  # snippets embedded between two saves
 # A query is a few tokens: on 16 threads it took 47 ms at the median and 133 ms at the 95th
 # percentile, on 4 threads 22 and 32 ms.
 QUERY_THREADS = 4
-_BLOCK = 1_000_000  # rows copied at a time
+_BLOCK = 100_000  # rows copied at a time
+# Measured on the intent suites, re-ranking the lexical top 100: 128 to 384 dimensions rank as
+# well as 768 (40/75/.58 apis any at 768, 41/74/.58 at 256); 256 keep 96% of the variance.
+KEPT = 256
+FIT = (400, 500)  # blocks of rows sampled from the store to fit the projection on, and their size
 
 
 @dataclass(frozen=True)
@@ -147,19 +153,53 @@ class Vectors:
                 f"the embeddings are for the index built {self.about['index_built']}, not"
                 f" {built}: run provgrep embed"
             )
+        self._projection = Projection.load(index / "pca.npz")
         self._vectors = [
             np.load(index / "partitions" / str(n) / "vectors.npy", mmap_mode="r")
             for n in range(partitions)
         ]
 
     def similarity(self, query: Any, snippets: list[tuple[int, int]]) -> list[float]:
-        """The cosine of each snippet's code, (partition, id), with the query (0 for one not
-        embedded)."""
+        """The cosine of each snippet's code, (partition, id), with the query, both projected (0
+        for one not embedded)."""
         if not snippets:
             return []
-        rows = np.stack([self._vectors[n][i] for n, i in snippets]).astype(np.float32)
-        cosines = rows @ query / np.maximum(np.linalg.norm(rows, axis=1), 1e-9)
-        return [float(c) for c in cosines]
+        rows = np.stack([self._vectors[n][i] for n, i in snippets]) / self._projection.scale
+        meaning = query @ self._projection.components
+        norms = np.linalg.norm(rows, axis=1) * np.linalg.norm(meaning)
+        return [float(c) for c in rows @ meaning / np.maximum(norms, 1e-9)]
+
+
+@dataclass(frozen=True)
+class Projection:
+    """The KEPT directions embeddings vary most along, and the scale that makes each int8."""
+
+    components: Any  # dimensions x KEPT
+    scale: Any  # KEPT
+
+    @classmethod
+    def fit(cls, rows: Any) -> Projection:
+        """Fitted on unit vectors as int8, not centred: a cosine of two projections is then
+        close to theirs."""
+        _, _, directions = np.linalg.svd(rows.astype(np.float32) / 127, full_matrices=False)
+        components = np.zeros((rows.shape[1], KEPT), dtype=np.float32)
+        components[:, : len(directions)] = directions[:KEPT].T  # fewer rows: fewer directions
+        top = np.abs(rows.astype(np.float32) / 127 @ components).max(axis=0)
+        return cls(components, 127 / np.where(top > 1e-6, top, 1))  # none: a direction unused
+
+    @classmethod
+    def load(cls, path: Path) -> Projection:
+        with np.load(path) as kept:
+            return cls(kept["components"], kept["scale"])
+
+    def save(self, path: Path) -> None:
+        with path.open("wb") as f:
+            np.savez(f, components=self.components, scale=self.scale)
+
+    def __call__(self, rows: Any) -> Any:
+        """int8 rows of the store, projected to int8 rows of an index."""
+        projected = rows.astype(np.float32) / 127 @ self.components * self.scale
+        return np.clip(np.rint(projected), -127, 127).astype(np.int8)
 
 
 class Store:
@@ -176,20 +216,41 @@ class Store:
             order = np.argsort(keys)
             self._runs.append((keys[order], order, np.load(run / "vectors.npy", mmap_mode="r")))
 
-    def take(self, keys: Any, vectors: Any, done: Any) -> Any:
-        """Fill the rows of vectors not done whose key a run embedded, and mark them done;
-        return which keys the store has."""
+    def has(self, keys: Any) -> Any:
+        """Which keys a run embedded (never 0: row 0, or an id no snippet has)."""
         found = np.zeros(len(keys), dtype=np.bool_)
-        for start in range(0, len(keys), _BLOCK):
-            block = keys[start : start + _BLOCK]
-            for sorted_keys, order, stored in self._runs:
-                at = np.minimum(np.searchsorted(sorted_keys, block), len(sorted_keys) - 1)
-                same = (sorted_keys[at] == block) & (block != 0)  # 0: row 0, no snippet
-                found[start : start + _BLOCK] |= same
-                same &= ~np.asarray(done[start : start + _BLOCK])
-                vectors[start : start + _BLOCK][same] = stored[order[at[same]]]
-                done[start : start + _BLOCK] |= same
+        for sorted_keys, _, _ in self._runs:
+            at = np.minimum(np.searchsorted(sorted_keys, keys), len(sorted_keys) - 1)
+            found |= (sorted_keys[at] == keys) & (keys != 0)
         return found
+
+    def take(self, keys: Any) -> Any:
+        """The vectors of keys, zero for a key no run embedded."""
+        out = np.zeros((len(keys), MODEL.dimensions), dtype=np.int8)
+        for sorted_keys, order, stored in self._runs:
+            at = np.minimum(np.searchsorted(sorted_keys, keys), len(sorted_keys) - 1)
+            same = (sorted_keys[at] == keys) & (keys != 0)
+            positions = order[at[same]]
+            ascending = np.argsort(positions)  # read in file order: the store may be on a disk
+            rows = np.empty((len(positions), MODEL.dimensions), dtype=np.int8)
+            rows[ascending] = stored[positions[ascending]]
+            out[same] = rows
+        return out
+
+    def projection(self) -> Projection:
+        """The store's projection, fitted on its first use: blocks of rows taken at random."""
+        path = self.path / f"pca-{KEPT}.npz"
+        if not path.exists():
+            pick = np.random.default_rng(0)
+            sizes = np.array([len(run[0]) for run in self._runs])
+            blocks, size = FIT
+            rows = []
+            for r in pick.choice(len(self._runs), blocks, p=sizes / sizes.sum()):
+                start = pick.integers(0, max(1, sizes[r] - size))
+                rows.append(np.asarray(self._runs[r][2][start : start + size]))
+            sample = np.concatenate(rows)
+            Projection.fit(sample[sample.any(axis=1)]).save(path)
+        return Projection.load(path)
 
     def add(self, keys: Any, vectors: Any) -> None:
         """Keep what a run embedded."""
@@ -228,19 +289,22 @@ def embed(index: Path, gpu: bool) -> dict[str, Any]:
     def encoder() -> Encoder:  # loaded only if some code is not in the store
         return Encoder(gpu)
 
-    for n in range(partitions):
-        if not (index / "partitions" / str(n) / "vectors.npy").exists():
-            run["new"][str(n)] = _partition(index, n, kept, encoder)
+    for n in range(partitions):  # first the store gets every function's embedding
+        if str(n) not in run["new"]:
+            run["new"][str(n)] = _embed(index, n, kept, encoder)
             begun.write_text(json.dumps(run), encoding="utf-8")
+    kept = store()  # with this run's
+    projection = kept.projection()
+    projection.save(index / "pca.npz")
+    for n in range(partitions):  # then each partition its rows, projected
+        _project(index, n, kept, projection)
     about = {
         "index_built": built,
         "model": {"repo": MODEL.repo, "revision": MODEL.revision},
+        "dimensions": KEPT,
         "embedded": datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "commit": source_commit(),
-        "snippets": sum(
-            len(np.load(index / "partitions" / str(n) / "vectors.npy", mmap_mode="r")) - 1
-            for n in range(partitions)
-        ),
+        "snippets": sum(len(_keys(index, n)) - 1 for n in range(partitions)),
         "new": sum(run["new"].values()),
         "seconds": round(time.time() - run["started"]),  # with the time it was interrupted
     }
@@ -249,54 +313,75 @@ def embed(index: Path, gpu: bool) -> dict[str, Any]:
     return about
 
 
-def _partition(index: Path, n: int, kept: Store, encoder: Callable[[], Encoder]) -> int:
-    """Write partition n's vectors; return how many the model embedded."""
-    started = time.monotonic()
-    here = index / "partitions" / str(n)
-    zdict = search.dictionary(index)
+def _keys(index: Path, n: int) -> Any:
+    """Partition n's store keys, by snippet id (0 for row 0 and ids no snippet has)."""
     db = search.connect(index, n)
     rows = (db.execute("SELECT max(id) FROM snippets").fetchone()[0] or 0) + 1
-    names = {name: here / f"{name}.part.npy" for name in ("vectors", "done")}
-    if names["done"].exists():  # an interrupted run of this partition
-        vectors, done = (np.load(path, mmap_mode="r+") for path in names.values())
-    else:
-        vectors = np.lib.format.open_memmap(
-            names["vectors"], "w+", np.int8, (rows, MODEL.dimensions)
-        )
-        done = np.lib.format.open_memmap(names["done"], "w+", np.bool_, (rows,))
     keys = np.zeros(rows, dtype=np.uint64)
     for snippet, hash_ in db.execute("SELECT id, hash FROM snippets"):
         keys[snippet] = int.from_bytes(hash_[:8])
-    stored = kept.take(keys, vectors, done)
-    new = 0
-    for start in range(1, rows, PART):
-        wanted = [s for s in range(start, min(start + PART, rows)) if not done[s]]
-        if not wanted:
+    db.close()
+    return keys
+
+
+def _embed(index: Path, n: int, kept: Store, encoder: Callable[[], Encoder]) -> int:
+    """Embed partition n's code that the store does not have, and keep it there; return how
+    much."""
+    started = time.monotonic()
+    here = index / "partitions" / str(n)
+    keys = _keys(index, n)
+    missing = np.flatnonzero(~kept.has(keys) & (keys != 0))  # the same after a crash: kept last
+    names = {name: here / f"{name}.part.npy" for name in ("vectors", "done")}
+    if not len(missing):
+        for path in names.values():  # left by a run stopped right after keeping its vectors
+            path.unlink(missing_ok=True)
+        return 0
+    if names["done"].exists():  # an interrupted run of this partition
+        vectors, done = (np.load(path, mmap_mode="r+") for path in names.values())
+    else:
+        shape = (len(missing), MODEL.dimensions)
+        vectors = np.lib.format.open_memmap(names["vectors"], "w+", np.int8, shape)
+        done = np.lib.format.open_memmap(names["done"], "w+", np.bool_, (len(missing),))
+    zdict = search.dictionary(index)
+    db = search.connect(index, n)
+    for start in range(0, len(missing), PART):
+        rows = [r for r in range(start, min(start + PART, len(missing))) if not done[r]]
+        if not rows:
             continue
+        ids = [int(missing[r]) for r in rows]
         code = {
             snippet: zstd.decompress(blob, zstd_dict=zdict).decode()
             for snippet, blob in db.execute(
-                "SELECT id, code FROM snippets WHERE id BETWEEN ? AND ?", (wanted[0], wanted[-1])
+                "SELECT id, code FROM snippets WHERE id BETWEEN ? AND ?", (ids[0], ids[-1])
             )
         }
-        wanted = [s for s in wanted if s in code]  # ids no snippet has
-        vectors[wanted] = np.rint(encoder()([code[s] for s in wanted]) * 127).astype(np.int8)
+        vectors[rows] = np.rint(encoder()([code[i] for i in ids]) * 127).astype(np.int8)
         vectors.flush()
-        done[wanted] = True
+        done[rows] = True
         done.flush()
-        new += len(wanted)
-        rate = new / (time.monotonic() - started)
-        print(
-            f"[{n}: {min(start + PART, rows) - 1}/{rows - 1}] {new} embedded, {rate:.0f}/s",
-            flush=True,
-        )
+        rate = (start + len(rows)) / (time.monotonic() - started)
+        print(f"[{n}: {start + len(rows)}/{len(missing)}] {rate:.0f}/s", flush=True)
     db.close()
-    fresh = np.flatnonzero(np.asarray(done) & (keys != 0) & ~stored)  # this start's or before
-    kept.add(keys[fresh], np.asarray(vectors[fresh]))
-    del vectors, done  # close the maps before their files are renamed
-    names["vectors"].replace(here / "vectors.npy")
-    names["done"].unlink()
-    return len(fresh)
+    kept.add(keys[missing], np.asarray(vectors))
+    del vectors, done  # close the maps before their files are removed
+    for path in names.values():
+        path.unlink()
+    return len(missing)
+
+
+def _project(index: Path, n: int, kept: Store, projection: Projection) -> None:
+    """Write partition n's vectors from the store's, projected."""
+    here = index / "partitions" / str(n)
+    if (here / "vectors.npy").exists():
+        return
+    keys = _keys(index, n)
+    part = here / "vectors.part.npy"
+    vectors = np.lib.format.open_memmap(part, "w+", np.int8, (len(keys), KEPT))
+    for start in range(0, len(keys), _BLOCK):
+        vectors[start : start + _BLOCK] = projection(kept.take(keys[start : start + _BLOCK]))
+    vectors.flush()
+    del vectors  # closed before it is renamed
+    part.replace(here / "vectors.npy")
 
 
 def _files(gpu: bool) -> tuple[Path, Path]:

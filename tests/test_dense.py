@@ -34,7 +34,7 @@ def test_embeddings_order_results_and_outlive_a_rebuild(
     manifest.write_text(json.dumps({"built": "first"}))
     assert dense.embed(index.path, gpu=False)["new"] == 4
     vectors = np.load(index.path / "partitions" / "0" / "vectors.npy")
-    assert vectors.shape == (5, dense.MODEL.dimensions)  # row n is snippet n; 0 is none
+    assert vectors.shape == (5, dense.KEPT)  # row n is snippet n; 0 is none
     assert not vectors[0].any()
     assert all(vectors[n].any() for n in range(1, 5))
 
@@ -80,5 +80,5 @@ def test_a_resumed_run_counts_and_keeps_all_its_work(
         "records.sqlite",
         "vectors.npy",
     ]
-    (run,) = dense.store().path.iterdir()
+    (run,) = (p for p in dense.store().path.iterdir() if p.name.isdigit())
     assert len(np.load(run / "keys.npy")) == 4  # the 2 embedded before the crash too
