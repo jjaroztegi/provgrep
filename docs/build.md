@@ -30,3 +30,10 @@ Two things outlive any one index, in `PROVGREP_CACHE` (by default the user cache
   everything again rather than mixing outputs; files under another key are removed.
 - `embeddings/<model>/<run>/`: every embedding the model has made, by the hash of the code. A
   rebuild takes its vectors from here and embeds only code no run has seen.
+
+## On several machines
+
+Staging is most of a build's time, and each repository is independent. `provgrep stage --part
+I/N` stages every Nth repository of the corpus from the Ith; copy the staged files of every part
+into one cache's `staging/<key>/` (the same key: the same code and tool versions) and run
+`provgrep build` there, which stages only what is missing.
