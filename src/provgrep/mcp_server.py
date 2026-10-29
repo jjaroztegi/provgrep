@@ -8,7 +8,6 @@ the text, and pretty-printed it was a third larger.
 """
 
 import json
-from dataclasses import replace
 from importlib.metadata import version
 from typing import Annotated, Any, Literal
 
@@ -20,7 +19,7 @@ from mcp.types import CallToolResult, TextContent, ToolAnnotations
 from pydantic import Field
 
 from provgrep.attribution import reuse_snippet
-from provgrep.search import Index, Page, Snippet, licenses_of
+from provgrep.search import MAX_COPIES, Index, Page, Snippet, licenses_of
 
 MAX_RESULTS = 20
 MAX_OFFSET = 100  # deeper than this, a better query finds it sooner
@@ -113,15 +112,15 @@ def server(index: Index, public: str | None = None) -> MCPServer:
     def snippet(
         id: Annotated[str, Field(description="A result's id")],
         copies: Annotated[
-            int, Field(ge=1, le=1000, description="Copies to list, first found first")
+            int, Field(ge=1, le=MAX_COPIES, description="Copies to list, first found first")
         ] = COPIES,
     ) -> Annotated[CallToolResult, Snippet]:
         """One result with the copies of its code in the index, each under its own license; the
         result's `copies` says how many there are in all."""
-        found = index.snippet(id)
+        found = index.snippet(id, copies)
         if found is None:
             raise ToolError(f"no snippet {id!r} in this index")
-        return _compact(replace(found, copies=found.copies[:copies]))
+        return _compact(found)
 
     @mcp.tool(title="Code with its attribution", annotations=_READ_ONLY)
     def attribution(id: Annotated[str, Field(description="A result's id")]) -> str:

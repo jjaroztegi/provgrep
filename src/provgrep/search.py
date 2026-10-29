@@ -45,6 +45,7 @@ MAX_ALLOWED = 8
 MAX_QUERY = 1000  # characters: a question, not a file
 MAX_REQUIRED = 8
 ID_LENGTH = 16  # hex digits of a snippet's hash that name it
+MAX_COPIES = 1000  # listed at most for a snippet: one has 3,069, all in one repository
 # A term in more than this share of a field's documents does not make a document match on its
 # own, as in Lucene's common terms query. At 0.01 the intent suites rank as well as with no cut,
 # and a search scores a third of the documents.
@@ -337,8 +338,9 @@ class Index:
         total = sum(shard.count for shard in found)  # type: ignore[attr-defined]  # not in its stubs
         return Page(total, [_result(rows[snippet], score, project) for score, snippet in ranked])
 
-    def snippet(self, id: str) -> Snippet | None:
-        """A snippet by its id, with every location of its code."""
+    def snippet(self, id: str, copies: int = MAX_COPIES) -> Snippet | None:
+        """A snippet by its id, with the first `copies` locations of its code (at most
+        MAX_COPIES); its result's `copies` counts them all."""
         if len(id) != ID_LENGTH or not all(c in "0123456789abcdef" for c in id):
             return None
         row = self._db.execute(
@@ -346,12 +348,12 @@ class Index:
         ).fetchone()
         if row is None:
             return None
-        copies = self._db.execute(
+        found = self._db.execute(
             f"SELECT {_LOCATION} FROM locations l JOIN files f ON f.id = l.file"
-            " JOIN repos r ON r.id = f.repo WHERE l.snippet = ? ORDER BY l.id",
-            (row[0],),
+            " JOIN repos r ON r.id = f.repo WHERE l.snippet = ? ORDER BY l.id LIMIT ?",
+            (row[0], max(0, min(copies, MAX_COPIES))),
         ).fetchall()
-        return Snippet(_result(self._rows([row[0]])[row[0]], 0.0), [_location(c) for c in copies])
+        return Snippet(_result(self._rows([row[0]])[row[0]], 0.0), [_location(c) for c in found])
 
     def _text(self, words: list[str]) -> Query | None:
         """The words in every field, weighted; a document must have one of the rarer ones (see

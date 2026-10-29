@@ -6,7 +6,7 @@
         license: "permissive" (default), "any", "allowed" (allowed=SPDX ids, comma-separated)
         or "compatible" (project=SPDX id: code OSADL's matrix says may go into that project)
         level: A, B, C or X, repeated; require: an identifier the code must contain, repeated
-    GET /api/snippets/{id}
+    GET /api/snippets/{id}?copies=100                  a snippet and up to that many copies
     POST /mcp                                           the same search as MCP tools
     GET /healthz                                        which build of the index is served
 
@@ -42,6 +42,7 @@ from provgrep.search import Index, Page, Result, licenses_of, query_terms, terms
 
 PAGE_SIZE = 10
 MAX_PAGE = 20  # deeper than this, refine the query
+COPIES = 100  # listed on a snippet's page, and by the API unless it asks for more
 MAX_CONNECTIONS = 64
 LOOPBACK = ("127.0.0.1", "localhost", "::1")
 # Searches a client may make: RATE a second, BURST at once. Typing in the search box asks for
@@ -196,7 +197,7 @@ def app(index: Index, host: str = "127.0.0.1", public: str | None = None) -> Sta
         return templates.TemplateResponse(request, name, context, status_code=400 if error else 200)
 
     def snippet_page(request: Request) -> Response:
-        found = index.snippet(request.path_params["id"])
+        found = index.snippet(request.path_params["id"], COPIES)
         if found is None:
             missing = {"query": {"q": "", "license": "permissive"}, "languages": LANGUAGES}
             return templates.TemplateResponse(request, "missing.html", missing, status_code=404)
@@ -216,7 +217,10 @@ def app(index: Index, host: str = "127.0.0.1", public: str | None = None) -> Sta
         return JSONResponse({"page": query["page"], "page_size": PAGE_SIZE, **asdict(found)})
 
     def api_snippet(request: Request) -> JSONResponse:
-        found = index.snippet(request.path_params["id"])
+        wanted = request.query_params.get("copies", str(COPIES))
+        if not wanted.isdigit():
+            return JSONResponse({"error": "copies is a number"}, status_code=400)
+        found = index.snippet(request.path_params["id"], int(wanted))
         if found is None:
             return JSONResponse({"error": "no such snippet"}, status_code=404)
         return JSONResponse(asdict(found))
