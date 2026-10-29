@@ -1,52 +1,140 @@
 {
  "suite": "xrender",
- "about": "What a programmer needed to find while writing an XRender program in C from scratch, live, from documentation that answers little. Queries name only what was known at that point; expected identifiers are what the code that answered it calls.",
+ "about": "What a programmer needed to find while writing an XRender program in C from scratch, live, from documentation that answers little, in the order it came up (`at`: the time in the video). Queries name only what was known at that point; expected identifiers are what the code that answered it calls.",
  "source": "Tsoding Daily, \"X11 extension that changes everything (XRender)\", https://www.youtube.com/watch?v=auzZCp45dJc",
  "intents": [
   {
+   "id": "open-display",
+   "at": "07:56",
+   "query": "open a connection to the default X11 display server",
+   "languages": ["c", "cpp"],
+   "expect": ["XOpenDisplay"]
+  },
+  {
+   "id": "simple-window",
+   "at": "09:37",
+   "query": "create a simple X11 window on the default root window",
+   "languages": ["c", "cpp"],
+   "expect": ["XCreateSimpleWindow", "XDefaultRootWindow|RootWindow|DefaultRootWindow"]
+  },
+  {
+   "id": "window-attributes",
+   "at": "10:16",
+   "query": "get the attributes and visual of an X11 window",
+   "languages": ["c", "cpp"],
+   "expect": ["XGetWindowAttributes", "XWindowAttributes"]
+  },
+  {
+   "id": "close-button",
+   "at": "10:54",
+   "query": "handle the window close button in X11 with WM_DELETE_WINDOW",
+   "languages": ["c", "cpp"],
+   "expect": ["XInternAtom", "XSetWMProtocols", "WM_DELETE_WINDOW"]
+  },
+  {
+   "id": "select-input",
+   "at": "11:38",
+   "query": "select keyboard mouse and window resize events on an X11 window",
+   "languages": ["c", "cpp"],
+   "expect": ["XSelectInput", "StructureNotifyMask|ExposureMask|KeyPressMask"]
+  },
+  {
+   "id": "title-and-map",
+   "at": "11:57",
+   "query": "set the title of an X11 window and show it on the screen",
+   "languages": ["c", "cpp"],
+   "expect": ["XStoreName", "XMapWindow"]
+  },
+  {
+   "id": "drain-events",
+   "at": "12:38",
+   "query": "drain all pending events from the X11 event queue in a loop",
+   "languages": ["c", "cpp"],
+   "expect": ["XPending", "XNextEvent"]
+  },
+  {
    "id": "version",
+   "at": "17:10",
    "query": "check that the X server supports the XRender extension and get its version",
    "languages": ["c", "cpp"],
    "expect": ["XRenderQueryVersion|XRenderQueryExtension"]
   },
   {
+   "id": "subpixel-order",
+   "at": "24:50",
+   "query": "query the subpixel order of an X11 screen with XRender",
+   "languages": ["c", "cpp"],
+   "expect": ["XRenderQuerySubpixelOrder|XRenderQueryFormats"]
+  },
+  {
+   "id": "standard-format",
+   "at": "25:34",
+   "query": "find a standard 32-bit ARGB XRender picture format or match by mask",
+   "languages": ["c", "cpp"],
+   "expect": [
+    "XRenderFindStandardFormat|XRenderFindFormat",
+    "PictStandardARGB32|PictFormatType|PictFormatDepth"
+   ]
+  },
+  {
+   "id": "filters",
+   "at": "29:36",
+   "query": "query available transformation filters for an XRender drawable and set a picture filter",
+   "languages": ["c", "cpp"],
+   "expect": ["XRenderQueryFilters|XRenderSetPictureFilter"]
+  },
+  {
+   "id": "fill-rectangle",
+   "at": "46:25",
+   "query": "fill a rectangle with a solid color using XRender",
+   "languages": ["c", "cpp"],
+   "expect": ["XRenderFillRectangle", "XRenderColor"]
+  },
+  {
    "id": "visual-format",
+   "at": "58:24",
    "query": "find the XRender picture format that matches the visual of a window",
    "languages": ["c", "cpp"],
    "expect": ["XRenderFindVisualFormat"]
   },
   {
    "id": "window-picture",
+   "at": "1:04:02",
    "query": "create an XRender picture for an X11 window to draw on",
    "languages": ["c", "cpp"],
    "expect": ["XRenderCreatePicture", "XRenderFindVisualFormat"]
   },
   {
-   "id": "fill-rectangle",
-   "query": "fill a rectangle with a solid color using XRender",
-   "languages": ["c", "cpp"],
-   "expect": ["XRenderFillRectangle", "XRenderColor"]
-  },
-  {
    "id": "composite-op",
+   "at": "1:06:51",
    "query": "what op to pass to XRenderComposite to copy one picture onto another",
    "languages": ["c", "cpp"],
    "expect": ["XRenderComposite", "PictOpSrc|PictOpOver"]
   },
   {
    "id": "pixels-to-picture",
+   "at": "1:13:02",
    "query": "upload an image from memory to a pixmap and make an XRender picture of it",
    "languages": ["c", "cpp"],
    "expect": ["XPutImage", "XRenderCreatePicture"]
   },
   {
+   "id": "image-from-memory",
+   "at": "1:27:24",
+   "query": "create a 24-bit or 32-bit XImage from an RGBA pixel buffer in memory",
+   "languages": ["c", "cpp"],
+   "expect": ["XCreateImage", "ZPixmap"]
+  },
+  {
    "id": "scale",
+   "at": "1:31:06",
    "query": "scale an image on the X server with an XRender picture transform",
    "languages": ["c", "cpp"],
    "expect": ["XRenderSetPictureTransform", "XDoubleToFixed"]
   },
   {
    "id": "shared-memory",
+   "at": "1:43:43",
    "query": "put a shared memory image (MIT-SHM) on a pixmap and composite it with XRender",
    "languages": ["c", "cpp"],
    "expect": ["XShmPutImage|XShmCreatePixmap", "XRenderComposite|XRenderCreatePicture"]
