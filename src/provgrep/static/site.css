@@ -248,7 +248,7 @@ main.single { flex: 1; width: 100%; max-width: 68rem; padding-top: 1.5rem; }
 .code .c { color: var(--warm); } /* comments */
 .code .n { color: #95a99f; } /* numbers, constants, escapes */
 .code .t { color: #b6b6b6; } /* types */
-.code mark { background: #8b8989de; color: #000; }
+.code mark { background: #f4f4ff; color: #0a0a0a; } /* the theme's find: white, black text */
 .line::before {
   content: attr(data-n);
   display: inline-block;
