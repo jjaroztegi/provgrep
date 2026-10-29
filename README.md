@@ -28,32 +28,31 @@ none. Files where both sides agree were not read. The audit, with its reasons an
 Two suites of intents in `truth/intents/`, each a question and the calls the code of a right
 answer contains; a result is a hit when its code has them all. Over the full index (built at
 378bb39 from corpus/github.json, sha256 526db429d94b, with its embeddings, and searched at
-1900cbf; queries embedded with the model's 8-bit weights):
+6e17fee; queries embedded with the model's 8-bit weights):
 
 | suite | licenses | intents | a hit first | a hit in the top 10 | MRR@10 | answerable from the index |
 |---|---|---:|---:|---:|---:|---:|
 | APIs: common tasks in 8 languages | any | 89 | 41 | 76 | 0.59 | 89 |
 | | permissive | 89 | 42 | 77 | 0.60 | 89 |
-| XRender: what a live session needed | any | 19 | 2 | 8 | 0.21 | 16 |
-| | permissive | 19 | 3 | 7 | 0.21 | 14 |
+| XRender: what a live session needed | any | 19 | 3 | 9 | 0.28 | 16 |
+| | permissive | 19 | 3 | 8 | 0.24 | 14 |
 
 Search finds the functions that have the question's words (BM25 over identifiers split into words
 and kept whole, in partitions searched at once), then orders the first 100 by how close their code
 is to the question in meaning ([docs/search.md](docs/search.md#ordering-by-meaning)). Without that
-order, a hit came first for 33 and 30 of the API intents (MRR 0.49 and 0.48) and in the top 10
-for 3 XRender questions with any license. On the 8-core server, once the index has been read from
+order, a hit came first for 32 and 29 of the API intents (MRR 0.49 and 0.47) and in the top 10
+for 5 XRender questions with any license. On the 8-core server, once the index has been read from
 disk, a search takes 28 ms at the median and 60 ms at the 95th percentile (23 and 53 ms without
 the order); the benchmark asks each question twice, with any license and with permissive ones,
 and the second time its embedding is remembered.
 
 The XRender questions are the 19 a programmer had while writing an XRender program in C from
 scratch, live ([Tsoding Daily](https://www.youtube.com/watch?v=auzZCp45dJc)), each with the time it
-came up. The index answers 16 of them; search puts one in the top 10 for 8. The misses are of two
+came up. The index answers 16 of them; search puts one in the top 10 for 9. The misses are of two
 kinds. Most XRender calls are in a handful of functions among 21 million, and three are in none: the
 subpixel order, a picture of an uploaded pixmap, a shared memory image. And the first steps of any
-X11 program (XGetWindowAttributes, XSelectInput, XStoreName with XMapWindow, XCreateImage) are in 35
-to 214 functions each, none of them in the top 10, where X11 window code that does something else
-comes first. Some answers exist only under copyleft: the only three functions that fill a rectangle
+X11 program (XSelectInput, XStoreName with XMapWindow, XCreateImage) are in 35 to 64 functions
+each, none of them in the top 10, where X11 window code that does something else comes first. Some answers exist only under copyleft: the only three functions that fill a rectangle
 with `XRenderFillRectangle` and an `XRenderColor` are in TigerVNC (GPL-2.0-or-later) and the OpenJDK
 (GPL-2.0 with the Classpath exception). The OpenJDK's comes first for that question, and a project
 under MIT gets nothing to copy for it, and is told so.
