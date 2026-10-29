@@ -37,3 +37,9 @@ Staging is most of a build's time, and each repository is independent. `provgrep
 I/N` stages every Nth repository of the corpus from the Ith; copy the staged files of every part
 into one cache's `staging/<key>/` (the same key: the same code and tool versions) and run
 `provgrep build` there, which stages only what is missing.
+
+## Removals
+
+`corpus/removed.json` lists what people asked to have left out: whole repositories, files or
+directories of one, and functions by id, each with the request it answers. Every build leaves
+them out (a repository is not even fetched) and counts what it left out in the manifest.

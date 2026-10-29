@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 
 import pytest
@@ -116,3 +117,29 @@ def test_a_snippet_lists_as_many_copies_as_asked(index: search.Index) -> None:
     assert first is not None
     assert [c.path for c in first.copies] == ["third_party/x/pic.h"]
     assert first.result.copies == 2  # how many there are in all
+
+
+def test_what_was_asked_to_be_removed_is_left_out(index: search.Index, tmp_path: Path) -> None:
+    picture = index.search("picture").results[0].id
+    asked = tmp_path / "removed.json"
+    asked.write_text(
+        json.dumps(
+            {
+                "removed": [
+                    {"repo": "Acme/Small", "issue": "1"},
+                    {"repo": "acme/big", "path": "src/fill.c/", "issue": "2"},
+                    {"function": picture, "issue": "3"},
+                ]
+            }
+        )
+    )
+    out = tmp_path / "left"
+    out.mkdir()
+    (out / "manifest.json").write_bytes((index.path / "manifest.json").read_bytes())
+    repos = github.load(index.path.parent / "corpus.json")
+    counts = build.write(repos, index.path.parent / "staging", out, 1, build.Removed.load(asked))
+    assert counts["removed"] == {"files": 1, "functions": 2}  # the picture and its vendored copy
+    assert counts["repos"] == 1
+    left = search.Index(out)
+    assert left.search("fill picture render own", licenses="any").total == 0
+    assert left.snippet(picture) is None

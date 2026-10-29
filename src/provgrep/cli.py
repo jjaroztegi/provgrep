@@ -66,6 +66,12 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--out", type=Path, default=Path("index/github"))
     p.add_argument("--jobs", type=int, default=4, help="repositories staged at once (default: 4)")
     p.add_argument("--limit", type=int, help="only the first N repositories of each language")
+    p.add_argument(
+        "--removed",
+        type=Path,
+        default=Path("corpus/removed.json"),
+        help="what people asked to have left out",
+    )
 
     p = commands.add_parser(
         "stage", help="stage the repositories of a corpus into the cache, or a part of them"
@@ -140,7 +146,7 @@ def main(argv: list[str] | None = None) -> int:
     elif args.command == "build":
         from provgrep.build import build
 
-        manifest = build(args.corpus, args.out, args.jobs, args.limit)
+        manifest = build(args.corpus, args.out, args.jobs, args.removed, args.limit)
         print(json.dumps(manifest["counts"], indent=1))
         if manifest["failed"]:
             print(f"failed: {len(manifest['failed'])} (listed in the manifest)")
