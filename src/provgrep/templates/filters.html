@@ -1,0 +1,44 @@
+{# The search's filters, named as the command line's flags. They belong to the search form above
+   (form="search"), so a search without the script is still one GET with all of them. #}
+{% set licenses = [("permissive", "permissive"), ("any", "any"), ("allowed", "only these…"), ("compatible", "fits my project…")] %}
+{% set levels = [("", "any"), ("A", "file header"), ("B", "two sources agree"), ("C", "one source"), ("X", "none found")] %}
+{% set language = query.language or "" %}{% set level = query.level or "" %}
+<details class="filters" open>
+  <summary>
+    {# site.js says the same as the filters change #}
+    <span class="state">{% if query.license == "allowed" %}{{ query.allowed or "only these" }}{% elif query.license == "compatible" %}fits {{ query.project }}{% else %}{{ query.license }} license{% endif %}, {{ language or "every language" }}, {{ "level " + level if level else "any level" }}</span>
+    <span class="toggle">filters</span>
+  </summary>
+  <fieldset>
+    <legend>--license</legend>
+    {% for value, label in licenses %}
+    <label class="option"><input type="radio" name="license" value="{{ value }}" form="search" {% if query.license == value %}checked{% endif %}><span>{{ label }}</span></label>
+    {% endfor %}
+    <label class="spdx allowed">
+      <span class="visually-hidden">SPDX ids, comma-separated</span>
+      <input type="text" name="allowed" value="{{ query.allowed or '' }}" placeholder="MIT, BSD-3-Clause" spellcheck="false" form="search">
+    </label>
+    <label class="spdx project">
+      <span class="visually-hidden">Your project's license</span>
+      <select name="project" form="search">
+        {% if query.project and query.project not in projects %}<option selected>{{ query.project }}</option>{% endif %}
+        {% for spdx in projects %}
+        <option {% if query.project == spdx %}selected{% endif %}>{{ spdx }}</option>
+        {% endfor %}
+      </select>
+    </label>
+  </fieldset>
+  <fieldset>
+    <legend>--language</legend>
+    <label class="option"><input type="radio" name="language" value="" form="search" {% if not language %}checked{% endif %}><span>any</span></label>
+    {% for key in languages %}
+    <label class="option"><input type="radio" name="language" value="{{ key }}" form="search" {% if language == key %}checked{% endif %}><span>{{ key }}</span></label>
+    {% endfor %}
+  </fieldset>
+  <fieldset>
+    <legend>--level</legend>
+    {% for value, label in levels %}
+    <label class="option"><input type="radio" name="level" value="{{ value }}" form="search" {% if level == value %}checked{% endif %}><span>{% if value %}<b>{{ value }}</b> {% endif %}{{ label }}</span></label>
+    {% endfor %}
+  </fieldset>
+</details>

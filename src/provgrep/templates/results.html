@@ -5,8 +5,11 @@
 {% elif found.total == 0 %}
   <p class="message">No functions match. Try fewer words, another language, or any license.</p>
 {% else %}
-  <p class="count">{{ "{:,}".format(found.total) }} function{{ "s" if found.total != 1 }}{% if query.page > 1 %}, page {{ query.page }}{% endif %}</p>
+  <p class="count">
+    <span>{{ "{:,}".format(found.total) }} function{{ "s" if found.total != 1 }}{% if query.page > 1 %}, page {{ query.page }}{% endif %}</span>
+    <a class="api" href="{{ api }}">GET {{ api }}</a>
+  </p>
   {% for v in results %}{{ card(v) }}{% endfor %}
-  {% if next %}<p class="next"><a href="{{ next }}">More results</a></p>{% endif %}
+  {% if next %}<p class="next"><a href="{{ next }}">more results</a></p>{% endif %}
 {% endif %}
 </section>

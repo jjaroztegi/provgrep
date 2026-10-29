@@ -34,6 +34,8 @@ def test_pages(index: search.Index) -> None:
     withheld = client.get("/", params={"q": "fill", "license": "any", "level": "X"}).text
     assert "The code is not shown here" in withheld
     assert "XRenderFillRectangle" not in withheld
+    assert 'value="X" form="search" checked' in withheld  # the filters say what was asked for
+    assert 'href="/api/search?q=fill&amp;license=any&amp;level=X"' in withheld
     allowed = client.get(
         "/", params={"q": "fill", "license": "allowed", "allowed": "GPL-2.0-or-later"}
     )
@@ -102,6 +104,7 @@ def test_public_serving_guards(index: search.Index, monkeypatch: pytest.MonkeyPa
     csp = page.headers["content-security-policy"]
     assert "script-src 'self'" in csp
     assert "frame-ancestors 'none'" in csp
+    assert "font-src 'self'" in csp  # the site's own fonts, and no one else's
     assert page.headers["referrer-policy"] == "no-referrer"
     assert [client.get("/api/search", params={"q": "x"}).status_code for _ in range(3)] == [
         200,
@@ -113,6 +116,7 @@ def test_public_serving_guards(index: search.Index, monkeypatch: pytest.MonkeyPa
     assert int(busy.headers["retry-after"]) > 0
     assert "nosniff" in busy.headers["x-content-type-options"]
     assert client.get("/static/site.css").status_code == 200  # not a search
+    assert client.get("/static/fonts/iosevka-400.woff2").status_code == 200
     assert client.get("/healthz").json()["index_built"] == "test"  # the fixture's build
     assert client.get("/robots.txt").text.startswith("User-agent: *\nAllow: /$\nDisallow: /")
 

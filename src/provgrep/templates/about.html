@@ -1,7 +1,8 @@
 {% extends "base.html" %}
 {% block title %}About, privacy and removal - provgrep{% endblock %}
-{% block main %}
-<section class="intro about">
+{% block page %}
+<main id="main" class="single">
+<section class="prose">
   <h1>About provgrep</h1>
   <p>provgrep searches functions from public repositories on GitHub, each read at a pinned commit, and shows every one with the license it is under, the evidence for that license and its copyright notices. Code with no license that lets it be shared is linked to, not shown. Licenses are as detected, not concluded, and they are not legal advice: the evidence is there to be checked. How each number is measured: <a href="https://github.com/jjaroztegi/provgrep">the source</a>.</p>
   {% set counts = manifest.get("counts", {}) %}
@@ -10,10 +11,11 @@
   {% endif %}
 
   <h2>Privacy</h2>
-  <p>There are no accounts, cookies, analytics or requests to anyone else: the page loads only its own script and styles. The server keeps no log of what is searched. To share the load fairly it counts each address's searches in memory for a few minutes, and nothing else about it.</p>
+  <p>There are no accounts, cookies, analytics or requests to anyone else: the page loads only its own script, styles and fonts. The server keeps no log of what is searched. To share the load fairly it counts each address's searches in memory for a few minutes, and nothing else about it.</p>
   <p>Email addresses are removed from what is indexed: from copyright notices, comments and docstrings. Authors are named only as their notices name them.</p>
 
   <h2>Removal</h2>
   <p>To have a repository, a file or a function left out of the index, or to report personal data in a result, <a href="https://github.com/jjaroztegi/provgrep/issues/new?template=removal.yml">open a removal request</a> with its link. What is left out stays out of every later build of the index; a removal takes effect when the index is next built.</p>
 </section>
+</main>
 {% endblock %}

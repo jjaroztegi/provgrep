@@ -1,50 +1,70 @@
-/* provgrep: code on the left, the evidence for its license on the right. The one loud thing is
-   the grade of that evidence; everything else is ink on paper. */
+/* provgrep looks like a terminal: Iosevka and the Gruber Darker palette, dark only. Colour means
+   something: green, warm and red say whether a result's code may be copied and on what terms;
+   yellow is what can be clicked, and what matched the search. Code has no other colour. */
 
-:root {
-  --paper: #f6f7f4;
-  --surface: #ffffff;
-  --ink: #1f2a44;
-  --ink-soft: #545f78;
-  --rule: #d3d8d2;
-  --mark: #ffef9a;
-  --permissive: #0f6b5e;
-  --copyleft: #8a5a00;
-  --link: #962d3e;
-  --focus: #2457c5;
-  --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", sans-serif;
-  --mono: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, "Liberation Mono", monospace;
-  --book: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
-  color-scheme: light dark;
+@font-face {
+  font-family: Iosevka;
+  font-weight: 400;
+  font-display: swap;
+  src: url("fonts/iosevka-400.woff2") format("woff2");
+}
+@font-face {
+  font-family: Iosevka;
+  font-weight: 600;
+  font-display: swap;
+  src: url("fonts/iosevka-600.woff2") format("woff2");
+}
+@font-face {
+  font-family: Iosevka;
+  font-weight: 700;
+  font-display: swap;
+  src: url("fonts/iosevka-700.woff2") format("woff2");
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --paper: #121722;
-    --surface: #181e2b;
-    --ink: #dce3ee;
-    --ink-soft: #9aa6bc;
-    --rule: #2c3547;
-    --mark: #5c4b00;
-    --permissive: #5cc8b4;
-    --copyleft: #e2a84b;
-    --link: #f28b9c;
-    --focus: #7fa6ff;
-  }
+:root {
+  --bg: #181818;
+  --bg-lighter: #1e1e1e;
+  --fg: #e4e4e4;
+  --muted: #a0a0a0;
+  --dim: #8a8a8a; /* line numbers and placeholders, 5:1 on --bg */
+  --rule: #444;
+  --yellow: #ffdd33;
+  --green: #73d936; /* permissive */
+  --warm: #cc8c3c; /* shareable on terms: copyleft and the like */
+  --red: #f43841; /* not shareable: linked to, never shown */
+  --mono: Iosevka, ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace;
+  color-scheme: dark;
 }
 
 * { box-sizing: border-box; }
 
-body {
-  margin: 0;
-  background: var(--paper);
-  color: var(--ink);
-  font: 1rem/1.5 var(--sans);
+html {
+  background: var(--bg);
+  color: var(--fg);
+  font: 16px/1.6 var(--mono);
+  scrollbar-gutter: stable;
 }
 
-a { color: inherit; text-underline-offset: 0.18em; }
-a:hover { text-decoration-thickness: 2px; }
-:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+body {
+  margin: 0;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  font-size: 0.875rem;
+}
+
+::selection { background: #484848; }
+
+a {
+  color: var(--yellow);
+  text-decoration: underline;
+  text-decoration-color: rgb(255 221 51 / 0.4);
+  text-underline-offset: 0.25em;
+}
+a:hover { text-decoration-color: currentColor; }
+:focus-visible { outline: 2px solid var(--yellow); outline-offset: 3px; }
+mark { background: none; color: var(--yellow); }
+abbr { text-decoration: none; }
 
 .visually-hidden {
   position: absolute;
@@ -55,283 +75,291 @@ a:hover { text-decoration-thickness: 2px; }
   white-space: nowrap;
 }
 
-.masthead, main, .colophon {
-  max-width: 76rem;
-  margin: 0 auto;
-  padding: 0 1.25rem;
-}
+/* The bar: the name, and the pages besides search */
 
-/* The search form */
-
-.masthead {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  gap: 0.75rem 1.5rem;
-  align-items: start;
-  padding-top: 1.25rem;
-  padding-bottom: 1.25rem;
+.top {
+  display: flex;
+  align-items: baseline;
+  gap: 3ch;
+  padding: 0.875rem 1.5rem;
   border-bottom: 1px solid var(--rule);
 }
+.brand { color: var(--fg); font-weight: 700; text-decoration: none; }
+.brand span { color: var(--muted); }
+.nav { display: flex; gap: 3ch; margin-left: auto; }
+.nav a { color: var(--muted); text-decoration: none; }
+.nav a:hover { color: var(--fg); }
 
-.wordmark {
-  font-weight: 750;
-  font-size: 1.375rem;
-  letter-spacing: -0.02em;
-  text-decoration: none;
-  line-height: 2.9rem;
-}
+/* The search: a prompt */
 
-.search { display: grid; gap: 0.6rem; }
-
-.query input {
-  width: 100%;
-  height: 2.9rem;
-  padding: 0 0.9rem;
-  border: 2px solid var(--ink);
-  border-radius: 6px;
-  background: var(--surface);
-  color: var(--ink);
-  font: inherit;
+.search {
+  display: flex;
+  align-items: center;
+  gap: 1ch;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--rule);
   font-size: 1.125rem;
 }
-
-.filters {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem 1rem;
-  align-items: end;
-  font-size: 0.875rem;
-}
-
-.filters label { display: flex; flex-direction: column; gap: 0.15rem; color: var(--ink-soft); }
-
-.filters select, .filters input, .filters button {
-  height: 2.1rem;
-  padding: 0 0.6rem;
-  border: 1px solid var(--rule);
-  border-radius: 6px;
-  background: var(--surface);
-  color: var(--ink);
+.search::before { content: "$" / ""; color: var(--green); }
+.prompt { flex: 1; min-width: 0; }
+.prompt input {
+  width: 100%;
+  padding: 0;
+  border: 0;
+  outline: none; /* the caret shows where typing goes */
+  background: transparent;
+  color: var(--fg);
+  caret-color: var(--yellow);
   font: inherit;
 }
-
-.filters .allowed, .filters .project { display: none; }
-.filters .allowed input { width: 19rem; max-width: 100%; }
-.search:has(option[value="allowed"]:checked) .allowed { display: flex; }
-.search:has(option[value="compatible"]:checked) .project { display: flex; }
-
-.filters button {
-  border-color: var(--ink);
-  background: var(--ink);
-  color: var(--paper);
+.prompt input::placeholder { color: var(--dim); }
+.prompt input::-webkit-search-cancel-button { appearance: none; }
+.search button {
+  padding: 0.25rem 0.75rem;
+  border: 0;
+  background: var(--yellow);
+  color: var(--bg);
+  font: inherit;
+  font-size: 0.875rem;
   font-weight: 600;
-  padding: 0 1rem;
+  cursor: pointer;
 }
+/* With the script, results follow what is typed and picked; the button is for without it. */
+.live .search button { display: none; }
 
-/* With the script, results follow what is typed; the button is only needed without it. */
-.live .filters button { display: none; }
+/* The page: the filters at the left, the results at the right */
 
-/* The page before a search */
+.page { flex: 1; display: grid; grid-template-columns: 15rem minmax(0, 1fr); }
+main { min-width: 0; padding: 0 1.5rem 2rem; }
+main.single { flex: 1; width: 100%; max-width: 68rem; padding-top: 1.5rem; }
 
-.intro { max-width: 44rem; padding: 3rem 0 2rem; }
-
-.intro h1 {
-  margin: 0 0 1rem;
-  font-size: clamp(1.75rem, 4.5vw, 2.6rem);
-  line-height: 1.12;
-  letter-spacing: -0.02em;
-  font-weight: 750;
+.filters {
+  padding: 0.25rem 1.5rem 1.5rem;
+  border-right: 1px solid var(--rule);
+  font-size: 0.8125rem;
 }
+.filters > summary { display: none; }
+.filters fieldset { min-width: 0; margin: 1.125rem 0 0; padding: 0; border: 0; }
+.filters legend { margin-bottom: 0.375rem; padding: 0; font-weight: 600; }
 
-.intro p { margin: 0 0 1.25rem; max-width: 38rem; }
+.option { position: relative; display: block; color: var(--muted); cursor: pointer; }
+.option input { position: absolute; width: 1px; height: 1px; margin: 0; opacity: 0; }
+.option:hover { color: var(--fg); }
+.option:has(:checked) { color: var(--fg); font-weight: 600; }
+.option:has(:checked)::before {
+  content: ">" / "";
+  position: absolute;
+  left: -1.5ch;
+  color: var(--yellow);
+}
+.option:has(:focus-visible) { outline: 2px solid var(--yellow); outline-offset: 2px; }
+.option b { color: var(--fg); font-weight: inherit; }
 
-.examples { margin: 0 0 2rem; padding: 0; list-style: none; display: grid; gap: 0.35rem; }
-.examples a { font-family: var(--mono); font-size: 0.9375rem; }
-.corpus { color: var(--ink-soft); font-size: 0.875rem; }
+.spdx { display: none; margin: 0.375rem 0 0.25rem; }
+.filters:has([value="allowed"]:checked) .allowed,
+.filters:has([value="compatible"]:checked) .project { display: block; }
+.spdx input, .spdx select {
+  width: 100%;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid var(--rule);
+  background: var(--bg-lighter);
+  color: var(--fg);
+  font: inherit;
+}
 
 /* Results */
 
-.count, .message, .next { margin: 1.25rem 0; color: var(--ink-soft); }
-.message { color: var(--ink); max-width: 40rem; }
-
-.result {
-  --verdict: var(--permissive);
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 17.5rem;
-  grid-template-rows: auto auto 1fr;
-  grid-template-areas: "source source" "code verdict" "code details";
-  gap: 0.6rem 1.5rem;
-  padding: 1.5rem 0;
-  border-top: 1px solid var(--rule);
-}
-.result.copyleft { --verdict: var(--copyleft); }
-.result.link { --verdict: var(--link); }
-
-.source {
-  grid-area: source;
+.count {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.15rem 0.9rem;
-  align-items: baseline;
-  min-width: 0;
-}
-.repo { font-weight: 650; }
-.path { font-family: var(--mono); font-size: 0.8125rem; overflow-wrap: anywhere; }
-.lines { color: var(--ink-soft); }
-.symbol { font-family: var(--mono); font-size: 0.8125rem; color: var(--ink-soft); overflow-wrap: anywhere; }
-
-.code { grid-area: code; min-width: 0; align-self: start; }
-
-.code pre {
+  justify-content: space-between;
+  gap: 2ch;
   margin: 0;
   padding: 0.75rem 0;
+  border-bottom: 1px solid var(--rule);
+  color: var(--muted);
+  font-size: 0.8125rem;
+}
+.count .api {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--muted);
+  text-decoration: none;
+}
+.count .api:hover { color: var(--yellow); }
+.message, .next { margin: 1.25rem 0; color: var(--muted); }
+.message { max-width: 46rem; color: var(--fg); }
+
+/* A result: where it is and its license on one line, then the code, its notices and evidence.
+   The code's rule is in the colour of its license, so the page can be scanned for what fits. */
+.result {
+  --license: var(--green);
+  margin: 0 -0.75rem;
+  padding: 1rem 0.75rem;
+  border-bottom: 1px solid var(--rule);
+}
+.result.copyleft { --license: var(--warm); }
+.result.link { --license: var(--red); }
+:where(.result) :where(p, ul) { margin: 0; }
+
+.source { display: flex; align-items: baseline; gap: 1.5ch; min-width: 0; }
+.repo { color: var(--fg); font-weight: 600; text-decoration: none; white-space: nowrap; }
+.repo:hover { color: var(--yellow); }
+/* A long path loses its start, not the file's name */
+.path {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  direction: rtl;
+  text-align: left;
+  color: var(--muted);
+  text-decoration: none;
+}
+.path:hover { color: var(--fg); }
+.source .license {
+  max-width: 55%;
+  margin-left: auto;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+.license { color: var(--license); font-weight: 600; }
+.license abbr { color: var(--muted); font-weight: 400; }
+
+.code, .withheld, .notices { margin-top: 0.625rem; }
+.code { border-left: 2px solid var(--license); }
+.code pre {
+  margin: 0;
+  padding: 0.125rem 0;
   overflow: auto;
-  background: var(--surface);
-  border: 1px solid var(--rule);
-  border-radius: 6px;
-  font: 0.8125rem/1.55 var(--mono);
+  font: 0.8125rem/1.65 var(--mono);
+  font-variant-ligatures: none;
   tab-size: 4;
 }
-.code.long pre { max-height: 36em; }
+.code.long pre { max-height: 40em; }
 .code.long.open pre { max-height: none; }
-
+.code.open .more { display: none; }
 .line { padding-right: 1rem; }
 .line::before {
   content: attr(data-n);
   display: inline-block;
-  width: 5ch;
-  margin-right: 1.5ch;
+  width: 6ch;
+  padding-right: 2ch;
   text-align: right;
-  color: var(--ink-soft);
+  color: var(--dim);
   user-select: none;
 }
 
-mark { background: var(--mark); color: inherit; border-radius: 2px; }
+.withheld {
+  padding: 0.125rem 0 0.125rem 2ch;
+  border-left: 2px solid var(--license);
+  color: var(--muted);
+}
 
-.more {
-  margin-top: 0.5rem;
+.notices { padding: 0; list-style: none; font-size: 0.8125rem; }
+.notices.none, .more-notices { color: var(--muted); }
+.evidence, .fits, .copies { color: var(--muted); font-size: 0.8125rem; }
+.evidence b { color: var(--fg); font-weight: 400; overflow-wrap: anywhere; }
+.warn { color: var(--red); }
+
+.actions { display: flex; flex-wrap: wrap; gap: 0.25rem 3ch; margin-top: 0.5rem; font-size: 0.8125rem; }
+.copy, .more {
   padding: 0;
   border: 0;
   background: none;
-  color: var(--ink);
+  color: var(--yellow);
   font: inherit;
-  font-size: 0.875rem;
   text-decoration: underline;
-  text-underline-offset: 0.18em;
+  text-decoration-color: rgb(255 221 51 / 0.4);
+  text-underline-offset: 0.25em;
   cursor: pointer;
 }
-.code.open .more { display: none; }
-
-.withheld {
-  grid-area: code;
-  margin: 0;
-  padding: 1rem;
-  border: 1px dashed var(--rule);
-  border-radius: 6px;
-  color: var(--ink-soft);
-  max-width: 40rem;
-}
-
-/* The evidence */
-
-.verdict { grid-area: verdict; display: flex; gap: 0.8rem; align-items: center; font-size: 0.875rem; }
-
-.details {
-  grid-area: details;
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  font-size: 0.875rem;
-  min-width: 0;
-}
-
-.grade {
-  flex: none;
-  display: grid;
-  place-items: center;
-  width: 3.4rem;
-  height: 3.4rem;
-  border: 2px solid var(--verdict);
-  border-radius: 50%;
-  color: var(--verdict);
-  font: 700 2.1rem/1 var(--book);
-}
-
-.expression {
-  margin: 0;
-  font-weight: 650;
-  font-size: 0.9375rem;
-  color: var(--verdict);
-  overflow-wrap: anywhere;
-}
-.why { margin: 0.1rem 0 0; color: var(--ink-soft); }
-.fits { margin: 0.25rem 0 0; color: var(--ink-soft); }
-
-.notices { margin: 0; padding: 0; list-style: none; }
-.notices li + li { margin-top: 0.15rem; }
-.notices.none { color: var(--ink-soft); }
-
-.evidence summary { cursor: pointer; color: var(--ink-soft); width: max-content; }
-.evidence ul { margin: 0.4rem 0 0; padding: 0; list-style: none; display: grid; gap: 0.3rem; }
-.evidence .kind { color: var(--ink-soft); }
-.evidence code { font-family: var(--mono); font-size: 0.8125rem; overflow-wrap: anywhere; }
-
-.copies { margin: 0; }
-.warn { color: var(--link); font-weight: 600; }
-
-.actions { display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; align-items: center; }
-
-.copy {
-  padding: 0.4rem 0.8rem;
-  border: 1.5px solid var(--ink);
-  border-radius: 6px;
-  background: transparent;
-  color: var(--ink);
-  font: inherit;
-  font-weight: 600;
-  cursor: pointer;
-}
-.copy:hover { background: var(--ink); color: var(--paper); }
-
+.more { margin-top: 0.375rem; font-size: 0.8125rem; }
 .attribution {
-  flex-basis: 100%;
-  margin: 0;
-  padding: 0.6rem;
+  margin: 0.5rem 0 0;
+  padding: 0.5rem 0.75rem;
   max-height: 16em;
   overflow: auto;
-  background: var(--surface);
   border: 1px solid var(--rule);
-  border-radius: 6px;
+  background: var(--bg-lighter);
   font: 0.75rem/1.5 var(--mono);
 }
 
+/* The page before a search */
+
+.intro { max-width: 46rem; padding: 3rem 0 2rem; }
+.intro h1 { margin: 0 0 1.25rem; font-size: clamp(1.5rem, 4vw, 1.875rem); line-height: 1.25; }
+.intro p { max-width: 40rem; margin: 0 0 1rem; color: var(--muted); line-height: 1.7; }
+.intro h2 { margin: 2rem 0 0.25rem; color: var(--muted); font: inherit; }
+.examples { margin: 0; padding: 0; list-style: none; }
+.examples li + li { margin-top: 0.25rem; }
+.examples li::before { content: "$ " / ""; color: var(--green); }
+.intro .corpus { margin-top: 2rem; font-size: 0.8125rem; }
+
+/* About, and what is not found: Markdown read in a pager */
+
+.prose { max-width: 46rem; line-height: 1.7; }
+.prose h1 { margin: 0 0 1rem; font-size: 1.375rem; line-height: 1.3; }
+.prose h2 { margin: 2.25rem 0 0.5rem; font-size: 1rem; }
+.prose h2::before { content: "## " / ""; color: var(--warm); }
+.prose p { margin: 0 0 1em; }
+
 /* A snippet's copies */
 
-.copies-title { margin: 2rem 0 0.25rem; font-size: 1.125rem; }
-.copies-note { margin: 0 0 1rem; color: var(--ink-soft); max-width: 40rem; }
-.copies-list { margin: 0 0 2rem; padding-left: 1.5rem; display: grid; gap: 0.6rem; }
-.copies-list .path { font-family: var(--mono); font-size: 0.8125rem; overflow-wrap: anywhere; }
-.copies-list .expression { display: block; color: var(--ink); font-weight: 600; font-size: 0.875rem; }
-.copies-list .why { display: inline; font-size: 0.8125rem; }
+.copies-title { margin: 2rem 0 0.25rem; font-size: 1rem; }
+.copies-note { max-width: 46rem; margin: 0 0 1rem; color: var(--muted); font-size: 0.8125rem; }
+.copies-list { width: 100%; border-collapse: collapse; font-size: 0.8125rem; }
+.copies-list th, .copies-list td {
+  padding: 0.5rem 2ch 0.5rem 0;
+  border-bottom: 1px solid var(--rule);
+  text-align: left;
+  vertical-align: baseline;
+}
+.copies-list thead th { border-bottom-color: var(--muted); font-weight: 600; }
+.copies-list tr { --license: var(--green); }
+.copies-list tr.copyleft { --license: var(--warm); }
+.copies-list tr.link { --license: var(--red); }
+.copies-list .path { color: var(--muted); overflow-wrap: anywhere; }
 
 .colophon {
-  margin-top: 2rem;
-  padding-top: 1rem;
-  padding-bottom: 2rem;
+  padding: 1rem 1.5rem 2rem;
   border-top: 1px solid var(--rule);
-  color: var(--ink-soft);
-  font-size: 0.8125rem;
+  color: var(--muted);
+  font-size: 0.75rem;
 }
-.colophon p { margin: 0 0 0.25rem; }
+.colophon p { max-width: 68rem; margin: 0 0 0.25rem; }
+.colophon a + a { margin-left: 2ch; }
+
+/* Phones: the filters fold into one line that says what they are set to */
 
 @media (max-width: 760px) {
-  .masthead { grid-template-columns: minmax(0, 1fr); }
-  .wordmark { line-height: 1.2; }
-  .result {
-    grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: none;
-    grid-template-areas: "source" "verdict" "code" "details";
+  .top, .search, .colophon { padding-inline: 1rem; }
+  .page { grid-template-columns: minmax(0, 1fr); align-content: start; }
+  main { padding-inline: 1rem; }
+  .filters { padding: 0 1rem; border-right: 0; border-bottom: 1px solid var(--rule); }
+  .filters[open] { padding-bottom: 1rem; }
+  .filters > summary {
+    display: flex;
+    justify-content: space-between;
+    gap: 2ch;
+    padding: 0.625rem 0;
+    color: var(--fg);
+    list-style: none;
+    cursor: pointer;
   }
-  .grade { width: 2.8rem; height: 2.8rem; font-size: 1.7rem; }
+  .filters > summary::-webkit-details-marker { display: none; }
+  .filters .toggle {
+    color: var(--yellow);
+    text-decoration: underline;
+    text-decoration-color: rgb(255 221 51 / 0.4);
+    text-underline-offset: 0.25em;
+  }
+  .filters fieldset { margin-top: 0.5rem; }
+  .option { display: inline-block; margin-right: 2.5ch; }
+  .source { flex-wrap: wrap; }
+  .path { order: 3; flex-basis: 100%; }
+  .count .api { display: none; }
   .intro { padding-top: 2rem; }
 }
