@@ -54,6 +54,11 @@ def main(argv: list[str] | None = None) -> int:
         help="GitHub language names, comma-separated",
     )
     p.add_argument("--count", type=int, default=500, help="repositories per language")
+    p.add_argument(
+        "--min-stars",
+        type=int,
+        help="every repository with at least this many stars, however many (not --count)",
+    )
     p.add_argument("--out", type=Path, default=Path("corpus/github.json"))
 
     p = commands.add_parser("build", help="build the search index of a pinned corpus")
@@ -118,7 +123,11 @@ def main(argv: list[str] | None = None) -> int:
         token = os.environ.get("GITHUB_TOKEN")
         if not token:
             parser.error("corpus needs a GitHub token in GITHUB_TOKEN (search is API-only)")
-        count = github.pin(args.languages.split(","), args.count, args.out, token)
+        languages = args.languages.split(",")
+        if args.min_stars is None:
+            count = github.pin(languages, args.out, token, args.count)
+        else:
+            count = github.pin(languages, args.out, token, None, args.min_stars)
         print(f"pinned {count} repositories in {args.out}")
     elif args.command == "build":
         from provgrep.build import build
