@@ -13,7 +13,6 @@ told apart from a corpus without the answer.
 
 import json
 import re
-import sqlite3
 import time
 from datetime import UTC, datetime
 from pathlib import Path
@@ -30,13 +29,12 @@ def evaluate(suites: list[Path], index_path: Path, out_root: Path) -> Path:
     """Score every intent of the suites against the index; write results/<UTC time>-search/."""
     started = time.monotonic()
     index = Index(index_path)
-    db = sqlite3.connect(f"{(index_path / 'records.sqlite').resolve().as_uri()}?mode=ro", uri=True)
     rows = []
     for suite_path in suites:
         suite = json.loads(suite_path.read_text(encoding="utf-8"))
         for intent in suite["intents"]:
             for mode in ("any", intent.get("licenses", "permissive")):
-                rows.append({"suite": suite["suite"], **score(index, db, intent, mode)})
+                rows.append({"suite": suite["suite"], **score(index, intent, mode)})
     run = {
         "suites": {p.as_posix(): sha256_of(p) for p in suites},
         "index": index_path.as_posix(),
@@ -55,9 +53,7 @@ def evaluate(suites: list[Path], index_path: Path, out_root: Path) -> Path:
     return out
 
 
-def score(
-    index: Index, db: sqlite3.Connection, intent: dict[str, Any], mode: Any
-) -> dict[str, Any]:
+def score(index: Index, intent: dict[str, Any], mode: Any) -> dict[str, Any]:
     """The rank of the first hit in the top DEPTH results (None if there is none), the hits, and
     how many snippets in the index contain what is expected."""
     languages = intent.get("languages", ())
@@ -68,9 +64,7 @@ def score(
     for rank, result in enumerate(page.results, 1):
         # Read from the records, not the result: code without a license is linked to, not
         # shown, and still counts as found.
-        code = db.execute(
-            "SELECT code FROM snippets WHERE hash >= ? AND hash < ?", (result.id, result.id + "g")
-        ).fetchone()[0]
+        code = index.code_of(result.id) or ""
         if contains(code, intent["expect"]):
             loc = result.location
             hits.append(

@@ -1,35 +1,54 @@
 """Build an index from a pinned corpus: every function of every repository, the license it is
 under with the evidence for it, its notices, and where else the same code is found.
 
-The build writes into one directory, in steps:
+An index is cut into partitions by the hash of each function's code, so that it grows by adding
+partitions, each about the size one core searches in tens of milliseconds:
 
-1. staging/<key>/: one file per repository (stage.py). A repository staged under the current key
-   is not fetched again; files under another key are removed.
-2. records.sqlite: repositories, files, snippets (one per distinct normalized code) and their
-   locations, in corpus order. The location shown for a snippet is its first copy outside a
-   vendored directory, in the most-starred repository: the same corpus gives the same index.
-3. lexical/: the search index over the snippets, in shards searched at once (search.py).
+- every copy of a function falls in the same partition, so each one finds its copies, picks the
+  one to show and counts them alone, and partitions are built at once, each in memory a fraction
+  of the corpus needs;
+- each holds a random sample of the corpus, so its BM25 statistics are the whole index's.
+
+The build writes `<out>.part/`, in steps, then puts it in place of out:
+
+1. Staging (stage.py): one file per repository, kept in the cache under a key of the code and
+   tools that staged it. A repository staged under the current key is not fetched again; staged
+   files under another key are removed.
+2. sources.sqlite: the repositories and their files, each with its license, evidence and
+   notices. The functions are routed meanwhile, by the first byte of their hash, to BUCKETS
+   spool files; a partition is a run of buckets.
+3. partitions/<n>/: records.sqlite, the distinct functions (code compressed with code.zdict, a
+   zstd dictionary trained on the corpus) and their locations; lexical/, the search index over
+   them (search.py). The location shown for a function is its first copy outside a vendored
+   directory, in corpus order (most-starred repository first): the same corpus gives the same
+   index.
 4. manifest.json: what was built from what, with which versions, and what was left out.
 """
 
 import gzip
 import json
 import multiprocessing
+import pickle
+import random
 import shutil
 import sqlite3
 import sys
 import time
 from collections import Counter
+from compression import zstd
 from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor, as_completed
 from concurrent.futures.process import BrokenProcessPool
+from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from functools import partial
 from importlib.metadata import version
 from pathlib import Path
 from typing import Any
 
+import tantivy
+
 from provgrep import github, search, source_commit, stage
-from provgrep.fetch import sha256_of
+from provgrep.fetch import cache_dir, sha256_of
 from provgrep.licenses import choices, permissive, shareable
 
 # Repositories a staging worker stages before a new one takes its place. A worker keeps the
@@ -37,7 +56,13 @@ from provgrep.licenses import choices, permissive, shareable
 # lived through the whole corpus held 44 GB, one of them 10 GB. A new one loads ScanCode's license
 # index in 3.4 s.
 TASKS_PER_WORKER = 8
-SCHEMA = """
+# Locations (copies of functions) per partition. T1, the 500 most-starred repositories of each
+# language, has 26.5 M in 21.3 M functions: 8 partitions of 2.7 M functions, searched in 20 ms.
+PARTITION_SIZE = 3_400_000
+DICTIONARY_SIZE = 64 << 10  # 2.9 times smaller code at level 9, against 2.3 without one
+SAMPLES = 20_000  # functions the dictionary is trained on
+CODE_LEVEL = 9
+SOURCES = """
 CREATE TABLE repos (
     id INTEGER PRIMARY KEY,  -- corpus order
     name TEXT NOT NULL,
@@ -62,21 +87,22 @@ CREATE TABLE files (
     evidence TEXT NOT NULL,  -- JSON
     notices TEXT NOT NULL  -- JSON: copyright statements
 );
+"""
+RECORDS = """
 CREATE TABLE snippets (
-    id INTEGER PRIMARY KEY,  -- order of first appearance in the corpus
-    hash TEXT NOT NULL UNIQUE,
+    id INTEGER PRIMARY KEY,  -- order of first appearance in the partition
+    hash BLOB NOT NULL UNIQUE,  -- the first 16 bytes of the sha256 of the normalized code
     language TEXT NOT NULL,
-    code TEXT NOT NULL,  -- as found at the location shown
-    doc TEXT NOT NULL,
+    code BLOB NOT NULL,  -- as found at the location shown, zstd with code.zdict
     location INTEGER NOT NULL,  -- the one shown
-    copies INTEGER NOT NULL DEFAULT 1,
-    repos INTEGER NOT NULL DEFAULT 1,
-    licenses INTEGER NOT NULL DEFAULT 1  -- distinct license expressions among the copies
+    copies INTEGER NOT NULL,
+    repos INTEGER NOT NULL,
+    licenses INTEGER NOT NULL  -- distinct license expressions among the copies
 );
 CREATE TABLE locations (
     id INTEGER PRIMARY KEY,
     snippet INTEGER NOT NULL REFERENCES snippets,
-    file INTEGER NOT NULL REFERENCES files,
+    file INTEGER NOT NULL,  -- in sources.sqlite
     symbol TEXT NOT NULL,
     start INTEGER NOT NULL,
     end INTEGER NOT NULL
@@ -100,18 +126,18 @@ def build(corpus: Path, out: Path, jobs: int, limit: int | None = None) -> dict[
                 kept.append(repo)
         repos = kept
     key = stage.key()
-    staging = out / "staging" / key
+    staging = cache_dir() / "staging" / key
     staging.mkdir(parents=True, exist_ok=True)
     for old in staging.parent.iterdir():
         if old != staging:
             shutil.rmtree(old)
     todo = [r for r in repos if not stage.path(staging, r).exists()]
-    failed = stage_all(todo, staging, jobs, out / "work")
+    failed = stage_all(todo, staging, jobs, cache_dir() / "work")
 
-    records = out / "records.sqlite"
-    counts = _records(repos, staging, records)
-    search.write_lexical(records, out / "lexical", jobs)
-
+    part = out.with_name(out.name + ".part")
+    shutil.rmtree(part, ignore_errors=True)
+    part.mkdir(parents=True)
+    counts = write(repos, staging, part, jobs)
     manifest = {
         "corpus": {
             "path": corpus.as_posix(),
@@ -127,80 +153,63 @@ def build(corpus: Path, out: Path, jobs: int, limit: int | None = None) -> dict[
         "failed": failed,
         "seconds": round(time.monotonic() - started),
     }
-    (out / "manifest.json").write_text(json.dumps(manifest, indent=1) + "\n", encoding="utf-8")
+    (part / "manifest.json").write_text(json.dumps(manifest, indent=1) + "\n", encoding="utf-8")
+    shutil.rmtree(out, ignore_errors=True)
+    part.replace(out)
     return manifest
 
 
-def _add_file(
-    db: sqlite3.Connection,
-    repo: int,
-    f: dict[str, Any],
-    snippets: dict[str, tuple[int, bool]],
-    locations: int,
-) -> int:
-    """Insert a staged file and the locations of its units; a unit not seen before is a new
-    snippet, one seen only in vendored files is shown from here if this file is not vendored.
-    Return the number of locations so far."""
-    expression = f["expression"]
-    file_id = db.execute(
-        "INSERT INTO files (repo, path, language, vendored, license, level, conflict, permissive,"
-        " shareable, choices, evidence, notices) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-        (
-            repo,
-            f["path"],
-            f["language"],
-            f["vendored"],
-            expression,
-            f["level"],
-            f["conflict"],
-            permissive(expression),
-            shareable(expression),
-            json.dumps(choices(expression) if expression else []),
-            json.dumps(f["evidence"]),
-            json.dumps(f["notices"]),
-        ),
-    ).lastrowid
-    for u in f["units"]:
-        locations += 1
-        seen = snippets.get(u["hash"])
-        if seen is None:
-            snippet = len(snippets) + 1
-            snippets[u["hash"]] = (snippet, f["vendored"])
-            db.execute(
-                "INSERT INTO snippets (id, hash, language, code, doc, location)"
-                " VALUES (?, ?, ?, ?, ?, ?)",
-                (snippet, u["hash"], f["language"], u["code"], u["doc"], locations),
-            )
-        else:
-            snippet = seen[0]
-            if seen[1] and not f["vendored"]:
-                db.execute(
-                    "UPDATE snippets SET language = ?, code = ?, doc = ?, location = ?"
-                    " WHERE id = ?",
-                    (f["language"], u["code"], u["doc"], locations, snippet),
-                )
-                snippets[u["hash"]] = (snippet, False)
-        db.execute(
-            "INSERT INTO locations VALUES (?, ?, ?, ?, ?, ?)",
-            (locations, snippet, file_id, u["symbol"], u["start"], u["end"]),
-        )
-    return locations
+def write(repos: list[github.Repo], staging: Path, out: Path, jobs: int) -> dict[str, Any]:
+    """Write the sources, dictionary and partitions of the staged repositories into out; return
+    the counts."""
+    spool = out / "spool"
+    counts, sizes = _route(repos, staging, out, spool)
+    partitions = max(1, -(-sum(sizes) // PARTITION_SIZE))
+    totals: Counter[str] = Counter()
+    languages: Counter[str] = Counter()
+    levels: Counter[str] = Counter()
+    with ProcessPoolExecutor(min(jobs, partitions)) as pool:
+        done = [
+            pool.submit(_reduce, spool, out, n, search.buckets(n, partitions))
+            for n in range(partitions)
+        ]
+        for future in done:
+            numbers, by_language, by_level = future.result()
+            totals.update(numbers)
+            languages.update(by_language)
+            levels.update(by_level)
+    shutil.rmtree(spool)
+    return {
+        **counts,
+        **totals,
+        "by_language": dict(sorted(languages.items())),
+        "by_level": dict(sorted(levels.items())),
+        "partitions": partitions,
+    }
 
 
-def _records(repos: list[github.Repo], staging: Path, path: Path) -> dict[str, Any]:
-    """Write records.sqlite from the staged repositories, in corpus order; return the counts."""
-    part = path.with_name(path.name + ".part")
-    part.unlink(missing_ok=True)
-    db = sqlite3.connect(part)
-    db.executescript(SCHEMA)
+def _route(
+    repos: list[github.Repo], staging: Path, out: Path, spool: Path
+) -> tuple[dict[str, Any], list[int]]:
+    """Write sources.sqlite and code.zdict from the staged repositories, in corpus order, and
+    each file's functions to the spool of their bucket; return the counts and the locations in
+    each bucket."""
+    db = sqlite3.connect(out / "sources.sqlite")
+    db.executescript(SOURCES)
+    spool.mkdir()
+    buckets = [zstd.open(spool / f"{b:02x}", "wb", level=1) for b in range(search.BUCKETS)]
+    sizes = [0] * search.BUCKETS
     kinds: Counter[str] = Counter()
     skipped: dict[str, str] = {}
-    snippets: dict[str, tuple[int, bool]] = {}  # hash: id, whether the location shown is vendored
-    locations = 0
+    samples: list[bytes] = []
+    pick = random.Random(0)
+    file_id = routed = 0
+    staged = 0
     for repo_id, repo in enumerate(repos, 1):
         staged_path = stage.path(staging, repo)
         if not staged_path.exists():
             continue  # failed; listed in the manifest
+        staged += 1
         db.execute(
             "INSERT INTO repos VALUES (?, ?, ?, ?, ?, ?, ?)",
             (
@@ -215,45 +224,178 @@ def _records(repos: list[github.Repo], staging: Path, path: Path) -> dict[str, A
         )
         with gzip.open(staged_path, "rt", encoding="utf-8") as lines:
             for line in lines:
-                staged = json.loads(line)
-                if "skipped" in staged:
-                    skipped[repo.name] = staged["skipped"]
-                if "kinds" in staged:
-                    kinds.update(staged["kinds"])
-                else:
-                    locations = _add_file(db, repo_id, staged, snippets, locations)
-    db.execute(
-        """UPDATE snippets SET (copies, repos, licenses) = (
-            SELECT count(*), count(DISTINCT f.repo), count(DISTINCT coalesce(f.license, ''))
-            FROM locations l JOIN files f ON f.id = l.file WHERE l.snippet = snippets.id)
-        WHERE id IN (SELECT snippet FROM locations GROUP BY snippet HAVING count(*) > 1)"""
-    )
+                f = json.loads(line)
+                if "skipped" in f:
+                    skipped[repo.name] = f["skipped"]
+                if "kinds" in f:
+                    kinds.update(f["kinds"])
+                    continue
+                file_id += 1
+                expression = f["expression"]
+                ways = [list(c) for c in choices(expression)] if expression else []
+                db.execute(
+                    "INSERT INTO files VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                    (
+                        file_id,
+                        repo_id,
+                        f["path"],
+                        f["language"],
+                        f["vendored"],
+                        expression,
+                        f["level"],
+                        f["conflict"],
+                        permissive(expression),
+                        shareable(expression),
+                        json.dumps(ways),
+                        json.dumps(f["evidence"]),
+                        json.dumps(f["notices"]),
+                    ),
+                )
+                units: dict[int, list[tuple[Any, ...]]] = {}
+                for u in f["units"]:
+                    units.setdefault(int(u["hash"][:2], 16), []).append(
+                        (u["hash"], u["code"], u["doc"], u["symbol"], u["start"], u["end"])
+                    )
+                    routed += 1
+                    if len(samples) < SAMPLES:  # a uniform sample: reservoir sampling
+                        samples.append(u["code"].encode())
+                    elif (n := pick.randrange(routed)) < SAMPLES:
+                        samples[n] = u["code"].encode()
+                copy = _File(
+                    repo_id,
+                    repo.name,
+                    file_id,
+                    f["path"],
+                    f["language"],
+                    f["vendored"],
+                    expression,
+                    permissive(expression),
+                    f["level"],
+                    ways,
+                )
+                for b, found in units.items():
+                    pickle.dump((copy, found), buckets[b])
+                    sizes[b] += len(found)
+    for bucket in buckets:
+        bucket.close()
     db.commit()
-    counts = {
-        "repos": db.execute("SELECT count(*) FROM repos").fetchone()[0],
-        "skipped": skipped,
-        "files": dict(kinds),
-        "locations": locations,
-        "snippets": len(snippets),
-        "snippets_with_copies": db.execute(
-            "SELECT count(*) FROM snippets WHERE copies > 1"
-        ).fetchone()[0],
-        "snippets_whose_copies_differ_in_license": db.execute(
-            "SELECT count(*) FROM snippets WHERE licenses > 1"
-        ).fetchone()[0],
-        "by_language": dict(
-            db.execute("SELECT language, count(*) FROM snippets GROUP BY language").fetchall()
-        ),
-        "by_level": dict(
-            db.execute(
-                "SELECT f.level, count(*) FROM snippets s JOIN locations l ON l.id = s.location"
-                " JOIN files f ON f.id = l.file GROUP BY f.level"
-            ).fetchall()
-        ),
-    }
     db.close()
-    part.replace(path)
-    return counts
+    try:
+        dictionary = zstd.train_dict(samples, DICTIONARY_SIZE).dict_content
+    except zstd.ZstdError:  # too little code to train on: compressed without one
+        pass
+    else:
+        (out / "code.zdict").write_bytes(dictionary)
+    counts = {"repos": staged, "skipped": skipped, "files": dict(kinds), "locations": routed}
+    return counts, sizes
+
+
+@dataclass(frozen=True)
+class _File:
+    """What a file's functions need of it in their partition."""
+
+    repo: int
+    repo_name: str
+    id: int
+    path: str
+    language: str
+    vendored: bool
+    license: str | None
+    permissive: bool
+    level: str
+    choices: list[list[str]]
+
+
+@dataclass
+class _Snippet:
+    id: int
+    hash: str
+    location: int  # the one shown, and what it was found as
+    file: _File
+    code: str
+    doc: str
+    symbol: str
+    copies: int = 1
+    repos: set[int] = field(default_factory=set)
+    licenses: set[str] = field(default_factory=set)
+
+
+def _reduce(
+    spool: Path, out: Path, n: int, buckets: range
+) -> tuple[Counter[str], Counter[str], Counter[str]]:
+    """Write partition n from the spools of its buckets; return its counts, of functions by
+    language and by level. One bucket at a time is in memory."""
+    here = out / "partitions" / str(n)
+    (here / "lexical").mkdir(parents=True)
+    db = sqlite3.connect(here / "records.sqlite")
+    db.executescript(RECORDS)
+    writer = tantivy.Index(search.schema(), path=str(here / "lexical")).writer(heap_size=1 << 29)
+    compressor = zstd.ZstdCompressor(CODE_LEVEL, zstd_dict=search.dictionary(out))
+    counts: Counter[str] = Counter()
+    languages: Counter[str] = Counter()
+    levels: Counter[str] = Counter()
+    snippets = locations = 0
+    for b in buckets:
+        seen: dict[str, _Snippet] = {}
+        found: list[tuple[int, int, int, str, int, int]] = []
+        with zstd.open(spool / f"{b:02x}", "rb") as f:
+            while True:
+                try:
+                    copy, units = pickle.load(f)  # written by _route, in this build
+                except EOFError:
+                    break
+                for hash_, code, doc, symbol, start, end in units:
+                    locations += 1
+                    s = seen.get(hash_)
+                    if s is None:
+                        snippets += 1
+                        s = seen[hash_] = _Snippet(
+                            snippets, hash_, locations, copy, code, doc, symbol
+                        )
+                    else:
+                        s.copies += 1
+                        if s.file.vendored and not copy.vendored:  # shown from here instead
+                            s.location, s.file, s.code, s.doc = locations, copy, code, doc
+                            s.symbol = symbol
+                    s.repos.add(copy.repo)
+                    s.licenses.add(copy.license or "")
+                    found.append((locations, s.id, copy.id, symbol, start, end))
+        db.executemany("INSERT INTO locations VALUES (?, ?, ?, ?, ?, ?)", found)
+        for s in seen.values():
+            row = (
+                s.id,
+                bytes.fromhex(s.hash[: 2 * search.HASH_BYTES]),
+                s.file.language,
+                compressor.compress(s.code.encode(), zstd.ZstdCompressor.FLUSH_FRAME),
+                s.location,
+                s.copies,
+                len(s.repos),
+                len(s.licenses),
+            )
+            db.execute("INSERT INTO snippets VALUES (?, ?, ?, ?, ?, ?, ?, ?)", row)
+            writer.add_document(
+                search.document(
+                    s.id,
+                    s.file.language,
+                    s.code,
+                    s.doc,
+                    s.symbol,
+                    f"{s.file.repo_name}/{s.file.path}",
+                    s.file.permissive,
+                    s.file.level,
+                    s.file.choices,
+                )
+            )
+            counts["snippets_with_copies"] += s.copies > 1
+            counts["snippets_whose_copies_differ_in_license"] += len(s.licenses) > 1
+            languages[s.file.language] += 1
+            levels[s.file.level] += 1
+        counts["snippets"] += len(seen)
+    db.commit()
+    db.close()
+    writer.commit()
+    writer.wait_merging_threads()
+    return counts, languages, levels
 
 
 def stage_all(repos: list[github.Repo], staging: Path, jobs: int, work: Path) -> dict[str, str]:

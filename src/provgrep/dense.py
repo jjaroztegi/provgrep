@@ -2,26 +2,32 @@
 to the query's.
 
 One pinned model (MODEL) makes the embeddings, run by onnxruntime: on a GPU for the corpus
-(`provgrep embed`, about a day for 21 million functions), on the CPU for a query.
+(`provgrep embed`, about 15 hours for 21 million functions), on the CPU for a query.
 
-dense/ in the index holds them: vectors.npy, row n for snippet n, as int8 (a unit vector times
-127), and keys.npy, the snippet's id (the first 16 hex digits of its code's hash) for each row.
-An index rebuilt from mostly the same code takes the vectors of the code it already had by key
-and embeds only what is new; an interrupted run goes on where it stopped. dense.json says which
-build of the index the rows are for: rows of another build would rank the wrong code.
+What the GPU makes is kept in the cache, apart from any index: embeddings/<model>/<n>/ holds
+keys.npy, the first 8 bytes of each function's code hash, and vectors.npy, its embedding as int8
+(a unit vector times 127), one directory per run. An index takes from there the vectors of the
+code it has, and the GPU embeds only code no run has seen: a rebuild of mostly the same code
+costs minutes, not a day.
+
+In the index, partitions/<n>/vectors.npy has row i for snippet i of the partition, and dense.json
+says which build of the index the rows are for: rows of another build would rank the wrong code.
+An interrupted run goes on where it stopped.
 """
 
 import json
-import sqlite3
 import time
+from collections.abc import Callable
+from compression import zstd
 from dataclasses import dataclass
 from datetime import UTC, datetime
+from functools import cache
 from pathlib import Path
 from typing import Any
 
 import numpy as np
 
-from provgrep import source_commit
+from provgrep import search, source_commit
 from provgrep.fetch import cache_dir, download
 
 MAX_TOKENS = 512  # longer code is embedded by its first MAX_TOKENS tokens
@@ -134,101 +140,163 @@ class Encoder:
 class Vectors:
     """An index's embeddings, if they are for its build."""
 
-    def __init__(self, index: Path, built: str) -> None:
-        self.about = json.loads((index / "dense" / "dense.json").read_text(encoding="utf-8"))
+    def __init__(self, index: Path, built: str, partitions: int) -> None:
+        self.about = json.loads((index / "dense.json").read_text(encoding="utf-8"))
         if self.about["index_built"] != built:
             raise ValueError(
-                f"dense/ is for the index built {self.about['index_built']}, not {built}:"
-                " run provgrep embed"
+                f"the embeddings are for the index built {self.about['index_built']}, not"
+                f" {built}: run provgrep embed"
             )
-        self._vectors = np.load(index / "dense" / "vectors.npy", mmap_mode="r")
+        self._vectors = [
+            np.load(index / "partitions" / str(n) / "vectors.npy", mmap_mode="r")
+            for n in range(partitions)
+        ]
 
-    def similarity(self, query: Any, snippets: list[int]) -> Any:
-        """The cosine of each snippet's code with the query (0 for one not embedded)."""
-        rows = self._vectors[snippets].astype(np.float32)
-        return rows @ query / np.maximum(np.linalg.norm(rows, axis=1), 1e-9)
+    def similarity(self, query: Any, snippets: list[tuple[int, int]]) -> list[float]:
+        """The cosine of each snippet's code, (partition, id), with the query (0 for one not
+        embedded)."""
+        if not snippets:
+            return []
+        rows = np.stack([self._vectors[n][i] for n, i in snippets]).astype(np.float32)
+        cosines = rows @ query / np.maximum(np.linalg.norm(rows, axis=1), 1e-9)
+        return [float(c) for c in cosines]
+
+
+class Store:
+    """The embeddings every run has made, by key: the first 8 bytes of the code's hash."""
+
+    def __init__(self, path: Path) -> None:
+        self.path = path
+        path.mkdir(parents=True, exist_ok=True)
+        self._runs = []
+        for run in sorted(
+            (p for p in path.iterdir() if p.name.isdigit()), key=lambda p: int(p.name)
+        ):
+            keys = np.load(run / "keys.npy")
+            order = np.argsort(keys)
+            self._runs.append((keys[order], order, np.load(run / "vectors.npy", mmap_mode="r")))
+
+    def take(self, keys: Any, vectors: Any, done: Any) -> Any:
+        """Fill the rows of vectors not done whose key a run embedded, and mark them done;
+        return which keys the store has."""
+        found = np.zeros(len(keys), dtype=np.bool_)
+        for start in range(0, len(keys), _BLOCK):
+            block = keys[start : start + _BLOCK]
+            for sorted_keys, order, stored in self._runs:
+                at = np.minimum(np.searchsorted(sorted_keys, block), len(sorted_keys) - 1)
+                same = (sorted_keys[at] == block) & (block != 0)  # 0: row 0, no snippet
+                found[start : start + _BLOCK] |= same
+                same &= ~np.asarray(done[start : start + _BLOCK])
+                vectors[start : start + _BLOCK][same] = stored[order[at[same]]]
+                done[start : start + _BLOCK] |= same
+        return found
+
+    def add(self, keys: Any, vectors: Any) -> None:
+        """Keep what a run embedded."""
+        if not len(keys):
+            return
+        run = self.path / str(
+            max((int(p.name) for p in self.path.iterdir() if p.name.isdigit()), default=-1) + 1
+        )
+        part = run.with_name(run.name + ".part")
+        part.mkdir()
+        np.save(part / "keys.npy", keys)
+        np.save(part / "vectors.npy", vectors)
+        part.replace(run)
+
+
+def store() -> Store:
+    return Store(
+        cache_dir() / "embeddings" / f"{MODEL.repo.replace('/', '__')}@{MODEL.revision[:12]}"
+    )
 
 
 def embed(index: Path, gpu: bool) -> dict[str, Any]:
-    """Embed the code of every snippet of the index that dense/ does not have yet."""
-    started = time.monotonic()
+    """Give every snippet of the index its embedding: from the store if a run made it, else from
+    the model, then kept in the store."""
     built = json.loads((index / "manifest.json").read_text(encoding="utf-8"))["built"]
-    out = index / "dense"
-    out.mkdir(exist_ok=True)
-    db = sqlite3.connect(f"{(index / 'records.sqlite').resolve().as_uri()}?mode=ro", uri=True)
-    rows = (db.execute("SELECT max(id) FROM snippets").fetchone()[0] or 0) + 1
-    names = {name: out / f"{name}.part.npy" for name in ("vectors", "keys", "done")}
-    # Written once the parts are ready: when the run began and how many rows it took from the
-    # last one, for a run interrupted (the GPU's driver kills one every few hours) and resumed.
-    begun = out / "run.part.json"
-    if begun.exists():
-        vectors, keys, done = (np.load(path, mmap_mode="r+") for path in names.values())
-    else:
-        shape = (rows, MODEL.dimensions)
-        vectors = np.lib.format.open_memmap(names["vectors"], "w+", np.int8, shape)
-        keys = np.lib.format.open_memmap(names["keys"], "w+", np.uint64, (rows,))
-        done = np.lib.format.open_memmap(names["done"], "w+", np.bool_, (rows,))
-        for snippet, hash_ in db.execute("SELECT id, hash FROM snippets"):
-            keys[snippet] = int(hash_[:16], 16)
-        if (out / "vectors.npy").exists():
-            _reuse(out, vectors, keys, done)
-        vectors.flush()  # not in a loop, whose variable would keep a map open after `del`
-        keys.flush()
-        done.flush()
-        run = {"started": time.time(), "reused": int(np.count_nonzero(done))}
-        begun.write_text(json.dumps(run), encoding="utf-8")
+    partitions = len(list((index / "partitions").iterdir()))
+    kept = store()
+    # When the run began, and what each partition took: a run interrupted (the GPU's driver kills
+    # one every few hours) and run again counts all its work.
+    begun = index / "dense.part.json"
+    if not begun.exists():
+        begun.write_text(json.dumps({"started": time.time(), "new": {}}), encoding="utf-8")
     run = json.loads(begun.read_text(encoding="utf-8"))
-    encoder = Encoder(gpu)
+
+    @cache
+    def encoder() -> Encoder:  # loaded only if some code is not in the store
+        return Encoder(gpu)
+
+    for n in range(partitions):
+        if not (index / "partitions" / str(n) / "vectors.npy").exists():
+            run["new"][str(n)] = _partition(index, n, kept, encoder)
+            begun.write_text(json.dumps(run), encoding="utf-8")
+    about = {
+        "index_built": built,
+        "model": {"repo": MODEL.repo, "revision": MODEL.revision},
+        "embedded": datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "commit": source_commit(),
+        "snippets": sum(
+            len(np.load(index / "partitions" / str(n) / "vectors.npy", mmap_mode="r")) - 1
+            for n in range(partitions)
+        ),
+        "new": sum(run["new"].values()),
+        "seconds": round(time.time() - run["started"]),  # with the time it was interrupted
+    }
+    (index / "dense.json").write_text(json.dumps(about, indent=1) + "\n", encoding="utf-8")
+    begun.unlink()
+    return about
+
+
+def _partition(index: Path, n: int, kept: Store, encoder: Callable[[], Encoder]) -> int:
+    """Write partition n's vectors; return how many the model embedded."""
+    started = time.monotonic()
+    here = index / "partitions" / str(n)
+    zdict = search.dictionary(index)
+    db = search.connect(index, n)
+    rows = (db.execute("SELECT max(id) FROM snippets").fetchone()[0] or 0) + 1
+    names = {name: here / f"{name}.part.npy" for name in ("vectors", "done")}
+    if names["done"].exists():  # an interrupted run of this partition
+        vectors, done = (np.load(path, mmap_mode="r+") for path in names.values())
+    else:
+        vectors = np.lib.format.open_memmap(
+            names["vectors"], "w+", np.int8, (rows, MODEL.dimensions)
+        )
+        done = np.lib.format.open_memmap(names["done"], "w+", np.bool_, (rows,))
+    keys = np.zeros(rows, dtype=np.uint64)
+    for snippet, hash_ in db.execute("SELECT id, hash FROM snippets"):
+        keys[snippet] = int.from_bytes(hash_[:8])
+    stored = kept.take(keys, vectors, done)
     new = 0
     for start in range(1, rows, PART):
         wanted = [s for s in range(start, min(start + PART, rows)) if not done[s]]
         if not wanted:
             continue
-        code = dict(
-            db.execute(
+        code = {
+            snippet: zstd.decompress(blob, zstd_dict=zdict).decode()
+            for snippet, blob in db.execute(
                 "SELECT id, code FROM snippets WHERE id BETWEEN ? AND ?", (wanted[0], wanted[-1])
             )
-        )
+        }
         wanted = [s for s in wanted if s in code]  # ids no snippet has
-        vectors[wanted] = np.rint(encoder([code[s] for s in wanted]) * 127).astype(np.int8)
+        vectors[wanted] = np.rint(encoder()([code[s] for s in wanted]) * 127).astype(np.int8)
         vectors.flush()
         done[wanted] = True
         done.flush()
         new += len(wanted)
         rate = new / (time.monotonic() - started)
         print(
-            f"[{min(start + PART, rows) - 1}/{rows - 1}] {new} embedded, {rate:.0f}/s", flush=True
+            f"[{n}: {min(start + PART, rows) - 1}/{rows - 1}] {new} embedded, {rate:.0f}/s",
+            flush=True,
         )
-    embedded = int(np.count_nonzero(done)) - run["reused"]
-    del vectors, keys, done  # close the maps before their files are renamed
-    names["vectors"].replace(out / "vectors.npy")
-    names["keys"].replace(out / "keys.npy")
+    db.close()
+    fresh = np.flatnonzero(np.asarray(done) & (keys != 0) & ~stored)  # this start's or before
+    kept.add(keys[fresh], np.asarray(vectors[fresh]))
+    del vectors, done  # close the maps before their files are renamed
+    names["vectors"].replace(here / "vectors.npy")
     names["done"].unlink()
-    begun.unlink()
-    about = {
-        "index_built": built,
-        "model": {"repo": MODEL.repo, "revision": MODEL.revision},
-        "embedded": datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),
-        "commit": source_commit(),
-        "snippets": rows - 1,
-        "new": embedded,
-        "seconds": round(time.time() - run["started"]),  # with the time it was interrupted
-    }
-    (out / "dense.json").write_text(json.dumps(about, indent=1) + "\n", encoding="utf-8")
-    return about
-
-
-def _reuse(out: Path, vectors: Any, keys: Any, done: Any) -> None:
-    """Copy the rows of the last run whose code this build still has, found by key."""
-    old_keys = np.load(out / "keys.npy")
-    old_vectors = np.load(out / "vectors.npy", mmap_mode="r")
-    order = np.argsort(old_keys)
-    for start in range(0, len(keys), _BLOCK):
-        block = np.asarray(keys[start : start + _BLOCK])
-        rows = order[np.minimum(np.searchsorted(old_keys, block, sorter=order), len(order) - 1)]
-        same = (old_keys[rows] == block) & (block != 0)  # 0: row 0, or an id no snippet has
-        vectors[start : start + _BLOCK][same] = old_vectors[rows[same]]
-        done[start : start + _BLOCK] = same
+    return len(fresh)
 
 
 def _files(gpu: bool) -> tuple[Path, Path]:

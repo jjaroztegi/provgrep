@@ -113,7 +113,7 @@ def test_public_serving_guards(index: search.Index, monkeypatch: pytest.MonkeyPa
     assert int(busy.headers["retry-after"]) > 0
     assert "nosniff" in busy.headers["x-content-type-options"]
     assert client.get("/static/site.css").status_code == 200  # not a search
-    assert client.get("/healthz").json()["index_built"] is None  # the fixture's manifest is {}
+    assert client.get("/healthz").json()["index_built"] == "test"  # the fixture's build
     assert client.get("/robots.txt").text.startswith("User-agent: *\nAllow: /$\nDisallow: /")
 
 

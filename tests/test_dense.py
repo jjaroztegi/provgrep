@@ -1,4 +1,5 @@
 import json
+from pathlib import Path
 from typing import Any
 
 import numpy as np
@@ -25,13 +26,14 @@ class Words:
 
 
 def test_embeddings_order_results_and_outlive_a_rebuild(
-    index: search.Index, monkeypatch: pytest.MonkeyPatch
+    index: search.Index, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     monkeypatch.setattr(dense, "Encoder", Words)
+    monkeypatch.setenv("PROVGREP_CACHE", str(tmp_path / "cache"))
     manifest = index.path / "manifest.json"
     manifest.write_text(json.dumps({"built": "first"}))
     assert dense.embed(index.path, gpu=False)["new"] == 4
-    vectors = np.load(index.path / "dense" / "vectors.npy")
+    vectors = np.load(index.path / "partitions" / "0" / "vectors.npy")
     assert vectors.shape == (5, dense.MODEL.dimensions)  # row n is snippet n; 0 is none
     assert not vectors[0].any()
     assert all(vectors[n].any() for n in range(1, 5))
@@ -42,12 +44,13 @@ def test_embeddings_order_results_and_outlive_a_rebuild(
     assert 0 < first.score <= 1  # a cosine, not BM25
     del ordered  # it maps vectors.npy, which Windows would not let the next run replace
 
-    manifest.write_text(json.dumps({"built": "second"}))  # a rebuild of the same code
-    with pytest.raises(ValueError, match="run provgrep embed"):
+    manifest.write_text(json.dumps({"built": "second"}))  # a rebuild of the same code...
+    (index.path / "partitions" / "0" / "vectors.npy").unlink()  # ...has no vectors yet
+    with pytest.raises(ValueError, match="run provgrep embed"):  # and these are not for it
         search.Index(index.path)
     again = dense.embed(index.path, gpu=False)
-    assert (again["new"], again["index_built"]) == (0, "second")
-    assert (np.load(index.path / "dense" / "vectors.npy") == vectors).all()
+    assert (again["new"], again["index_built"]) == (0, "second")  # all from the store
+    assert (np.load(index.path / "partitions" / "0" / "vectors.npy") == vectors).all()
 
 
 class Dies(Words):
@@ -62,17 +65,20 @@ class Dies(Words):
         return super().__call__(texts)
 
 
-def test_a_resumed_run_counts_all_its_work(
-    index: search.Index, monkeypatch: pytest.MonkeyPatch
+def test_a_resumed_run_counts_and_keeps_all_its_work(
+    index: search.Index, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     monkeypatch.setattr(dense, "Encoder", Dies)
     monkeypatch.setattr(dense, "PART", 2)  # snippets 1-2, then 3-4
+    monkeypatch.setenv("PROVGREP_CACHE", str(tmp_path / "cache"))
     (index.path / "manifest.json").write_text(json.dumps({"built": "first"}))
     with pytest.raises(RuntimeError):
         dense.embed(index.path, gpu=False)
     assert dense.embed(index.path, gpu=False)["new"] == 4  # not the 2 of the last start
-    assert sorted(p.name for p in (index.path / "dense").iterdir()) == [
-        "dense.json",
-        "keys.npy",
+    assert sorted(p.name for p in (index.path / "partitions" / "0").iterdir()) == [
+        "lexical",
+        "records.sqlite",
         "vectors.npy",
     ]
+    (run,) = dense.store().path.iterdir()
+    assert len(np.load(run / "keys.npy")) == 4  # the 2 embedded before the crash too
