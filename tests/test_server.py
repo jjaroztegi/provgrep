@@ -16,6 +16,9 @@ def test_api(index: search.Index) -> None:
     picture = client.get("/api/search", params={"q": "picture"}).json()["results"][0]
     copies = client.get(f"/api/snippets/{picture['id']}").json()["copies"]
     assert len(copies) == 2
+    one = client.get(f"/api/snippets/{picture['id']}", params={"copies": "1"}).json()
+    assert (len(one["copies"]), one["result"]["copies"]) == (1, 2)
+    assert client.get(f"/api/snippets/{picture['id']}", params={"copies": "-1"}).status_code == 400
     assert client.get("/api/search", params={"q": "x", "page": "0"}).status_code == 400
     assert client.get("/api/snippets/nope").status_code == 404
 

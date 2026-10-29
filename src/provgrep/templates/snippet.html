@@ -5,7 +5,7 @@
 <section class="results">
   {{ card(result, linked=False) }}
   <h2 class="copies-title">Where this code is</h2>
-  <p class="copies-note">Every copy in the index, each under the license its own file is under. Which copy came first is not decided here.</p>
+  <p class="copies-note">{% if result.r.copies > copies|length %}The first {{ copies|length }} of {{ "{:,}".format(result.r.copies) }} copies{% else %}Every copy{% endif %} in the index, each under the license its own file is under. Which copy came first is not decided here.</p>
   <ol class="copies-list">
     {% for c, why in copies %}
     <li>

@@ -97,3 +97,11 @@ def test_search_for_a_project_keeps_what_fits_it(index: search.Index) -> None:
     assert index.search("fill").results == []  # without a project, no verdict and no change
     with pytest.raises(ValueError, match="no license 'Proprietary'"):
         index.search("fill", project="Proprietary")
+
+
+def test_a_snippet_lists_as_many_copies_as_asked(index: search.Index) -> None:
+    picture = index.search("picture").results[0].id
+    first = index.snippet(picture, copies=1)
+    assert first is not None
+    assert [c.path for c in first.copies] == ["third_party/x/pic.h"]
+    assert first.result.copies == 2  # how many there are in all
