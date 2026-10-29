@@ -14,19 +14,11 @@ import hashlib
 import re
 import textwrap
 import time
-from collections.abc import Callable
 from dataclasses import dataclass
 from functools import cache
 from pathlib import PurePosixPath
 
-import tree_sitter_c
-import tree_sitter_cpp
-import tree_sitter_go
-import tree_sitter_java
-import tree_sitter_javascript
-import tree_sitter_python
-import tree_sitter_rust
-import tree_sitter_typescript
+import tree_sitter_language_pack
 from tree_sitter import Language as Grammar
 from tree_sitter import Node, Parser, Query, QueryCursor
 
@@ -41,7 +33,7 @@ MAX_LINES = 300
 @dataclass(frozen=True)
 class Language:
     name: str  # what the index and its filters call it
-    grammar: Callable[[], object]
+    grammar: str  # its name in tree-sitter-language-pack
     suffixes: tuple[str, ...]
     # @unit: the lines of a unit; @name: its name, else found through C declarators;
     # @scope: a name it is qualified with, like a Go method's receiver type.
@@ -51,6 +43,11 @@ class Language:
     # @doc: comments and docstrings, the words people write about code.
     docs: str
     tests: re.Pattern[str]  # file names of tests
+    # Nodes right above a unit that are part of it, besides comments: Rust's attributes,
+    # Haskell's type signatures, Julia's docstrings.
+    leading: tuple[str, ...] = ()
+    # Units of one name in a row are one: the equations of a Haskell function.
+    clauses: bool = False
 
 
 _JS_UNITS = """
@@ -79,7 +76,7 @@ _C_TESTS = re.compile(r"(test_.*|.*_(unit)?test)\.(c|cc|cpp|cxx)")
 LANGUAGES = {
     "python": Language(
         "python",
-        tree_sitter_python.language,
+        "python",
         (".py",),
         """
         (function_definition name: (_) @name) @unit
@@ -88,13 +85,13 @@ LANGUAGES = {
         "(class_definition name: (_) @name) @container",
         """
         (comment) @doc
-        (function_definition body: (block . (expression_statement (string (string_content) @doc))))
+        (function_definition body: (block . (string (string_content) @doc)))
         """,
         re.compile(r"test_.*\.py|.*_test\.py|conftest\.py"),
     ),
     "c": Language(
         "c",
-        tree_sitter_c.language,
+        "c",
         (".c", ".h"),
         "(function_definition) @unit",
         "",
@@ -103,7 +100,7 @@ LANGUAGES = {
     ),
     "cpp": Language(
         "cpp",
-        tree_sitter_cpp.language,
+        "cpp",
         (".cc", ".cpp", ".cxx", ".c++", ".hh", ".hpp", ".hxx", ".h++"),
         """
         (function_definition) @unit
@@ -119,7 +116,7 @@ LANGUAGES = {
     ),
     "javascript": Language(
         "javascript",
-        tree_sitter_javascript.language,
+        "javascript",
         (".js", ".mjs", ".cjs", ".jsx"),
         _JS_UNITS,
         _JS_CONTAINERS,
@@ -128,7 +125,7 @@ LANGUAGES = {
     ),
     "typescript": Language(
         "typescript",
-        tree_sitter_typescript.language_typescript,
+        "typescript",
         (".ts", ".mts", ".cts"),
         _JS_UNITS,
         _TS_CONTAINERS,
@@ -137,7 +134,7 @@ LANGUAGES = {
     ),
     "tsx": Language(
         "typescript",
-        tree_sitter_typescript.language_tsx,
+        "tsx",
         (".tsx",),
         _JS_UNITS,
         _TS_CONTAINERS,
@@ -146,7 +143,7 @@ LANGUAGES = {
     ),
     "go": Language(
         "go",
-        tree_sitter_go.language,
+        "go",
         (".go",),
         """
         (function_declaration name: (_) @name body: (_)) @unit
@@ -160,7 +157,7 @@ LANGUAGES = {
     ),
     "rust": Language(
         "rust",
-        tree_sitter_rust.language,
+        "rust",
         (".rs",),
         "(function_item name: (_) @name) @unit",
         """
@@ -170,10 +167,11 @@ LANGUAGES = {
         """,
         "[(line_comment) (block_comment)] @doc",
         re.compile(r"tests?\.rs"),
+        leading=("attribute_item",),
     ),
     "java": Language(
         "java",
-        tree_sitter_java.language,
+        "java",
         (".java",),
         """
         (method_declaration name: (_) @name body: (_)) @unit
@@ -187,6 +185,255 @@ LANGUAGES = {
         """,
         "[(line_comment) (block_comment)] @doc",
         re.compile(r".*Tests?\.java"),
+    ),
+    # The languages below are the ones Tsoding writes in (github.com/tsoding), and a few more of
+    # their kind. Each is cut into what it calls a function, procedure or subprogram.
+    "zig": Language(
+        "zig",
+        "zig",
+        (".zig",),
+        "(Decl (FnProto function: (_) @name) (Block)) @unit",
+        """
+        (VarDecl variable_type_function: (_) @name
+          (ErrorUnionExpr (SuffixExpr (ContainerDecl)))) @container
+        """,
+        "[(line_comment) (doc_comment) (container_doc_comment)] @doc",
+        re.compile(r"test_.*\.zig|.*_test\.zig"),
+    ),
+    "odin": Language(
+        "odin",
+        "odin",
+        (".odin",),
+        "(procedure_declaration . (identifier) @name (procedure (block))) @unit",
+        "",
+        "[(comment) (block_comment)] @doc",
+        re.compile(r".*_test\.odin"),
+    ),
+    "c3": Language(
+        "c3",
+        "c3",
+        (".c3", ".c3i"),
+        """
+        (func_definition (func_header method_type: (_) @scope name: (_) @name) body: (_)) @unit
+        (func_definition (func_header !method_type name: (_) @name) body: (_)) @unit
+        (macro_declaration (macro_header method_type: (_) @scope name: (_) @name) body: (_)) @unit
+        (macro_declaration (macro_header !method_type name: (_) @name) body: (_)) @unit
+        """,
+        "",
+        "[(line_comment) (block_comment) (doc_comment)] @doc",
+        re.compile(r"test_.*\.c3|.*_test\.c3"),
+    ),
+    "jai": Language(
+        "jai",
+        "jai",
+        (".jai",),
+        "(procedure_declaration name: (_) @name (block)) @unit",
+        "",
+        "[(comment) (block_comment)] @doc",
+        re.compile(r"test_.*\.jai|.*_test\.jai"),
+    ),
+    "nim": Language(
+        "nim",
+        "nim",
+        (".nim",),
+        # A routine is the only child of its statement, the sibling of the comments above it.
+        "(stmt . (routine . (keyw) . (symbol) @name (block)) .) @unit",
+        "",
+        "[(comment) (docComment) (multilineComment) (multilineDocComment)] @doc",
+        re.compile(r"test_.*\.nim|.*_test\.nim"),
+    ),
+    "d": Language(
+        "d",
+        "d",
+        (".d",),
+        """
+        (function_declaration (identifier) @name (function_body)) @unit
+        (constructor (this) @name (function_body)) @unit
+        """,
+        """
+        (class_declaration . (class) . (identifier) @name) @container
+        (struct_declaration . (struct) . (identifier) @name) @container
+        (interface_declaration . (interface) . (identifier) @name) @container
+        (union_declaration . (union) . (identifier) @name) @container
+        """,
+        "(comment) @doc",
+        re.compile(r"test_.*\.d|.*_test\.d"),
+    ),
+    "ada": Language(
+        "ada",
+        "ada",
+        (".adb", ".ada"),
+        """
+        (subprogram_body (function_specification name: (_) @name)) @unit
+        (subprogram_body (procedure_specification name: (_) @name)) @unit
+        """,
+        """
+        (package_body name: (_) @name) @container
+        (protected_body . (identifier) @name) @container
+        (task_body . (identifier) @name) @container
+        """,
+        "(comment) @doc",
+        re.compile(r"test_.*\.adb|.*[-_]tests?\.adb"),
+    ),
+    "pascal": Language(
+        "pascal",
+        "pascal",
+        (".pas", ".pp", ".dpr", ".lpr"),
+        "(defProc header: (declProc name: (_) @name)) @unit",
+        "",
+        "(comment) @doc",
+        re.compile(r"[Tt]est.*\.(pas|pp)|.*Tests?\.(pas|pp)"),
+    ),
+    "fortran": Language(
+        "fortran",
+        "fortran",
+        (".f90", ".f95", ".f03", ".f08", ".f", ".for"),
+        """
+        (function (function_statement name: (_) @name)) @unit
+        (subroutine (subroutine_statement name: (_) @name)) @unit
+        (module_procedure (module_procedure_statement name: (_) @name)) @unit
+        (program (program_statement (name) @name)) @unit
+        """,
+        """
+        (module (module_statement (name) @name)) @container
+        (submodule (submodule_statement (name) @name)) @container
+        """,
+        "(comment) @doc",
+        re.compile(r"test_.*\.f\w*|.*_test\.f\w*"),
+    ),
+    "erlang": Language(
+        "erlang",
+        "erlang",
+        (".erl",),
+        "(fun_decl . (function_clause name: (_) @name)) @unit",
+        "",
+        "(comment) @doc",
+        re.compile(r".*_SUITE\.erl|.*_tests?\.erl"),
+    ),
+    "haskell": Language(
+        "haskell",
+        "haskell",
+        (".hs",),
+        """
+        (function name: (_) @name) @unit
+        (bind name: (_) @name) @unit
+        """,
+        """
+        (class name: (_) @name) @container
+        (instance name: (_) @name) @container
+        """,
+        "[(comment) (haddock)] @doc",
+        re.compile(r".*Spec\.hs|.*Tests?\.hs"),
+        leading=("signature", "haddock"),
+        clauses=True,
+    ),
+    "ocaml": Language(
+        "ocaml",
+        "ocaml",
+        (".ml",),
+        """
+        (value_definition (let_binding pattern: (_) @name (parameter))) @unit
+        (value_definition (let_binding pattern: (_) @name
+          body: [(fun_expression) (function_expression)])) @unit
+        (value_definition (let_binding pattern: (unit) @name)) @unit
+        (method_definition (method_name) @name) @unit
+        """,
+        """
+        (module_binding (module_name) @name) @container
+        (class_binding (class_name) @name) @container
+        """,
+        "(comment) @doc",
+        re.compile(r"test_.*\.ml|.*_test\.ml"),
+    ),
+    "lua": Language(
+        "lua",
+        "lua",
+        (".lua",),
+        """
+        (function_declaration name: (_) @name) @unit
+        (assignment_statement (variable_list name: (_) @name)
+          (expression_list value: (function_definition))) @unit
+        (field name: (_) @name value: (function_definition)) @unit
+        """,
+        "",
+        "(comment) @doc",
+        re.compile(r".*_spec\.lua|test_.*\.lua|.*_test\.lua"),
+    ),
+    "teal": Language(
+        "teal",
+        "teal",
+        (".tl",),
+        "(function_statement name: (_) @name) @unit",
+        "",
+        "(comment) @doc",
+        re.compile(r".*_spec\.tl|test_.*\.tl"),
+    ),
+    "julia": Language(
+        "julia",
+        "julia",
+        (".jl",),
+        """
+        (function_definition (signature (call_expression . (_) @name))) @unit
+        (function_definition (signature (typed_expression . (call_expression . (_) @name)))) @unit
+        (function_definition (signature (where_expression . (call_expression . (_) @name)))) @unit
+        (macro_definition (signature (call_expression . (_) @name))) @unit
+        """,
+        "(module_definition name: (_) @name) @container",
+        """
+        [(line_comment) (block_comment)] @doc
+        ((string_literal) @doc . [(function_definition) (macro_definition)])
+        """,
+        re.compile(r"runtests\.jl|test_.*\.jl"),
+        leading=("string_literal",),  # a docstring
+    ),
+    "vala": Language(
+        "vala",
+        "vala",
+        (".vala",),
+        """
+        (function_definition name: (_) @name) @unit
+        (class_constructor_definition name: (_) @name) @unit
+        """,
+        """
+        (class_declaration (identifier) @name) @container
+        (namespace (identifier) @name) @container
+        """,
+        "(comment) @doc",
+        re.compile(r"test_.*\.vala|.*[-_]test\.vala"),
+    ),
+    "racket": Language(
+        "racket",
+        "racket",
+        (".rkt",),
+        """
+        (list . (symbol) @define . (list . (symbol) @name)
+          (#any-of? @define "define" "define/contract" "define/public" "define/private"
+            "define/override" "define-syntax-rule")) @unit
+        """,
+        "",
+        "[(comment) (block_comment)] @doc",
+        re.compile(r"test-.*\.rkt|.*-tests?\.rkt"),
+    ),
+    "commonlisp": Language(
+        "commonlisp",
+        "commonlisp",
+        (".lisp", ".lsp"),
+        "(list_lit . (defun (defun_header function_name: (_) @name))) @unit",
+        "",
+        """
+        [(comment) (block_comment)] @doc
+        (defun (defun_header) . (str_lit) @doc)
+        """,
+        re.compile(r"test-.*\.lisp|.*-tests?\.lisp"),
+    ),
+    "glsl": Language(
+        "glsl",
+        "glsl",
+        (".glsl", ".vert", ".frag", ".geom", ".comp", ".tesc", ".tese", ".vs", ".fs"),
+        "(function_definition) @unit",
+        "",
+        "(comment) @doc",
+        re.compile(r"(?!)"),  # shaders have no test files
     ),
 }
 _BY_SUFFIX = {suffix: key for key, lang in LANGUAGES.items() for suffix in lang.suffixes}
@@ -286,12 +533,12 @@ def units(text: str, language: str) -> list[Unit]:
         node = match["unit"][0]
         if node.id not in found:
             found[node.id] = (node, _first(match, "name"), _first(match, "scope"))
-    containers = []
+    named: dict[int, tuple[int, int, str]] = {}  # the first name found for each container
     for _, m in QueryCursor(_query(language, "containers")).matches(root):
-        if "name" in m:
-            box = m["container"][0]
-            containers.append((box.start_byte, box.end_byte, _scope_name(m["name"][0], source)))
-    containers.sort()
+        box = m["container"][0]
+        if "name" in m and box.id not in named:
+            named[box.id] = (box.start_byte, box.end_byte, _scope_name(m["name"][0], source))
+    containers = sorted(named.values())
     docs = sorted(
         (n.start_byte, n.end_byte, without_emails(_text(n, source)))
         for n in QueryCursor(_query(language, "docs")).captures(root).get("doc", [])
@@ -299,41 +546,64 @@ def units(text: str, language: str) -> list[Unit]:
     doc_starts = [d[0] for d in docs]
     lines = _without_emails_in_docs(source, docs) if docs else lines
 
+    leading = LANGUAGES[language].leading
+    ordered = sorted(found.values(), key=lambda f: (f[0].start_byte, -f[0].end_byte))
+    runs = (
+        _clauses(ordered, source, leading)
+        if LANGUAGES[language].clauses
+        else [(node, node, name, scope) for node, name, scope in ordered]
+    )
     out: list[Unit] = []
     last_end = -1
-    for node, name, scope in sorted(
-        found.values(), key=lambda f: (f[0].start_byte, -f[0].end_byte)
-    ):
-        if node.end_byte <= last_end:
+    for node, last, name, scope in runs:
+        if last.end_byte <= last_end:
             continue  # inside a unit already taken
-        length = node.end_point.row - node.start_point.row + 1
+        length = last.end_point.row - node.start_point.row + 1
         if length > MAX_LINES:
             continue  # the units inside it are taken instead
-        last_end = node.end_byte
+        last_end = last.end_byte
         outer = [
-            n for start, end, n in containers if start <= node.start_byte and node.end_byte <= end
+            n for start, end, n in containers if start <= node.start_byte and last.end_byte <= end
         ]
-        own = lines[node.start_point.row : node.end_point.row + 1]
+        own = lines[node.start_point.row : last.end_point.row + 1]
         if _substantive(own) < MIN_LINES or _TEST_SCOPES & {n.lower() for n in outer}:
             continue
-        first = _leading(node, root, lines)
+        first = _leading(node, root, lines, leading)
         lo = bisect.bisect_left(doc_starts, first.start_byte)
-        hi = bisect.bisect_left(doc_starts, node.end_byte)
-        doc = "\n".join(t for _, end, t in docs[lo:hi] if end <= node.end_byte)
-        code = textwrap.dedent("\n".join(lines[first.start_point.row : node.end_point.row + 1]))
+        hi = bisect.bisect_left(doc_starts, last.end_byte)
+        doc = "\n".join(t for _, end, t in docs[lo:hi] if end <= last.end_byte)
+        code = textwrap.dedent("\n".join(lines[first.start_point.row : last.end_point.row + 1]))
         scoped = [_scope_name(scope, source)] if scope else []
         qualified = [*outer, *scoped, _name(name, node, source)]
         out.append(
             Unit(
                 ".".join(qualified),
                 first.start_point.row + 1,
-                node.end_point.row + 1,
+                last.end_point.row + 1,
                 code,
                 doc,
                 hashlib.sha256(normalized(code).encode()).hexdigest(),
             )
         )
     return out
+
+
+def _clauses(
+    found: list[tuple[Node, Node | None, Node | None]], source: bytes, leading: tuple[str, ...]
+) -> list[tuple[Node, Node, Node | None, Node | None]]:
+    """Units as runs of the same name, one after another with only comments and leading nodes
+    between them: (first, last, name, scope)."""
+    runs: list[tuple[Node, Node, Node | None, Node | None]] = []
+    for node, name, scope in found:
+        if runs and name is not None and (top := runs[-1])[2] is not None:
+            prev = node.prev_named_sibling
+            while prev is not None and _leads(prev, leading):
+                prev = prev.prev_named_sibling
+            if prev == top[1] and _text(name, source) == _text(top[2], source):
+                runs[-1] = (top[0], node, top[2], top[3])
+                continue
+        runs.append((node, node, name, scope))
+    return runs
 
 
 def _without_emails_in_docs(source: bytes, docs: list[tuple[int, int, str]]) -> list[str]:
@@ -364,14 +634,14 @@ def _substantive(lines: list[str]) -> int:
     return sum(bool(line.strip(" \t\r{}()[];,")) for line in lines)
 
 
-def _leading(node: Node, root: Node, lines: list[str]) -> Node:
-    """The first of the comments and attributes right above a unit, each on its own line, or the
-    unit itself. A run of comments that reaches the top of the file is the file's header."""
+def _leading(node: Node, root: Node, lines: list[str], leading: tuple[str, ...]) -> Node:
+    """The first of the comments and leading nodes right above a unit, each on its own line, or
+    the unit itself. A run of comments that reaches the top of the file is the file's header."""
     first = node
     prev = node.prev_named_sibling
     while (
         prev is not None
-        and ("comment" in prev.type or prev.type == "attribute_item")
+        and _leads(prev, leading)
         and prev.end_point.row >= first.start_point.row - 1
         and not lines[prev.start_point.row][: prev.start_point.column].strip()
     ):
@@ -380,6 +650,10 @@ def _leading(node: Node, root: Node, lines: list[str]) -> Node:
     if prev is None and first is not node and node.parent is not None and node.parent == root:
         return node
     return first
+
+
+def _leads(node: Node, leading: tuple[str, ...]) -> bool:
+    return "comment" in node.type or node.type in leading
 
 
 def _name(name: Node | None, node: Node, source: bytes) -> str:
@@ -422,7 +696,7 @@ def _text(node: Node, source: bytes) -> str:
 
 @cache
 def _grammar(language: str) -> Grammar:
-    return Grammar(LANGUAGES[language].grammar())
+    return tree_sitter_language_pack.get_language(LANGUAGES[language].grammar)
 
 
 @cache

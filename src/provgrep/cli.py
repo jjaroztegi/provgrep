@@ -53,11 +53,18 @@ def main(argv: list[str] | None = None) -> int:
         default="c,c++,go,java,javascript,python,rust,typescript",
         help="GitHub language names, comma-separated",
     )
-    p.add_argument("--count", type=int, default=500, help="repositories per language")
     p.add_argument(
-        "--min-stars",
+        "--count",
         type=int,
-        help="every repository with at least this many stars, however many (not --count)",
+        help="repositories per language (default: 500, or all of them with --min-stars)",
+    )
+    p.add_argument(
+        "--min-stars", type=int, default=0, help="only repositories with at least this many stars"
+    )
+    p.add_argument(
+        "--add",
+        action="store_true",
+        help="add them to the corpus in --out as a tier, the repositories it has kept as pinned",
     )
     p.add_argument("--out", type=Path, default=Path("corpus/github.json"))
 
@@ -138,10 +145,8 @@ def main(argv: list[str] | None = None) -> int:
         if not token:
             parser.error("corpus needs a GitHub token in GITHUB_TOKEN (search is API-only)")
         languages = args.languages.split(",")
-        if args.min_stars is None:
-            count = github.pin(languages, args.out, token, args.count)
-        else:
-            count = github.pin(languages, args.out, token, None, args.min_stars)
+        per_language = args.count if args.count or args.min_stars else 500
+        count = github.pin(languages, args.out, token, per_language, args.min_stars, args.add)
         print(f"pinned {count} repositories in {args.out}")
     elif args.command == "build":
         from provgrep.build import build

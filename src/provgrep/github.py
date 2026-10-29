@@ -2,7 +2,8 @@
 
 The corpus is the most-starred repositories whose main language is the one asked for, forks left
 out, as GitHub's search ranked them when they were pinned: a number of them per language, or all
-with at least a number of stars. The pinned file is the corpus: building
+with at least a number of stars. A corpus grows by tiers, each pinned when it was added, and a
+repository keeps the commit it was first pinned at. The pinned file is the corpus: building
 from it needs no API and no token, only each commit's tarball, and the commit id that `git archive`
 writes into the tarball's pax header shows the tarball is that commit.
 """
@@ -59,22 +60,44 @@ class Repo:
         return f"https://github.com/{self.name}/blob/{self.commit}/{path}{anchor}"
 
 
-def pin(languages: list[str], out: Path, token: str, count: int | None, min_stars: int = 0) -> int:
+def pin(
+    languages: list[str],
+    out: Path,
+    token: str,
+    count: int | None,
+    min_stars: int = 0,
+    add: bool = False,
+) -> int:
     """Write the `count` most-starred repositories of each language (all of them with None)
-    that have at least min_stars stars, each at its default branch's head, most-starred
-    first."""
-    repos = [r for language in languages for r in _top(language, count, min_stars, token)]
-    repos.sort(key=lambda r: (-r.stars, r.name.lower()))
+    that have at least min_stars stars, each at its default branch's head, most-starred first;
+    return how many. With add, as a tier added to the corpus in out: the repositories it has
+    keep their commits and are not counted."""
+    tiers: list[dict[str, Any]] = []
+    repos: dict[str, dict[str, Any]] = {}
+    if add and out.exists():
+        corpus = json.loads(out.read_text(encoding="utf-8"))
+        tiers = corpus["tiers"]
+        repos = {r["name"].lower(): r for r in corpus["repos"]}
+    before = len(repos)
+    for language in languages:
+        for repo in _top(language, count, min_stars, token):
+            repos.setdefault(repo.name.lower(), asdict(repo))
+    tiers.append(
+        {
+            "pinned": datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "languages": languages,
+            "per_language": count,
+            "min_stars": min_stars,
+            "repos": len(repos) - before,
+        }
+    )
     pinned = {
-        "pinned": datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),
-        "languages": languages,
-        "per_language": count,
-        "min_stars": min_stars,
-        "repos": [asdict(r) for r in repos],
+        "tiers": tiers,
+        "repos": sorted(repos.values(), key=lambda r: (-r["stars"], r["name"].lower())),
     }
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(pinned, indent=1) + "\n", encoding="utf-8")
-    return len(repos)
+    return len(repos) - before
 
 
 def _top(language: str, count: int | None, min_stars: int, token: str) -> list[Repo]:
@@ -82,9 +105,10 @@ def _top(language: str, count: int | None, min_stars: int, token: str) -> list[R
     stars seen, until enough repositories are found or there are no more."""
     found: dict[str, Repo] = {}
     stars = f"stars:>={min_stars}"
+    name = f'"{language}"' if " " in language else language  # "Common Lisp"
     while count is None or len(found) < count:
         before = len(found)
-        query = f"language:{language} fork:false {stars} sort:stars-desc"
+        query = f"language:{name} fork:false {stars} sort:stars-desc"
         for node in _search(query, token):
             target = (node.get("defaultBranchRef") or {}).get("target")
             if not target or node["nameWithOwner"] in found:

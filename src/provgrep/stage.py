@@ -30,8 +30,7 @@ TOOLS = (
     "scancode-toolkit",
     "license-expression",
     "tree-sitter",
-    *(f"tree-sitter-{g}" for g in ("c", "cpp", "go", "java", "javascript", "python", "rust")),
-    "tree-sitter-typescript",
+    "tree-sitter-language-pack",  # every grammar, by its version
 )
 
 

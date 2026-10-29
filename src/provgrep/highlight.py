@@ -6,10 +6,10 @@ grammars the index was cut with, so a page needs no script for it."""
 
 import re
 from functools import cache, lru_cache
-from importlib import resources
 from itertools import pairwise
 from pathlib import PurePosixPath
 
+import tree_sitter_language_pack
 from tree_sitter import Language, Parser, Query, QueryCursor
 
 from provgrep.chunks import LANGUAGES
@@ -33,27 +33,18 @@ _CLASSES = {
     "constructor": "t",
     "attribute": "t",
 }
-# Which highlight queries each grammar takes, as (package, file): C++'s and TypeScript's add to
-# C's and JavaScript's.
-_JSX = ("tree_sitter_javascript", "highlights-jsx.scm")
-_QUERIES = {
-    "python": [("tree_sitter_python", "highlights.scm")],
-    "c": [("tree_sitter_c", "highlights.scm")],
-    "cpp": [("tree_sitter_c", "highlights.scm"), ("tree_sitter_cpp", "highlights.scm")],
-    "javascript": [("tree_sitter_javascript", "highlights.scm"), _JSX],
-    "typescript": [
-        ("tree_sitter_javascript", "highlights.scm"),
-        ("tree_sitter_typescript", "highlights.scm"),
-    ],
-    "tsx": [
-        ("tree_sitter_javascript", "highlights.scm"),
-        _JSX,
-        ("tree_sitter_typescript", "highlights.scm"),
-    ],
-    "go": [("tree_sitter_go", "highlights.scm")],
-    "rust": [("tree_sitter_rust", "highlights.scm")],
-    "java": [("tree_sitter_java", "highlights.scm")],
-}
+# Queries that extend another grammar's without saying so. Others say it in a first line, as
+# nvim-treesitter's do: "; inherits: c".
+_BASES = {"typescript": ("javascript",), "tsx": ("javascript",)}
+_INHERITS = re.compile(r"^; inherits: ([\w,]+)", re.MULTILINE)
+# JSX's elements, which tree-sitter-javascript colours in a query of their own that the pack
+# leaves out: a lower-case name is an element of the page, a capitalised one a component.
+_JSX = """
+(jsx_opening_element name: (identifier) @tag (#match? @tag "^[a-z][^.]*$"))
+(jsx_closing_element name: (identifier) @tag (#match? @tag "^[a-z][^.]*$"))
+(jsx_self_closing_element name: (identifier) @tag (#match? @tag "^[a-z][^.]*$"))
+(jsx_attribute (property_identifier) @attribute)
+"""
 _BY_SUFFIX = {suffix: key for key, language in LANGUAGES.items() for suffix in language.suffixes}
 
 _CAPTURE = re.compile(rb"@([\w.]+)")
@@ -70,7 +61,10 @@ def runs(path: str, code: str) -> tuple[Run, ...]:
     key = _BY_SUFFIX.get(PurePosixPath(path).suffix.lower())
     if key is None:
         return (("", code),)
-    language, query = _grammar(key)
+    grammar = _grammar(key)
+    if grammar is None:
+        return (("", code),)
+    language, query = grammar
     data = code.encode()
     parser = Parser(language)  # one a call: pages are made on several threads
     tree, shift = parser.parse(data), 0
@@ -100,12 +94,14 @@ def runs(path: str, code: str) -> tuple[Run, ...]:
 
 
 @cache
-def _grammar(key: str) -> tuple[Language, Query]:
-    language = Language(LANGUAGES[key].grammar())
-    source = "\n".join(
-        (resources.files(package) / "queries" / name).read_text(encoding="utf-8")
-        for package, name in _QUERIES[key]
-    )
+def _grammar(key: str) -> tuple[Language, Query] | None:
+    grammar = LANGUAGES[key].grammar
+    source = _source(grammar)
+    if source is None:
+        return None  # a grammar with no highlights
+    if grammar in ("javascript", "tsx"):
+        source += _JSX
+    language = tree_sitter_language_pack.get_language(grammar)
     query = Query(language, source)
     # Most matches are of patterns that only name what stays plain (variables, calls, brackets):
     # without them a query runs in about half the time, and plain text loses nothing.
@@ -115,6 +111,17 @@ def _grammar(key: str) -> tuple[Language, Query]:
         if not any(_class(name.decode()) for name in _CAPTURE.findall(pattern)):
             query.disable_pattern(i)
     return language, query
+
+
+def _source(grammar: str) -> str | None:
+    """A grammar's highlights query, after those of the grammars it builds on. nvim-treesitter's
+    `#lua-match?` takes Lua patterns, which tree-sitter does not know; the ones these queries use
+    are regular expressions as they are."""
+    own = tree_sitter_language_pack.get_highlights_query(grammar)
+    if own is None:
+        return None
+    bases = [*_BASES.get(grammar, ()), *(b for m in _INHERITS.findall(own) for b in m.split(","))]
+    return "\n".join([*(_source(b) or "" for b in bases), own.replace("#lua-match?", "#match?")])
 
 
 @cache
