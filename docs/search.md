@@ -59,15 +59,15 @@ the license and the link are what attribution has.
 
 ## Queries
 
-Words and identifiers are matched in the function's name, its comments and docstrings, its path
-and its code. Identifiers are split into words (`XRenderCreatePicture`: x, render, create,
-picture), kept whole, and kept as the family prefixes APIs are named by (`xrender`), so a part,
-the whole name or its family all find it. An identifier typed as one in a query weighs three
-times a plain word. A result has at least one of the query's less common terms: a word found in
-more than 1% of functions (`get`, `data`) adds to the rank of a result that has a rarer one, but
-does not bring in results by itself, unless every word of the query is that common. `require`
-asks for identifiers that must be in the code, whole, `A|B` for either: `--require
-XRenderCreatePicture` in the command line, `require=` in the API. Whole means case and
+Words and identifiers are matched in the function's name, its comments and docstrings, its path and
+its code. Identifiers are split into words (`XRenderCreatePicture`: x, render, create, picture),
+kept whole, and kept as the family prefixes APIs are named by (`xrender`), so a part, the whole name
+or its family all find it. An identifier typed as one in a query weighs three times a plain word; a
+name with a number, as `X11` or `SDL2`, is a plain word. A result has at least one of the query's
+less common terms: a word found in more than 1% of functions (`get`, `data`) adds to the rank of a
+result that has a rarer one, but does not bring in results by itself, unless every word of the query
+is that common. `require` asks for identifiers that must be in the code, whole, `A|B` for either:
+`--require XRenderCreatePicture` in the command line, `require=` in the API. Whole means case and
 underscores aside (`parse_rtp_header` is `parseRtpHeader`) but not a part: `wait` does not match
 `epoll_wait`.
 

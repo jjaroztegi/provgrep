@@ -156,12 +156,16 @@ def _parts(word: str) -> list[str]:
 def query_terms(query: str) -> list[str]:
     """The terms of a query as the query parser takes them. An identifier typed as one
     (`XRender`, `epoll_wait`) weighs IDENTIFIER times a word: whoever types it knows the name.
-    The single letters an identifier splits into (`XRender`: x) are left out; most code has them.
+    A name and a number (`X11`, `SDL2`) is a word: the code that calls Xlib does not say X11,
+    and weighed as an identifier it brought the functions named after it first. The single
+    letters an identifier splits into (`XRender`: x) are left out; most code has them.
     """
     out = []
     for word in _WORD.findall(query):
         found = terms(word)
-        if len(found) > 1:
+        parts = _parts(word)
+        numbered = len(parts) == 2 and parts[1].isdigit() and not parts[0].isdigit()
+        if len(found) > 1 and not numbered:
             out.append(f"{found[0]}^{IDENTIFIER}")
             found = found[1:]
         out += [t for t in found if len(t) > 1]
