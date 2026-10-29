@@ -38,8 +38,11 @@ MAX_TOKENS = 512  # longer code is embedded by its first MAX_TOKENS tokens
 BATCH_TOKENS = 64 * MAX_TOKENS
 MAX_BATCH = 256
 PART = 100_000  # snippets embedded between two saves
-# A query is a few tokens: on 16 threads it took 47 ms at the median and 133 ms at the 95th
-# percentile, on 4 threads 22 and 32 ms.
+# Embedding a query is most of a search's time, and it runs beside the partitions' lexical
+# searches. On an 8-core CPU, a page of results took 35 ms at the median and 61 at the 95th
+# percentile with the 8-bit weights on 4 threads, against 40 and 68 in full precision; they rank
+# as well (41/76/.59 apis any, against 41/75/.59). On 8 threads a query alone is faster (12 ms
+# against 18), but a search is not: the threads take the cores the lexical searches need.
 QUERY_THREADS = 4
 _BLOCK = 100_000  # rows copied at a time
 # Measured on the intent suites, re-ranking the lexical top 100: 128 to 384 dimensions rank as
@@ -54,6 +57,7 @@ class Model:
     revision: str
     onnx: tuple[str, str]  # path in the repository, sha256
     onnx_fp16: tuple[str, str]  # the same in half precision, for a GPU
+    onnx_int8: tuple[str, str]  # in 8 bits, for queries on a CPU
     tokenizer: tuple[str, str]
     pad: str  # the token that pads a batch
     dimensions: int
@@ -72,6 +76,10 @@ MODEL = Model(
         "onnx/model_fp16.onnx",
         "1aafc4fcd63d2e6899e88402ff731e7c646c2e435048294a3cbc908a40d45d7c",
     ),
+    onnx_int8=(
+        "onnx/model_quantized.onnx",
+        "ed45870251c9f0cf656e78aab0d37a23489066df8a222bb1c8caf8a45f2cb16d",
+    ),
     tokenizer=(
         "tokenizer.json",
         "b01c78a902aa4facb2f47f95449f48e2f7bbfea5d2472ee2f6ce92323c6f86e5",
@@ -84,18 +92,21 @@ MODEL = Model(
 
 
 class Encoder:
-    """MODEL on onnxruntime: texts in, unit vectors out."""
+    """MODEL on onnxruntime: texts in, unit vectors out. Code is embedded in full or half
+    precision; queries in 8 bits, fast on a CPU."""
 
-    def __init__(self, gpu: bool = False) -> None:
+    def __init__(self, gpu: bool = False, queries: bool = False) -> None:
         import onnxruntime
         from tokenizers import Tokenizer
 
-        onnx, tokenizer = _files(gpu)
+        onnx, tokenizer = _files(
+            MODEL.onnx_fp16 if gpu else MODEL.onnx_int8 if queries else MODEL.onnx
+        )
         if gpu:
             onnxruntime.preload_dlls()  # the CUDA libraries are wheels, not on the loader's path
         providers = ["CUDAExecutionProvider" if gpu else "CPUExecutionProvider"]
         options = onnxruntime.SessionOptions()
-        if not gpu:
+        if queries:
             options.intra_op_num_threads = QUERY_THREADS
         self._session = onnxruntime.InferenceSession(str(onnx), options, providers=providers)
         if self._session.get_providers()[0] != providers[0]:  # it falls back without a word
@@ -384,12 +395,11 @@ def _project(index: Path, n: int, kept: Store, projection: Projection) -> None:
     part.replace(here / "vectors.npy")
 
 
-def _files(gpu: bool) -> tuple[Path, Path]:
-    """The model's ONNX file (half precision for a GPU) and tokenizer, downloaded once."""
+def _files(weights: tuple[str, str]) -> tuple[Path, Path]:
+    """One of the model's ONNX files and its tokenizer, downloaded once."""
     base = f"https://huggingface.co/{MODEL.repo}/resolve/{MODEL.revision}/"
     here = cache_dir() / "models" / f"{MODEL.repo.replace('/', '__')}@{MODEL.revision[:12]}"
     onnx, tokenizer = (
-        download([base + path], sha256, here / path)
-        for path, sha256 in (MODEL.onnx_fp16 if gpu else MODEL.onnx, MODEL.tokenizer)
+        download([base + path], sha256, here / path) for path, sha256 in (weights, MODEL.tokenizer)
     )
     return onnx, tokenizer

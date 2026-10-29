@@ -79,7 +79,9 @@ are put in order of how close each function's code is to the query in meaning, a
 embeds them; later results keep the lexical order. Lexical search still decides what is found:
 a function with none of the query's terms is not a result, however close its meaning. A
 result's score is then the cosine of its code with the query, not BM25. Only the first 512
-tokens of a long function are embedded.
+tokens of a long function are embedded. Queries are embedded with the model's 8-bit weights
+(`onnx/model_quantized.onnx`), which rank as well as full precision and take most of a search's
+time in less; code is embedded in full or half precision.
 
 Embedding the 21 million functions of the full index takes about 15 hours on one 16 GB NVIDIA
 GPU (an RTX A4000, 320 to 480 functions a second), with the CUDA build of onnxruntime in place of

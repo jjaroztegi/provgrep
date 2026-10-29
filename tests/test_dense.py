@@ -11,7 +11,7 @@ from provgrep import dense, search
 class Words:
     """An encoder whose vectors are the words of a text: close when they share words."""
 
-    def __init__(self, gpu: bool = False) -> None:
+    def __init__(self, gpu: bool = False, queries: bool = False) -> None:
         pass
 
     def __call__(self, texts: list[str]) -> Any:
