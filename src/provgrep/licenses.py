@@ -31,7 +31,7 @@ from license_expression import LicenseWithExceptionSymbol, Licensing, get_spdx_l
 from licensedcode.cache import get_index, get_licenses_db
 from scancode.api import get_licenses, get_package_data
 
-from provgrep import without_emails
+from provgrep import read_text, without_emails
 
 _HASH = ("#",)
 _SLASH = ("//",)
@@ -289,7 +289,7 @@ def _header(path: Path, rel: PurePosixPath) -> tuple[Evidence | None, tuple[str,
     """The license a file's header names, and its copyright statements."""
     if path.stat().st_size > _MAX_SCAN:
         return None, ()
-    text = path.read_text(encoding="utf-8", errors="replace")
+    text = read_text(path)
     header = "\n".join(text.splitlines()[: header_end(text, rel.suffix.lower())])
     if not _HINT.search(header):
         return None, ()
@@ -305,7 +305,7 @@ def _header(path: Path, rel: PurePosixPath) -> tuple[Evidence | None, tuple[str,
 def _license_file(path: Path) -> tuple[str | None, tuple[str, ...]]:
     if path.stat().st_size > _MAX_SCAN:
         return None, ()
-    text = path.read_text(encoding="utf-8", errors="replace")
+    text = read_text(path)
     expression, texts = _detect(text)
     return expression, _copyrights(text, texts)
 
@@ -319,7 +319,7 @@ def _declared_expression(path: Path) -> str | None:
     `project.license`, `License-Expression`) is taken as written: ScanCode would AND it with the
     classifiers, turning `MIT OR Apache-2.0` into `(MIT OR Apache-2.0) AND MIT`."""
     explicit = None
-    text = path.read_text(encoding="utf-8", errors="replace")
+    text = read_text(path)
     if path.name == "pyproject.toml":
         with contextlib.suppress(tomllib.TOMLDecodeError):
             explicit = tomllib.loads(text).get("project", {}).get("license")

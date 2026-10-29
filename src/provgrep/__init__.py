@@ -19,6 +19,13 @@ def without_emails(text: str) -> str:
     return _EMAIL.sub("", text)
 
 
+def read_text(path: Path) -> str:
+    """A source, license or manifest file as provgrep reads it: UTF-8 without the byte-order mark
+    some editors start a file with (left in, it hid the file's header and so its license), bytes
+    that are not UTF-8 replaced."""
+    return path.read_text(encoding="utf-8-sig", errors="replace")
+
+
 def source_commit() -> str | None:
     """The source commit, with `-dirty` if tracked files have changed since."""
     here = Path(__file__).parent

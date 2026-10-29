@@ -79,7 +79,15 @@ def test_resolve_tree(tmp_path: Path) -> None:
     (tmp_path / "pkg").mkdir()
     (tmp_path / "pkg" / "plain.py").write_text("def f():\n    return 'MIT or GPL'\n")
     (tmp_path / "pkg" / "gpl.py").write_text("# SPDX-License-Identifier: GPL-2.0-or-later\nx = 1\n")
+    # A byte-order mark before the header, as some editors write it: the header still counts.
+    gpl_c = "// Copyright 2014 A\n// SPDX-License-Identifier: GPL-2.0-or-later\nint x;\n"
+    (tmp_path / "pkg" / "bom.c").write_text(gpl_c, encoding="utf-8-sig")
     resolved = resolve_tree(tmp_path)
+    assert (resolved["pkg/bom.c"].expression, resolved["pkg/bom.c"].level) == (
+        "GPL-2.0-or-later",
+        "A",
+    )
+    assert resolved["pkg/bom.c"].notices == ("Copyright 2014 A",)
     assert resolved["pkg/plain.py"].level == "B"  # the string in the code is not its license
     assert resolved["pkg/plain.py"].expression == "MIT"
     assert resolved["pkg/gpl.py"].expression == "GPL-2.0-or-later"
