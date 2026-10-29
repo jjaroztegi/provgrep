@@ -1,7 +1,8 @@
 """A corpus of GitHub repositories, each pinned to a commit.
 
 The corpus is the most-starred repositories whose main language is the one asked for, forks left
-out, as GitHub's search ranked them when they were pinned. The pinned file is the corpus: building
+out, as GitHub's search ranked them when they were pinned: a number of them per language, or all
+with at least a number of stars. The pinned file is the corpus: building
 from it needs no API and no token, only each commit's tarball, and the commit id that `git archive`
 writes into the tarball's pax header shows the tarball is that commit.
 """
@@ -58,15 +59,17 @@ class Repo:
         return f"https://github.com/{self.name}/blob/{self.commit}/{path}{anchor}"
 
 
-def pin(languages: list[str], count: int, out: Path, token: str) -> int:
-    """Write the `count` most-starred repositories of each language, each at its default
-    branch's head, most-starred first."""
-    repos = [r for language in languages for r in _top(language, count, token)]
+def pin(languages: list[str], out: Path, token: str, count: int | None, min_stars: int = 0) -> int:
+    """Write the `count` most-starred repositories of each language (all of them with None)
+    that have at least min_stars stars, each at its default branch's head, most-starred
+    first."""
+    repos = [r for language in languages for r in _top(language, count, min_stars, token)]
     repos.sort(key=lambda r: (-r.stars, r.name.lower()))
     pinned = {
         "pinned": datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "languages": languages,
         "per_language": count,
+        "min_stars": min_stars,
         "repos": [asdict(r) for r in repos],
     }
     out.parent.mkdir(parents=True, exist_ok=True)
@@ -74,14 +77,14 @@ def pin(languages: list[str], count: int, out: Path, token: str) -> int:
     return len(repos)
 
 
-def _top(language: str, count: int, token: str) -> list[Repo]:
-    """Search returns at most 1000 results per query, so it is asked again below the fewest stars
-    seen, until enough repositories are found."""
+def _top(language: str, count: int | None, min_stars: int, token: str) -> list[Repo]:
+    """Search returns at most 1000 results per query, so it is asked again at or below the fewest
+    stars seen, until enough repositories are found or there are no more."""
     found: dict[str, Repo] = {}
-    below = ""
-    while len(found) < count:
+    stars = f"stars:>={min_stars}"
+    while count is None or len(found) < count:
         before = len(found)
-        query = f"language:{language} fork:false {below} sort:stars-desc".replace("  ", " ")
+        query = f"language:{language} fork:false {stars} sort:stars-desc"
         for node in _search(query, token):
             target = (node.get("defaultBranchRef") or {}).get("target")
             if not target or node["nameWithOwner"] in found:
@@ -96,7 +99,7 @@ def _top(language: str, count: int, token: str) -> list[Repo]:
             )
         if len(found) == before:
             break
-        below = f"stars:<={min(r.stars for r in found.values())}"
+        stars = f"stars:{min_stars}..{min(r.stars for r in found.values())}"
     return sorted(found.values(), key=lambda r: (-r.stars, r.name.lower()))[:count]
 
 
@@ -144,6 +147,11 @@ def _graphql(query: str, variables: dict[str, Any], token: str) -> dict[str, Any
         except urllib.error.HTTPError as e:
             # Search times out now and then with a 502; anything else is not worth retrying.
             if e.code < 500 or attempt == 3:
+                raise
+            time.sleep(2**attempt)
+            continue
+        except OSError:  # a dropped connection (URLError), as in a long pin
+            if attempt == 3:
                 raise
             time.sleep(2**attempt)
             continue
