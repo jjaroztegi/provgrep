@@ -27,13 +27,14 @@ none. Files where both sides agree were not read. The audit, with its reasons an
 
 Two suites of intents in `truth/intents/`, each a question and the calls the code of a right
 answer contains; a result is a hit when its code has them all. Over the full index (built and
-searched at 378bb39 from corpus/github.json, sha256 526db429d94b, with its embeddings):
+searched at 378bb39 from corpus/github.json, sha256 526db429d94b, with its embeddings; queries
+embedded with the model's 8-bit weights):
 
 | suite | licenses | intents | a hit first | a hit in the top 10 | MRR@10 | answerable from the index |
 |---|---|---:|---:|---:|---:|---:|
-| APIs: common tasks in 8 languages | any | 89 | 41 | 75 | 0.59 | 89 |
-| | permissive | 89 | 41 | 79 | 0.59 | 89 |
-| XRender: what a live session needed | any | 8 | 1 | 4 | 0.22 | 6 |
+| APIs: common tasks in 8 languages | any | 89 | 41 | 76 | 0.59 | 89 |
+| | permissive | 89 | 42 | 77 | 0.60 | 89 |
+| XRender: what a live session needed | any | 8 | 1 | 4 | 0.24 | 6 |
 | | permissive | 8 | 2 | 2 | 0.25 | 5 |
 
 Search finds the functions that have the question's words (BM25 over identifiers split into words
@@ -41,8 +42,9 @@ and kept whole, in partitions searched at once), then orders the first 100 by ho
 is to the question in meaning ([docs/search.md](docs/search.md#ordering-by-meaning)). Without that
 order, a hit came first for 33 and 30 of the API intents (MRR 0.49 and 0.48) and in the top 10
 for no XRender question with any license. On the 8-core server, once the index has been read from
-disk, a search takes 34 ms at the median and 64 ms at the 95th percentile (23 and 53 ms without
-the order).
+disk, a search takes 28 ms at the median and 60 ms at the 95th percentile (23 and 53 ms without
+the order); the benchmark asks each question twice, with any license and with permissive ones,
+and the second time its embedding is remembered.
 
 The XRender questions are the ones a programmer had while writing an XRender program in C from
 scratch, live ([Tsoding Daily](https://www.youtube.com/watch?v=auzZCp45dJc)). The index answers 6

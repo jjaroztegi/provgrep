@@ -28,6 +28,7 @@ from collections.abc import Sequence
 from compression import zstd
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
+from functools import lru_cache
 from pathlib import Path
 from typing import Any
 from urllib.parse import quote
@@ -257,7 +258,8 @@ class Index:
         self.vectors = None
         if (path / "dense.json").exists():
             self.vectors = dense.Vectors(path, self.manifest["built"], self.partitions)
-            self._encoder = dense.Encoder()
+            # A query asked again (another filter, the next page) is not embedded again
+            self._meaning = lru_cache(maxsize=1024)(dense.Encoder(queries=True).query)
 
     def search(
         self,
@@ -322,7 +324,7 @@ class Index:
         depth = max(offset + limit, RERANK) if vectors is not None else offset + limit
         searches = [self._pool.submit(s.search, combined, depth) for s in self._searchers]
         # The query is embedded while the shards are searched: it needs none of their results.
-        meaning = self._encoder.query(query) if vectors is not None else None
+        meaning = self._meaning(query) if vectors is not None else None
         found = [future.result() for future in searches]
         hits = sorted(
             ((score, n, address) for n, part in enumerate(found) for score, address in part.hits),
