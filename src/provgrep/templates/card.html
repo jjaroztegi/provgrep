@@ -36,7 +36,7 @@
     {% endif %}
     {% if r.copies > 1 %}
     <p class="copies">
-      {% if linked %}<a href="/s/{{ r.id }}">{% endif %}Same code in {{ r.copies }} places{% if r.repos > 1 %}, {{ r.repos }} repositories{% endif %}{% if linked %}</a>{% endif %}{% if r.licenses > 1 %}, <strong class="warn">under {{ r.licenses }} different licenses</strong>{% endif %}
+      {% if linked %}<a href="/s/{{ r.id }}">{% endif %}Same code in {{ "{:,}".format(r.copies) }} places{% if r.repos > 1 %}, {{ "{:,}".format(r.repos) }} repositories{% endif %}{% if linked %}</a>{% endif %}{% if r.licenses > 1 %}, <strong class="warn">under {{ r.licenses }} different licenses</strong>{% endif %}
     </p>
     {% endif %}
     <div class="actions">
