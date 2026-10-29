@@ -46,6 +46,9 @@ def test_search_filters_and_withholds_unlicensed_code(index: search.Index) -> No
     # Whole identifiers: `wait` is not in code that has only `epoll_wait`.
     assert index.search("", licenses="any", require=["wait"]).total == 0
     assert index.search("", licenses="any", require=["epoll_wait|nothing"]).total == 1
+    # A name of several (`io.open`) needs every one of them.
+    assert index.search("", licenses="any", require=["XSync.epoll_wait"]).total == 1
+    assert index.search("", licenses="any", require=["epoll_wait.nothing"]).total == 0
     assert index.search("fill", licenses=["GPL-2.0-or-later ", " MIT"]).total == 1
     assert index.search("fill", licenses="any", languages=["go"]).total == 0
     assert index.search("fill", licenses=search.licenses_of("Any"), languages=["C"]).total == 2

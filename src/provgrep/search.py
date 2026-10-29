@@ -297,10 +297,15 @@ class Index:
             clauses.append((Occur.Must, text))
         filters = []
         for identifier in require:
-            whole = [w for alt in identifier.split("|") for w in identifiers(alt)]
-            if not whole:
+            # An alternative of several names (`io.open`, Lisp's `with-open-file`) needs them all.
+            alternatives = [sorted(w) for alt in identifier.split("|") if (w := identifiers(alt))]
+            if not alternatives:
                 raise ValueError(f"not an identifier: {identifier!r}")
-            filters.append(self._any("identifiers", whole))
+            filters.append(
+                Query.boolean_query(
+                    [(Occur.Should, self._all("identifiers", words)) for words in alternatives]
+                )
+            )
         if text is None and not filters:
             return Page(0, [])
         if languages:
@@ -424,6 +429,11 @@ class Index:
                 if compatibility.verdict(project, [term.split(" + ")]).answer == "yes"
             )
         return self._compatible[project]
+
+    def _all(self, field: str, values: Sequence[str]) -> Query:
+        return Query.boolean_query(
+            [(Occur.Must, Query.term_query(self._schema, field, v)) for v in values]
+        )
 
     def _any(self, field: str, values: Sequence[str]) -> Query:
         return Query.boolean_query(

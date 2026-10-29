@@ -3,8 +3,11 @@
 ## A result is a function, not a file
 
 The index holds the functions and methods of each repository (with the comments right above
-them), cut by tree-sitter for C, C++, Go, Java, JavaScript, Python, Rust and TypeScript. Tests,
-generated and minified files are left out; vendored copies stay in, as copies.
+them), cut by tree-sitter for C, C++, Go, Java, JavaScript, Python, Rust and TypeScript, and for
+the languages a programmer like [Tsoding](https://github.com/tsoding) writes in beside C: Ada, C3,
+Common Lisp, D, Erlang, Fortran, GLSL, Haskell, Jai, Julia, Lua, Nim, OCaml, Odin, Pascal,
+Racket, Teal, Vala and Zig. A Haskell function's equations are one result, with its type
+signature. Tests, generated and minified files are left out; vendored copies stay in, as copies.
 
 The same code found in several places is one result. Two copies are the same when they differ
 only in indentation, trailing spaces or blank lines. The copy shown is the first one outside a
@@ -69,7 +72,7 @@ result that has a rarer one, but does not bring in results by itself, unless eve
 is that common. `require` asks for identifiers that must be in the code, whole, `A|B` for either:
 `--require XRenderCreatePicture` in the command line, `require=` in the API. Whole means case and
 underscores aside (`parse_rtp_header` is `parseRtpHeader`) but not a part: `wait` does not match
-`epoll_wait`.
+`epoll_wait`. A name of several, as Lua's `io.open` or Lisp's `with-open-file`, needs them all.
 
 ## Ordering by meaning
 

@@ -183,3 +183,86 @@ def test_a_parse_past_its_deadline_gives_no_units(monkeypatch: pytest.MonkeyPatc
     started = time.monotonic()
     assert units("0x54, 0x42, 0x4c, 0x42,\n" * 20000, "cpp") == []
     assert time.monotonic() - started < 5
+
+
+def test_equations_signatures_docstrings_and_containers() -> None:
+    haskell = """module M where
+
+one :: Int
+one =
+  let x = 1
+  in x
+
+-- | Factorial.
+fact :: Int -> Int
+fact 0 = 1
+fact n =
+  n * fact (n - 1)
+"""
+    assert _units("M.hs", haskell) == [("one", 3, 6), ("fact", 8, 12)]
+    julia = '''using Base
+
+"""
+    area(r)
+
+The area of a circle.
+"""
+function area(r)
+    a = pi * r^2
+    return a
+end
+'''
+    (unit,) = units(julia, "julia")
+    assert (unit.symbol, unit.start, unit.end) == ("area", 3, 11)
+    assert "The area of a circle." in unit.doc
+    nim = "import std/math\n\n# Adds.\nfunc add(a, b: int): int =\n  let x = a + b\n  result = x\n"
+    assert _units("a.nim", nim) == [("add", 3, 6)]
+    zig = """const Point = struct {
+    /// Adds two points.
+    pub fn add(self: Point, other: Point) Point {
+        const x = self.x + other.x;
+        return .{ .x = x };
+    }
+};
+"""
+    assert _units("p.zig", zig) == [("Point.add", 2, 6)]
+
+
+@pytest.mark.parametrize(
+    ("name", "code", "expected"),
+    [
+        ("a.odin", "add :: proc(a, b: int) -> int {\n\tx := a + b\n\treturn x\n}\n", "add"),
+        ("a.c3", "fn int Point.len(self)\n{\n    int d = self.x;\n    return d;\n}\n", "Point.len"),
+        ("a.jai", "add :: (a: int, b: int) -> int {\n    x := a + b;\n    return x;\n}\n", "add"),
+        ("a.d", "int add(int a, int b)\n{\n    auto x = a + b;\n    return x;\n}\n", "add"),
+        (
+            "a.adb",
+            'procedure Hello is\nbegin\n   Put_Line ("a");\n   Put_Line ("b");\nend Hello;\n',
+            "Hello",
+        ),
+        (
+            "a.pas",
+            "procedure TPoint.Draw;\nbegin\n  WriteLn(X);\n  WriteLn(Y);\nend;\n",
+            "TPoint.Draw",
+        ),
+        (
+            "a.f90",
+            "subroutine show(x)\n  integer :: x\n  print *, x\nend subroutine show\n",
+            "show",
+        ),
+        ("a.erl", "loop(S) ->\n    receive\n        M -> loop([M | S])\n    end.\n", "loop"),
+        ("a.ml", "let read_all path =\n  let ic = open_in path in\n  input_line ic\n", "read_all"),
+        ("a.lua", "function M:draw(p)\n  print(p.x)\n  print(p.y)\nend\n", "M:draw"),
+        ("a.tl", "local function add(a: number): number\n  local x = a\n  return x\nend\n", "add"),
+        ("a.vala", 'void main () {\n    var a = 1;\n    print ("%d", a);\n}\n', "main"),
+        (
+            "a.rkt",
+            "(define (fact n)\n  (if (zero? n)\n      1\n      (* n (fact (- n 1)))))\n",
+            "fact",
+        ),
+        ("a.lisp", "(defun twice (x)\n  (let ((y x))\n    (+ y y)))\n", "twice"),
+        ("a.frag", "void main()\n{\n    vec4 c = vec4(1.0);\n    gl_FragColor = c;\n}\n", "main"),
+    ],
+)
+def test_each_language_is_cut_into_its_functions(name: str, code: str, expected: str) -> None:
+    assert [symbol for symbol, _, _ in _units(name, code)] == [expected]
