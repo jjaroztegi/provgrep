@@ -1,19 +1,22 @@
 {% extends "base.html" %}
 {% from "card.html" import card %}
 {% block title %}{{ result.loc.symbol }} - provgrep{% endblock %}
-{% block main %}
-<section class="results">
+{% block page %}
+<main id="main" class="single">
   {{ card(result, linked=False) }}
   <h2 class="copies-title">Where this code is</h2>
   <p class="copies-note">{% if result.r.copies > copies|length %}The first {{ copies|length }} of {{ "{:,}".format(result.r.copies) }} copies{% else %}Every copy{% endif %} in the index, each under the license its own file is under. Which copy came first is not decided here.</p>
-  <ol class="copies-list">
-    {% for c, why in copies %}
-    <li>
-      <a href="{{ c.url }}">{{ c.repo }} <span class="path">{{ c.path }}:{{ c.start }}–{{ c.end }}</span></a>
-      <span class="expression">{{ c.license.expression or "No license found" }}</span>
-      <span class="why">level {{ c.license.level }}{% if c.vendored %}, vendored{% endif %}</span>
-    </li>
+  <table class="copies-list">
+    <thead><tr><th>repository and file</th><th>license</th><th>evidence</th></tr></thead>
+    <tbody>
+    {% for c, why, category in copies %}
+    <tr class="{{ category }}">
+      <td><a href="{{ c.url }}">{{ c.repo }}</a> <span class="path">{{ c.path }}:{{ c.start }}–{{ c.end }}</span></td>
+      <td class="license">{{ c.license.expression or "No license found" }}</td>
+      <td><abbr title="{{ why }}">{{ c.license.level }}</abbr>{% if c.vendored %}, vendored{% endif %}</td>
+    </tr>
     {% endfor %}
-  </ol>
-</section>
+    </tbody>
+  </table>
+</main>
 {% endblock %}

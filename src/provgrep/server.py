@@ -38,7 +38,7 @@ from starlette.types import ASGIApp, Message, Receive, Scope, Send
 from provgrep import compatibility
 from provgrep.attribution import reuse_snippet
 from provgrep.mcp_server import server as mcp_server
-from provgrep.search import Index, Page, Result, licenses_of, query_terms, terms
+from provgrep.search import Index, License, Page, Result, licenses_of, query_terms, terms
 
 PAGE_SIZE = 10
 MAX_PAGE = 20  # deeper than this, refine the query
@@ -55,8 +55,8 @@ _HEADERS = [
     for name, value in {
         # Nothing but this site's own script, styles and requests: no third parties, no inline code.
         "content-security-policy": "default-src 'none'; script-src 'self'; style-src 'self';"
-        " img-src 'self' data:; connect-src 'self'; form-action 'self'; base-uri 'none';"
-        " frame-ancestors 'none'",
+        " font-src 'self'; img-src 'self' data:; connect-src 'self'; form-action 'self';"
+        " base-uri 'none'; frame-ancestors 'none'",
         "x-content-type-options": "nosniff",
         "referrer-policy": "no-referrer",  # a link to GitHub does not say what was searched
     }.items()
@@ -136,9 +136,8 @@ def app(index: Index, host: str = "127.0.0.1", public: str | None = None) -> Sta
 
     def search(params: Any) -> tuple[dict[str, Any], Page]:
         """The query a request asks for, as the page shows it, and its page of results."""
-        license = params.get("license", "permissive")
-        allowed = params.get("allowed", "")
-        project = params.get("project", "") if license == "compatible" else ""
+        query = _query(params)
+        license, allowed, project = query["license"], query["allowed"], query["project"]
         if license == "allowed":
             licenses: str | list[str] = allowed.split(",")
         elif license == "compatible":
@@ -151,14 +150,7 @@ def app(index: Index, host: str = "127.0.0.1", public: str | None = None) -> Sta
         if not number.isdigit() or not 1 <= int(number) <= MAX_PAGE:
             raise ValueError(f"page goes from 1 to {MAX_PAGE}")
         page = int(number)
-        query = {
-            "q": params.get("q", ""),
-            "language": params.get("language", ""),
-            "license": license,
-            "allowed": allowed,
-            "project": project,
-            "page": page,
-        }
+        query["page"] = page
         found = index.search(
             query["q"],
             languages=[v for v in params.getlist("language") if v],  # "" is the form's "all"
@@ -173,7 +165,7 @@ def app(index: Index, host: str = "127.0.0.1", public: str | None = None) -> Sta
 
     def home(request: Request) -> Response:
         params = request.query_params
-        query: dict[str, Any] = {"q": params.get("q", ""), "license": "permissive", "page": 1}
+        query = _query(params)
         found, error = None, None
         if query["q"] or params.getlist("require"):
             try:
@@ -186,6 +178,8 @@ def app(index: Index, host: str = "127.0.0.1", public: str | None = None) -> Sta
             "error": error,
             "results": [_view(r, query["q"]) for r in found.results] if found else [],
             "next": _next(request, found, query["page"]),
+            "api": "/api/search?"
+            + urlencode([(k, v) for k, v in params.multi_items() if v and k != "partial"]),
             "manifest": index.manifest,
             "languages": LANGUAGES,
             "examples": EXAMPLES,
@@ -205,7 +199,7 @@ def app(index: Index, host: str = "127.0.0.1", public: str | None = None) -> Sta
             "query": {"q": "", "license": "permissive"},
             "languages": LANGUAGES,
             "result": _view(found.result, ""),
-            "copies": [(c, LEVELS[c.license.level]) for c in found.copies],
+            "copies": [(c, LEVELS[c.license.level], _category(c.license)) for c in found.copies],
         }
         return templates.TemplateResponse(request, "snippet.html", context)
 
@@ -333,7 +327,6 @@ class Guard:
 def _view(result: Result, query: str) -> dict[str, Any]:
     """What a result card shows."""
     lic = result.location.license
-    category = "link" if not lic.shareable else "permissive" if lic.permissive else "copyleft"
     lines = []
     if result.code is not None:
         wanted = {t.split("^")[0] for t in query_terms(query)} - _UNMARKED
@@ -343,12 +336,31 @@ def _view(result: Result, query: str) -> dict[str, Any]:
         "r": result,
         "loc": result.location,
         "lic": lic,
-        "category": category,
+        "category": _category(lic),
         "level_text": LEVELS[lic.level],
         "language": LANGUAGES.get(result.language, result.language),
         "lines": lines,
         "attribution": reuse_snippet(result),
     }
+
+
+def _query(params: Any) -> dict[str, Any]:
+    """The search a request asks for, as the page shows it."""
+    license = params.get("license", "permissive")
+    return {
+        "q": params.get("q", ""),
+        "language": params.get("language", ""),
+        "level": params.get("level", ""),
+        "license": license,
+        "allowed": params.get("allowed", ""),
+        "project": params.get("project", "") if license == "compatible" else "",
+        "page": 1,
+    }
+
+
+def _category(lic: License) -> str:
+    """Which colour a license is shown in: whether its code may be shared, and on what terms."""
+    return "link" if not lic.shareable else "permissive" if lic.permissive else "copyleft"
 
 
 def _marked(line: str, wanted: set[str]) -> Markup:
