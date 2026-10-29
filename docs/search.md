@@ -98,9 +98,16 @@ is sound (a CPU embedding of 1,600 of the functions, 600 of them from right afte
 with the stored vectors to a cosine of 0.998, what storing them as int8 costs), so run it again
 until it exits with 0.
 
-The embeddings belong to one build of the index: after a rebuild, the index does not open until
-`provgrep embed` has run again. That run takes the vectors of the code it already had, by the
-code's hash, and embeds only what is new.
+Every embedding the model makes is kept in the cache, by the hash of the code, apart from any
+index ([docs/build.md](build.md#caches-apart-from-the-index)). The embeddings in an index belong to
+one build of it: after a rebuild, the index does not open until `provgrep embed` has run again.
+That run takes the vectors of the code any earlier run embedded, and the model embeds only code no
+run has seen: minutes for a rebuild of mostly the same code, not a day.
+
+An index keeps each vector smaller than the model makes it: projected on the 256 directions the
+vectors vary most along (a PCA fitted once on the cache, so vectors projected at any time
+compare), as int8. 128 to 384 directions rank the intent suites as well as all 768 do; 256 keep
+96% of the variance, a third of the size.
 
 ## Measuring it
 
