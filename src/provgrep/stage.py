@@ -21,7 +21,7 @@ from importlib.metadata import version
 from pathlib import Path, PurePosixPath
 from typing import TextIO
 
-from provgrep import chunks, github
+from provgrep import chunks, github, read_text
 from provgrep.fetch import TooLarge
 from provgrep.licenses import evidence_file, resolve_tree
 
@@ -79,7 +79,7 @@ def _stage_tree(root: Path, out: TextIO) -> int:
         if language is None:
             continue
         path = root / rel
-        text = path.read_text(encoding="utf-8", errors="replace")
+        text = read_text(path)
         kind = chunks.kind(rel, text, language)
         kinds[kind] += 1
         if kind in SKIPPED:
@@ -91,7 +91,7 @@ def _stage_tree(root: Path, out: TextIO) -> int:
         if name not in code:
             continue
         language, kind = code[name]
-        units = chunks.units((root / name).read_text(encoding="utf-8", errors="replace"), language)
+        units = chunks.units(read_text(root / name), language)
         if units:
             staged = {
                 "path": name,
