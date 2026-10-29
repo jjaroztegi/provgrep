@@ -15,17 +15,19 @@ script only fetches the same results as you type. The whole query is in the URL,
 request only reads the index: replicas of the server can serve the same index directory.
 """
 
+import html
 import math
 import re
 import time
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from dataclasses import asdict
+from functools import lru_cache
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlencode, urlsplit
 
-from markupsafe import Markup, escape
+from markupsafe import Markup
 from mcp.server.transport_security import TransportSecuritySettings
 from starlette.applications import Starlette
 from starlette.requests import Request
@@ -35,7 +37,7 @@ from starlette.staticfiles import StaticFiles
 from starlette.templating import Jinja2Templates
 from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
-from provgrep import compatibility
+from provgrep import compatibility, highlight
 from provgrep.attribution import reuse_snippet
 from provgrep.mcp_server import server as mcp_server
 from provgrep.search import Index, License, Page, Result, licenses_of, query_terms, terms
@@ -330,8 +332,7 @@ def _view(result: Result, query: str) -> dict[str, Any]:
     lines = []
     if result.code is not None:
         wanted = {t.split("^")[0] for t in query_terms(query)} - _UNMARKED
-        for n, line in enumerate(result.code.split("\n"), result.location.start):
-            lines.append((n, _marked(line, wanted)))
+        lines = _lines(result.location.path, result.code, result.location.start, wanted)
     return {
         "r": result,
         "loc": result.location,
@@ -363,19 +364,45 @@ def _category(lic: License) -> str:
     return "link" if not lic.shareable else "permissive" if lic.permissive else "copyleft"
 
 
-def _marked(line: str, wanted: set[str]) -> Markup:
-    """A line of code, escaped, with the identifiers that match the query marked."""
-    if not wanted:
-        return escape(line)
-    out = []
-    last = 0
-    for m in _WORD.finditer(line):
-        if wanted & set(terms(m.group())):
-            out += [escape(line[last : m.start()]), Markup("<mark>"), escape(m.group())]
-            out.append(Markup("</mark>"))
-            last = m.end()
-    out.append(escape(line[last:]))
-    return Markup("").join(out)
+def _lines(path: str, code: str, first: int, wanted: set[str]) -> list[tuple[int, Markup]]:
+    """The code's lines, numbered, escaped, coloured by its syntax, with the identifiers that
+    match the query marked. Built as plain strings: a page has thousands of pieces."""
+    marks = [
+        (m.start(), m.end())
+        for m in _WORD.finditer(code if wanted else "")
+        if not wanted.isdisjoint(_terms(m.group()))
+    ]
+    lines: list[list[str]] = [[]]
+    at = 0  # where in the code the next piece starts
+    i = 0  # the first mark that does not end before it
+    for cls, text in highlight.runs(path, code):
+        for n, part in enumerate(text.split("\n")):
+            if n:
+                lines.append([])
+                at += 1
+            if not part:
+                continue
+            end = at + len(part)
+            out, last = [], at
+            while i < len(marks) and marks[i][0] < end:
+                start, stop = max(marks[i][0], at), min(marks[i][1], end)
+                out += [_escape(code[last:start]), "<mark>", _escape(code[start:stop]), "</mark>"]
+                last = stop
+                if marks[i][1] > end:  # a word the syntax cut in two goes on in the next piece
+                    break
+                i += 1
+            out.append(_escape(code[last:end]))
+            piece = "".join(out)
+            lines[-1].append(f'<span class="{cls}">{piece}</span>' if cls else piece)
+            at = end
+    return [(n, Markup("".join(parts))) for n, parts in enumerate(lines, first)]
+
+
+def _escape(text: str) -> str:
+    return html.escape(text, quote=False)  # text inside an element: quotes need no escaping
+
+
+_terms = lru_cache(maxsize=65536)(terms)  # code repeats its identifiers
 
 
 def _next(request: Request, found: Page | None, page: int) -> str | None:
