@@ -43,3 +43,15 @@ into one cache's `staging/<key>/` (the same key: the same code and tool versions
 `corpus/removed.json` lists what people asked to have left out: whole repositories, files or
 directories of one, and functions by id, each with the request it answers. Every build leaves
 them out (a repository is not even fetched) and counts what it left out in the manifest.
+
+## Serving
+
+`provgrep serve` listens on 127.0.0.1. To listen on another address (`--host`), give the URL
+people reach the site at (`--public https://...`): MCP refuses requests addressed to any other host
+or sent from another site's pages. Each address may search twice a second, 30 at once, and the
+server takes 64 connections at a time; wider limits belong in the proxy in front of it. Nothing
+about a search is logged.
+
+A search reads parts of every partition, so right after it starts on a new index the first
+searches wait on the disk: on the 4,000-repository index, p95 was 0.7 s cold and 62 ms once the
+index had been read. Read the index once after switching to it (`cat` its files to `/dev/null`).
