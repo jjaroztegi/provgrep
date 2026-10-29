@@ -22,9 +22,11 @@ search keeps the code OSADL's matrix says may go into it, and says why (compatib
 
 import itertools
 import json
+import mmap
 import re
 import sqlite3
-from collections.abc import Sequence
+import struct
+from collections.abc import Iterable, Sequence
 from compression import zstd
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
@@ -33,6 +35,7 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import quote
 
+import numpy as np
 import tantivy
 from tantivy import Occur, Query
 
@@ -49,6 +52,9 @@ MAX_REQUIRED = 8
 ID_LENGTH = 16  # hex digits of a snippet's hash that name it
 MAX_COPIES = 1000  # listed at most for a snippet: one has 3,069, all in one repository
 HASH_BYTES = 16  # of a code's sha256, kept to tell functions apart
+# Functions whose code is compressed together, by id: 16% smaller than one by one, and read in
+# 40 us. Ids are the order functions were first found in, so a block's are much alike.
+BLOCK = 16
 BUCKETS = 256  # by the first byte of the hash: a partition is a run of them
 # A term in more than this share of a field's documents does not make a document match on its
 # own, as in Lucene's common terms query. At 0.01 the intent suites rank as well as with no cut,
@@ -250,7 +256,7 @@ class Index:
         self.manifest = json.loads((path / "manifest.json").read_text(encoding="utf-8"))
         self.partitions = len(list((path / "partitions").iterdir()))
         self._dbs = [connect(path, n) for n in range(self.partitions)]
-        self._dictionary = dictionary(path)
+        self._code = [Code(path, n) for n in range(self.partitions)]
         self._searchers = [
             tantivy.Index.open(str(path / "partitions" / str(n) / "lexical")).searcher()
             for n in range(self.partitions)
@@ -377,8 +383,7 @@ class Index:
         if found is None:
             return None
         n, snippet = found
-        (code,) = self._dbs[n].execute("SELECT code FROM snippets WHERE id = ?", (snippet,))
-        return self._code(code[0])
+        return self._code[n]([snippet])[snippet]
 
     def _find(self, id: str) -> tuple[int, int] | None:
         """The partition a snippet id is in, and its id there."""
@@ -393,9 +398,6 @@ class Index:
             .fetchone()
         )
         return None if row is None else (n, row[0])
-
-    def _code(self, blob: bytes) -> str:
-        return zstd.decompress(blob, zstd_dict=self._dictionary).decode()
 
     def _text(self, words: list[str]) -> Query | None:
         """The words in every field, weighted; a document must have one of the rarer ones (see
@@ -445,16 +447,17 @@ class Index:
         out = {}
         for n in {n for n, _ in snippets}:
             ids = [snippet for m, snippet in snippets if m == n]
+            code = self._code[n](ids)
             rows = self._dbs[n].execute(
-                f"SELECT {_LOCATION}, s.id, s.hash, s.language, s.code, s.copies, s.repos,"
-                " s.licenses FROM snippets s JOIN locations l ON l.id = s.location"
+                f"SELECT {_LOCATION}, s.id, s.hash, s.language, s.copies, s.repos, s.licenses"
+                " FROM snippets s JOIN locations l ON l.snippet = s.id AND l.id = s.location"
                 " JOIN files f ON f.id = l.file JOIN repos r ON r.id = f.repo"
                 f" WHERE s.id IN ({','.join('?' * len(ids))})",
                 ids,
             )
             for row in rows:
-                code = self._code(row[_LOCATION_COLUMNS + 3])
-                out[(n, row[_LOCATION_COLUMNS])] = (*row[: _LOCATION_COLUMNS + 3], code, *row[-3:])
+                snippet = row[_LOCATION_COLUMNS]
+                out[(n, snippet)] = (*row[: _LOCATION_COLUMNS + 3], code[snippet], *row[-3:])
         return out
 
 
@@ -523,6 +526,65 @@ def connect(index: Path, n: int) -> sqlite3.Connection:
     return db
 
 
+class Code:
+    """A partition's code, by snippet id. Blocks of BLOCK functions, each a zstd frame of how
+    many it has (2 bytes), their lengths (4 bytes each) and their code, one after another in
+    code.zst; code.npy has where each block starts and the last ends. A file of its own, not
+    rows of records.sqlite: a block, ~4 KB, spilled over two of its pages, a fifth wasted."""
+
+    def __init__(self, index: Path, n: int) -> None:
+        here = index / "partitions" / str(n)
+        self._starts = np.load(here / "code.npy")
+        self._dictionary = dictionary(index)
+        self._data: mmap.mmap | bytes = b""  # an empty file cannot be mapped
+        if self._starts[-1]:
+            with (here / "code.zst").open("rb") as f:
+                self._data = mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ)
+
+    def __call__(self, ids: Iterable[int]) -> dict[int, str]:
+        out = {}
+        for block, wanted in itertools.groupby(sorted(set(ids)), key=lambda i: (i - 1) // BLOCK):
+            frame = self._data[self._starts[block] : self._starts[block + 1]]
+            data = zstd.decompress(frame, zstd_dict=self._dictionary)
+            (count,) = struct.unpack_from("<H", data)
+            lengths = struct.unpack_from(f"<{count}I", data, 2)
+            ends = list(itertools.accumulate(lengths, initial=2 + 4 * count))
+            for i in wanted:
+                at = i - 1 - BLOCK * block
+                out[i] = data[ends[at] : ends[at + 1]].decode()
+        return out
+
+
+class CodeWriter:
+    """Writes what Code reads, a function at a time in id order."""
+
+    def __init__(self, here: Path, compressor: zstd.ZstdCompressor) -> None:
+        self._file = (here / "code.zst").open("wb")
+        self._here = here
+        self._compressor = compressor
+        self._block: list[bytes] = []
+        self._starts = [0]
+
+    def add(self, code: str) -> None:
+        self._block.append(code.encode())
+        if len(self._block) == BLOCK:
+            self._flush()
+
+    def close(self) -> None:
+        if self._block:
+            self._flush()
+        self._file.close()
+        np.save(self._here / "code.npy", np.array(self._starts, dtype=np.uint64))
+
+    def _flush(self) -> None:
+        head = struct.pack(f"<H{len(self._block)}I", len(self._block), *map(len, self._block))
+        data = head + b"".join(self._block)
+        frame = self._compressor.compress(data, zstd.ZstdCompressor.FLUSH_FRAME)
+        self._file.write(frame)
+        self._starts.append(self._starts[-1] + len(frame))
+        self._block = []
+
+
 def dictionary(index: Path) -> zstd.ZstdDict | None:
     """The zstd dictionary an index's code is compressed with (none for very little code)."""
     path = index / "code.zdict"
@@ -560,7 +622,7 @@ def document(
 
 def schema() -> tantivy.Schema:
     builder = tantivy.SchemaBuilder()
-    builder.add_unsigned_field("id", stored=True, indexed=True, fast=True)
+    builder.add_unsigned_field("id", stored=True)  # read with a result, never searched
     for field in FIELDS:
         builder.add_text_field(field, tokenizer_name="en_stem", index_option="freq")
     for field in ("language", "level", "license", "identifiers"):

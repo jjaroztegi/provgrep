@@ -7,9 +7,10 @@ index directory that `provgrep serve`, `search` and `mcp` read and never write.
 
 - `sources.sqlite`: the repositories and their files, each file with its license, the evidence
   for it and its copyright notices.
-- `partitions/<n>/`: `records.sqlite` (the distinct functions, their code compressed with
-  `code.zdict`, and where each one is found) and `lexical/` (the search index over them). With
-  embeddings, also `vectors.npy`.
+- `partitions/<n>/`: `records.sqlite` (the distinct functions and where each one is found),
+  `code.zst` and `code.npy` (their code, 16 functions to a zstd frame, compressed with
+  `code.zdict`) and `lexical/` (the search index over them, in one segment). With embeddings,
+  also `vectors.npy`.
 - `manifest.json`: the corpus, code and tool versions it was built from, its counts, and what
   was left out and why.
 

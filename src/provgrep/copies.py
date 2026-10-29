@@ -10,7 +10,6 @@ are often written alike in many projects, so the counts are given by length too.
 import json
 import sqlite3
 import time
-from compression import zstd
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -28,7 +27,6 @@ def study(index: Path, out_root: Path) -> Path:
     manifest = json.loads((index / "manifest.json").read_text(encoding="utf-8"))
     partitions = len(list((index / "partitions").iterdir()))
     dbs = [search.connect(index, n) for n in range(partitions)]
-    zdict = search.dictionary(index)
 
     def count(where: str) -> int:
         return sum(db.execute(f"SELECT count(*) FROM snippets {where}").fetchone()[0] for db in dbs)
@@ -42,12 +40,15 @@ def study(index: Path, out_root: Path) -> Path:
     # Each snippet whose copies disagree, across repositories: its lines, whether some copy is
     # permissive and some copyleft, and whether some copy is vendored.
     rows = [
-        (n, snippet, zstd.decompress(code, zstd_dict=zdict).count(b"\n") + 1, *rest)
+        (n, *row)
         for n, db in enumerate(dbs)
-        for snippet, code, *rest in db.execute(
-            """SELECT s.id, s.code, s.repos, max(f.permissive),
+        for row in db.execute(
+            # The lines of the copy shown: its code's.
+            """SELECT s.id, shown.end - shown.start + 1, s.repos, max(f.permissive),
                       max(f.shareable AND NOT f.permissive), max(f.vendored)
-               FROM snippets s JOIN locations l ON l.snippet = s.id JOIN files f ON f.id = l.file
+               FROM snippets s
+               JOIN locations shown ON shown.snippet = s.id AND shown.id = s.location
+               JOIN locations l ON l.snippet = s.id JOIN files f ON f.id = l.file
                WHERE s.licenses > 1 AND s.repos > 1 GROUP BY s.id"""
         )
     ]

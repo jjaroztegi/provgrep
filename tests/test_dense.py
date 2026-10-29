@@ -76,6 +76,8 @@ def test_a_resumed_run_counts_and_keeps_all_its_work(
         dense.embed(index.path, gpu=False)
     assert dense.embed(index.path, gpu=False)["new"] == 4  # not the 2 of the last start
     assert sorted(p.name for p in (index.path / "partitions" / "0").iterdir()) == [
+        "code.npy",
+        "code.zst",
         "lexical",
         "records.sqlite",
         "vectors.npy",
