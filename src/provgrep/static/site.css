@@ -1,6 +1,8 @@
-/* provgrep looks like a terminal: Iosevka and the Gruber Darker palette, dark only. Colour means
-   something: green, warm and red say whether a result's code may be copied and on what terms;
-   yellow is what can be clicked, and what matched the search. Code has no other colour. */
+/* provgrep looks like a terminal: Iosevka and the Gruber Darker palette, dark only. Outside code,
+   colour means something: green, warm and red say whether a result's code may be copied and on
+   what terms; yellow is what can be clicked. Code is coloured as the Gruber Darker theme colours
+   it in an editor (github.com/jjaroztegi/Gruber-Darker-Theme), and what matched the search is
+   marked as the theme marks what a find matched. */
 
 @font-face {
   font-family: Iosevka;
@@ -63,7 +65,6 @@ a {
 }
 a:hover { text-decoration-color: currentColor; }
 :focus-visible { outline: 2px solid var(--yellow); outline-offset: 3px; }
-mark { background: none; color: var(--yellow); }
 abbr { text-decoration: none; }
 
 .visually-hidden {
@@ -242,6 +243,12 @@ main.single { flex: 1; width: 100%; max-width: 68rem; padding-top: 1.5rem; }
 .code.long.open pre { max-height: none; }
 .code.open .more { display: none; }
 .line { padding-right: 1rem; }
+.code .k { color: var(--yellow); } /* keywords, operators */
+.code .s { color: #73c936; } /* strings */
+.code .c { color: var(--warm); } /* comments */
+.code .n { color: #95a99f; } /* numbers, constants, escapes */
+.code .t { color: #b6b6b6; } /* types */
+.code mark { background: #8b8989de; color: #000; }
 .line::before {
   content: attr(data-n);
   display: inline-block;

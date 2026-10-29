@@ -29,6 +29,7 @@ def test_pages(index: search.Index) -> None:
     assert "What should the code do?" in home
     page = client.get("/", params={"q": "create picture"}).text
     assert "<mark>XRenderCreatePicture</mark>" in page
+    assert '<span class="k">return</span>' in page  # the code is coloured by its syntax
     assert "Copyright (c) 2020 Acme" in page
     assert "Same code in 2 places" in page
     withheld = client.get("/", params={"q": "fill", "license": "any", "level": "X"}).text
