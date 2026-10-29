@@ -28,7 +28,7 @@ none. Files where both sides agree were not read. The audit, with its reasons an
 Two suites of intents in `truth/intents/`, each a question and the calls the code of a right
 answer contains; a result is a hit when its code has them all. Over the full index (built at
 378bb39 from corpus/github.json, sha256 526db429d94b, with its embeddings, and searched at
-6e17fee; queries embedded with the model's 8-bit weights):
+c1aaef1; queries embedded with the model's 8-bit weights):
 
 | suite | licenses | intents | a hit first | a hit in the top 10 | MRR@10 | answerable from the index |
 |---|---|---:|---:|---:|---:|---:|
