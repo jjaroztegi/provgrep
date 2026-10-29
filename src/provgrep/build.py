@@ -116,23 +116,8 @@ def build(corpus: Path, out: Path, jobs: int, limit: int | None = None) -> dict[
     first `limit` repositories of each language."""
     started = time.monotonic()
     commit = source_commit()  # the code that runs is the code at the start
-    repos = github.load(corpus)
-    if limit is not None:
-        taken: Counter[str] = Counter()
-        kept = []
-        for repo in repos:
-            taken[repo.language] += 1
-            if taken[repo.language] <= limit:
-                kept.append(repo)
-        repos = kept
-    key = stage.key()
-    staging = cache_dir() / "staging" / key
-    staging.mkdir(parents=True, exist_ok=True)
-    for old in staging.parent.iterdir():
-        if old != staging:
-            shutil.rmtree(old)
-    todo = [r for r in repos if not stage.path(staging, r).exists()]
-    failed = stage_all(todo, staging, jobs, cache_dir() / "work")
+    repos = load(corpus, limit)
+    staging, failed = stage_corpus(repos, jobs)
 
     part = out.with_name(out.name + ".part")
     shutil.rmtree(part, ignore_errors=True)
@@ -147,7 +132,7 @@ def build(corpus: Path, out: Path, jobs: int, limit: int | None = None) -> dict[
         },
         "built": datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "commit": commit,
-        "stage_key": key,
+        "stage_key": staging.name,
         "versions": {name: version(name) for name in (*stage.TOOLS, "tantivy")},
         "counts": counts,
         "failed": failed,
@@ -157,6 +142,33 @@ def build(corpus: Path, out: Path, jobs: int, limit: int | None = None) -> dict[
     shutil.rmtree(out, ignore_errors=True)
     part.replace(out)
     return manifest
+
+
+def load(corpus: Path, limit: int | None = None) -> list[github.Repo]:
+    """The repositories of a pinned corpus; with limit, the first `limit` of each language."""
+    repos = github.load(corpus)
+    if limit is None:
+        return repos
+    taken: Counter[str] = Counter()
+    kept = []
+    for repo in repos:
+        taken[repo.language] += 1
+        if taken[repo.language] <= limit:
+            kept.append(repo)
+    return kept
+
+
+def stage_corpus(repos: list[github.Repo], jobs: int) -> tuple[Path, dict[str, str]]:
+    """Stage the repositories the cache does not have under the current key; return where they
+    are staged, and the ones that failed, with why. Staged files are named by repository and
+    commit, so machines that stage parts of a corpus merge them by copying the files."""
+    staging = cache_dir() / "staging" / stage.key()
+    staging.mkdir(parents=True, exist_ok=True)
+    for old in staging.parent.iterdir():
+        if old != staging:
+            shutil.rmtree(old)
+    todo = [r for r in repos if not stage.path(staging, r).exists()]
+    return staging, stage_all(todo, staging, jobs, cache_dir() / "work")
 
 
 def write(repos: list[github.Repo], staging: Path, out: Path, jobs: int) -> dict[str, Any]:

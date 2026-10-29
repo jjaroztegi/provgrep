@@ -67,6 +67,14 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--jobs", type=int, default=4, help="repositories staged at once (default: 4)")
     p.add_argument("--limit", type=int, help="only the first N repositories of each language")
 
+    p = commands.add_parser(
+        "stage", help="stage the repositories of a corpus into the cache, or a part of them"
+    )
+    p.add_argument("--corpus", type=Path, default=Path("corpus/github.json"))
+    p.add_argument("--jobs", type=int, default=4, help="repositories staged at once (default: 4)")
+    p.add_argument("--limit", type=int, help="only the first N repositories of each language")
+    p.add_argument("--part", default="1/1", help="I/N: every Nth repository from the Ith")
+
     p = commands.add_parser("search", help="search the index")
     p.add_argument("query")
     p.add_argument("--index", type=Path, default=Path("index/github"))
@@ -136,6 +144,17 @@ def main(argv: list[str] | None = None) -> int:
         print(json.dumps(manifest["counts"], indent=1))
         if manifest["failed"]:
             print(f"failed: {len(manifest['failed'])} (listed in the manifest)")
+    elif args.command == "stage":
+        from provgrep.build import load, stage_corpus
+
+        part, _, parts = args.part.partition("/")
+        if not (part.isdigit() and parts.isdigit() and 1 <= int(part) <= int(parts)):
+            parser.error("--part is I/N, with I from 1 to N")
+        repos = load(args.corpus, args.limit)[int(part) - 1 :: int(parts)]
+        staging, failed = stage_corpus(repos, args.jobs)
+        print(f"{len(repos) - len(failed)} of {len(repos)} repositories staged in {staging}")
+        for name, why in failed.items():
+            print(f"failed: {name}: {why}")
     elif args.command == "search":
         from provgrep.search import Index, licenses_of
 
