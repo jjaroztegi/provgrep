@@ -48,7 +48,28 @@ _COMMENTS: dict[str, tuple[tuple[str, ...], tuple[tuple[str, str], ...]]] = {
     **dict.fromkeys((".java", ".kt", ".scala", ".swift", ".cs", ".go", ".rs"), (_SLASH, _C_BLOCK)),
     **dict.fromkeys((".js", ".mjs", ".cjs", ".jsx"), (_SLASH, _C_BLOCK)),
     **dict.fromkeys((".ts", ".mts", ".cts", ".tsx"), (_SLASH, _C_BLOCK)),
-    ".lua": (("--",), (("--[[", "]]"),)),
+    **dict.fromkeys((".lua", ".tl"), (("--",), (("--[[", "]]"),))),
+    ".zig": (_SLASH, ()),
+    **dict.fromkeys((".odin", ".jai", ".vala"), (_SLASH, _C_BLOCK)),
+    **dict.fromkeys((".c3", ".c3i"), (_SLASH, (("/*", "*/"), ("<*", "*>")))),
+    ".d": (_SLASH, (("/*", "*/"), ("/+", "+/"), ("/++", "+/"))),
+    ".nim": (_HASH, (("##[", "]##"), ("#[", "]#"))),
+    ".jl": (_HASH, (("#=", "=#"),)),
+    **dict.fromkeys((".adb", ".ada"), (("--",), ())),
+    **dict.fromkeys((".pas", ".pp", ".dpr", ".lpr"), (_SLASH, (("{", "}"), ("(*", "*)")))),
+    **dict.fromkeys((".f90", ".f95", ".f03", ".f08"), (("!",), ())),
+    # Fixed form: a C or * in the first column, which a stripped line cannot tell from code
+    # starting with c. The few lines it may take past a header are code ScanCode finds nothing in.
+    **dict.fromkeys((".f", ".for"), (("!", "C", "c", "*"), ())),
+    ".erl": (("%",), ()),
+    ".hs": (("--",), (("{-", "-}"),)),
+    ".ml": ((), (("(*", "*)"),)),
+    ".rkt": (("#lang", ";"), (("#|", "|#"),)),  # `#lang racket` comes first, the notices after
+    **dict.fromkeys((".lisp", ".lsp"), ((";",), (("#|", "|#"),))),
+    **dict.fromkeys(
+        (".glsl", ".vert", ".frag", ".geom", ".comp", ".tesc", ".tese", ".vs", ".fs"),
+        (_SLASH, _C_BLOCK),
+    ),
 }
 CODE_SUFFIXES = frozenset(_COMMENTS)
 

@@ -2,7 +2,9 @@ from pathlib import Path
 
 import licensedcode
 
+from provgrep import chunks
 from provgrep.licenses import (
+    CODE_SUFFIXES,
     Evidence,
     _combine,
     _resolve,
@@ -21,6 +23,17 @@ def test_header_ends_at_the_first_statement() -> None:
     js = "#!/usr/bin/env node\n// SPDX-License-Identifier: MIT\nconst a = 1;\n"
     assert header_end(js, ".js") == 2
     assert header_end('x = 1\n"""not a header"""\n', ".py") == 0
+    hs = "{- Copyright 2020 A\n   SPDX-License-Identifier: MIT -}\n-- | Module.\nmodule M where\n"
+    assert header_end(hs, ".hs") == 3
+    rkt = "#lang racket/base\n;; Copyright 2020 A\n;; MIT\n(provide f)\n"
+    assert header_end(rkt, ".rkt") == 3  # `#lang` first, the notice after it
+    nim = "##[ Copyright 2020 A\nMIT ]##\n# More.\nimport os\n"
+    assert header_end(nim, ".nim") == 3
+
+
+def test_every_language_cut_is_resolved() -> None:
+    # A file cut into units but not resolved is never staged: its language would not be indexed.
+    assert chunks.SUFFIXES <= CODE_SUFFIXES
 
 
 def test_levels() -> None:
