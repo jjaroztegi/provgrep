@@ -467,6 +467,11 @@ _GENERATED = re.compile(
 )
 _MAX_FILE = 1 << 20
 PARSE_SECONDS = 10.0
+# Bytes of source handed to the parser at a time. py-tree-sitter 0.25 leaks each piece a parse
+# reads (py-tree-sitter#498), and some grammars read the same source again and again: D's read
+# a 405 KB file 27,833 times, and in 64 KB pieces kept 1.6 GB of it. In 1 KB pieces it kept 29
+# MB and parsed 12 times as fast; C and C++ parse as fast either way.
+READ = 1 << 10
 _DATA_LINE = re.compile(r"\s*((0[xX][0-9a-fA-F]+|-?\d+(\.\d+)?[fFuUlL]*)\s*,\s*)+\S{0,20}\s*")
 # Rust test modules and C++ test namespaces: units inside them are tests.
 _TEST_SCOPES = frozenset({"test", "tests"})
@@ -521,7 +526,7 @@ def units(text: str, language: str) -> list[Unit]:
         # A byte array in a file of its own, parsed as C++, took 372 s: what does not parse in
         # PARSE_SECONDS is data, not code. Only parsing from a callback can be stopped.
         tree = _parser(language).parse(
-            lambda at, _: source[at : at + (1 << 16)],
+            lambda at, _: source[at : at + READ],
             progress_callback=lambda *_: time.monotonic() > deadline,
         )  # nodes do not keep their tree alive
     except ValueError:
