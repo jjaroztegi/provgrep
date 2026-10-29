@@ -14,11 +14,16 @@ The build writes into one directory, in steps:
 
 import gzip
 import json
+import multiprocessing
 import shutil
 import sqlite3
+import sys
 import time
 from collections import Counter
+from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor, as_completed
+from concurrent.futures.process import BrokenProcessPool
 from datetime import UTC, datetime
+from functools import partial
 from importlib.metadata import version
 from pathlib import Path
 from typing import Any
@@ -27,6 +32,11 @@ from provgrep import github, search, source_commit, stage
 from provgrep.fetch import sha256_of
 from provgrep.licenses import choices, permissive, shareable
 
+# Repositories a staging worker stages before a new one takes its place. A worker keeps the
+# memory of the largest repository it has staged (the allocator rarely gives it back): twelve that
+# lived through the whole corpus held 44 GB, one of them 10 GB. A new one loads ScanCode's license
+# index in 3.4 s.
+TASKS_PER_WORKER = 8
 SCHEMA = """
 CREATE TABLE repos (
     id INTEGER PRIMARY KEY,  -- corpus order
@@ -96,7 +106,7 @@ def build(corpus: Path, out: Path, jobs: int, limit: int | None = None) -> dict[
         if old != staging:
             shutil.rmtree(old)
     todo = [r for r in repos if not stage.path(staging, r).exists()]
-    failed = stage.stage_all(todo, staging, jobs, out / "work")
+    failed = stage_all(todo, staging, jobs, out / "work")
 
     records = out / "records.sqlite"
     counts = _records(repos, staging, records)
@@ -244,3 +254,79 @@ def _records(repos: list[github.Repo], staging: Path, path: Path) -> dict[str, A
     db.close()
     part.replace(path)
     return counts
+
+
+def stage_all(repos: list[github.Repo], staging: Path, jobs: int, work: Path) -> dict[str, str]:
+    """Stage repositories in parallel; return the ones that failed, with why. Workers unpack
+    under work, which is emptied whenever none is running.
+
+    A worker that dies (a crash in native code, the kernel ending it for memory) takes the pool
+    with it, and its siblings are ended without cleaning up. The repositories being staged then,
+    the ones with a `.part` file, are staged again each in a process of its own, so a crash is
+    only that repository's; the ones not started go to a new pool.
+    """
+    expected = stage.key()
+    failed: dict[str, str] = {}
+    done = 0
+
+    def report(repo: github.Repo, outcome: str) -> None:
+        nonlocal done
+        done += 1
+        print(f"[{done}/{len(repos)}] {repo.name}: {outcome}", file=sys.stderr)
+
+    pending = repos
+    while pending:
+        _empty(work)
+        suspects: list[github.Repo] = []
+        waiting: list[github.Repo] = []
+        # The platform's start method: max_tasks_per_child alone would make it spawn.
+        context = multiprocessing.get_context()
+        with ProcessPoolExecutor(jobs, context, max_tasks_per_child=TASKS_PER_WORKER) as pool:
+            futures = {
+                pool.submit(stage.stage, repo, stage.path(staging, repo), expected, work): repo
+                for repo in pending
+            }
+            for future in as_completed(futures):
+                repo = futures[future]
+                try:
+                    report(repo, f"{future.result()} units")
+                except BrokenProcessPool:
+                    running = stage.part(stage.path(staging, repo)).exists()
+                    (suspects if running else waiting).append(repo)
+                except Exception as e:  # one broken repository must not lose the build
+                    failed[repo.name] = f"{type(e).__name__}: {e}"
+                    report(repo, failed[repo.name])
+        _empty(work)
+        if not suspects and len(waiting) == len(pending):
+            # The pool died before staging anything: it would again.
+            for repo in waiting:
+                failed[repo.name] = "the worker pool broke before any repository started"
+                report(repo, failed[repo.name])
+            break
+        with ThreadPoolExecutor(jobs) as threads:
+            outcomes = threads.map(partial(_isolated, staging=staging, work=work), suspects)
+            for repo, outcome in zip(suspects, outcomes, strict=True):
+                if isinstance(outcome, int):
+                    report(repo, f"{outcome} units")
+                else:
+                    failed[repo.name] = outcome
+                    report(repo, outcome)
+        pending = waiting
+    _empty(work)
+    return failed
+
+
+def _empty(work: Path) -> None:
+    shutil.rmtree(work, ignore_errors=True)
+    work.mkdir(parents=True)
+
+
+def _isolated(repo: github.Repo, staging: Path, work: Path) -> int | str:
+    """Stage a repository in a process of its own: its units, or why it failed."""
+    with ProcessPoolExecutor(1) as pool:
+        try:
+            return pool.submit(
+                stage.stage, repo, stage.path(staging, repo), stage.key(), work
+            ).result()
+        except Exception as e:
+            return f"{type(e).__name__}: {e}"
