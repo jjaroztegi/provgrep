@@ -21,7 +21,8 @@ repositories, each to a commit:
 
 `provgrep evaluate licenses` compares the license provgrep gives each code file with the one
 Debian's maintainers record in `debian/copyright`. It covers 300 Python source packages with their
-upstream on GitHub: 19,534 code files, Debian snapshot 20261024T000000Z, about 630 MB of downloads.
+upstream on GitHub: 19,534 code files, Debian snapshot 20261024T000000Z, about 630 MB of downloads,
+measured with the code of 568f998.
 Debian's license names are mapped to SPDX ids by a table of provgrep's own, so the two sides do not
 share a detector's mistakes, and a name the table does not know leaves its file out.
 
@@ -69,9 +70,9 @@ code that does something else comes first.
 
 The languages suite asks 40 common tasks, each in one of the 19 languages (a gen_server in Erlang,
 a counter in Haskell's State monad, a raylib window in Odin). The raylib suite asks what Tsoding's
-musializer and panim do with raylib in C, and each question names raylib. Without the name, a hit
-was in the top 10 for 2 of the 15: raylib's calls are in 3 to 242 functions each, and SDL, GLFW and
-OpenGL code also makes windows, textures and sounds.
+musializer and panim do with raylib in C, and each question names raylib: its calls are in 3 to
+242 functions each (the suite's coverage), and SDL, GLFW and OpenGL code also makes windows,
+textures and sounds.
 
 The index of the 500 most-starred repositories of the 8 languages alone (21,259,913 functions,
 corpus sha256 526db429d94b, built at 378bb39, searched with the code of 21c6088) had 41/76/0.59 and
@@ -118,11 +119,12 @@ main at bf7cd5f with that change alone:
 - Leaving words like `the`, `to` and `for` out of queries (#39). `the` is in 26% of functions'
   docs and 28% of their code, and every candidate was moved along its postings in four fields of
   each partition. Without them, the two suites above take 27.8 ms at the median and 51.9 at the
-  95th percentile against 35.8 and 73.1. Rows of the suites move by one or two either way, with
-  the same totals (134 hits first, 259 in the top 10).
+  95th percentile against 35.8 and 73.1. Over the four suites, rows move by one or two either
+  way, and the totals stay at 134 hits first and 259 in the top 10.
 - Embedding queries with a 4-layer distillation of the embedding model (#40), published as
-  [jina-v2-code-query-4l](https://huggingface.co/jjaroztegi/jina-v2-code-query-4l). A query costs
-  a third of the CPU, and with #39 the suites total 139 hits first and 263 in the top 10. Its card
+  [jina-v2-code-query-4l](https://huggingface.co/jjaroztegi/jina-v2-code-query-4l). On one thread,
+  over the 155 distinct questions of the suites, a query costs 18.6 CPU-ms against 59 for the
+  model in 8 bits, and with #39 the four suites total 139 hits first and 263 in the top 10. Its card
   says how it was trained; `provgrep distill` makes it again ([docs/build.md](build.md#embeddings)).
 - Letting the query encoder's threads sleep between queries (#36). onnxruntime's threads spin
   while they wait for work by default, on the cores the partitions' searches need at that moment.
@@ -130,13 +132,18 @@ main at bf7cd5f with that change alone:
 Together, the four suites' second run went from 32.6 ms at the median and 69.0 at the 95th
 percentile (bf7cd5f) to 15.5 and 33.2 (the code of 5904e2f).
 
-Measuring memory this way needs the index's pages out of the page cache first (`posix_fadvise`
-with `POSIX_FADV_DONTNEED` on each of its files, with no other process mapping them), then two runs
-in one cgroup, whose `memory.stat` says what the runs left:
+Measuring memory this way needs the index's pages out of the page cache first, with no other
+process mapping them, then two runs in one cgroup (Linux, cgroup v2), whose `memory.stat` says what
+the runs left: `file` is the page cache, `anon` the process's own.
 
 ```sh
-systemd-run --user --wait -p MemoryHigh=2.5G -p MemorySwapMax=0 \
-    sh -c 'provgrep evaluate search; provgrep evaluate search'
+find index/github -type f -exec python3 -c 'import os, sys
+for p in sys.argv[1:]:
+    fd = os.open(p, os.O_RDONLY); os.posix_fadvise(fd, 0, 0, os.POSIX_FADV_DONTNEED); os.close(fd)
+' {} +
+systemd-run --user --wait --pipe --same-dir -E PATH -p MemoryHigh=2.5G -p MemorySwapMax=0 sh -c '
+    provgrep evaluate search; provgrep evaluate search
+    grep -E "^(anon|file) " /sys/fs/cgroup$(cut -d: -f3 /proc/self/cgroup)/memory.stat'
 ```
 
 The load test that drove this work found a bug: searches running at the same time shared a

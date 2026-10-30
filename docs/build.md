@@ -67,9 +67,8 @@ functions a second. At that rate the 32.5 million from nothing would take about 
 
 Under WSL, NVIDIA's driver kills a run now and then (6 times in the 15 hours of the first index's
 run, 2 in the 8 of this one), with an illegal instruction or a segmentation fault while copying a
-batch's vectors off the GPU. What a run saved before a crash is sound: a CPU embedding of 1,600 of
-the functions, 600 of them from right after a crash, agrees with the stored vectors to a cosine of
-0.998, which is what storing them as int8 costs. Run it again until it exits with 0.
+batch's vectors off the GPU. What a run saved before a crash is kept and taken up by the next run,
+so run it again until it exits with 0.
 
 The query model, [jina-v2-code-query-4l](https://huggingface.co/jjaroztegi/jina-v2-code-query-4l),
 is made from the staged corpus and the embeddings cache by `provgrep distill`. It took 37 minutes
@@ -98,8 +97,8 @@ request came to.
 
 Each address may search twice a second, 30 at once, and the server takes 64 connections at a time;
 wider limits belong in the proxy in front of it. The server sees the address the proxy forwards
-only if the proxy connects from 127.0.0.1. From anywhere else (a container), name the proxy in
-`FORWARDED_ALLOW_IPS` (an address or a network), or every visitor shares the proxy's budget.
+only if the proxy connects from 127.0.0.1 or ::1. From anywhere else (a container), name the proxy
+in `FORWARDED_ALLOW_IPS` (an address or a network), or every visitor shares the proxy's budget.
 Nothing about a search is logged, but a proxy that logs requests logs what was searched.
 
 A search reads small parts of every partition, a page at a time on Linux, so the first searches on

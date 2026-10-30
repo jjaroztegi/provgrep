@@ -42,7 +42,9 @@ disagreement and leaves it there.
   explanation and the matrix's timestamp. Only a plain Yes passes. "Check dependency" does not:
   Apache-2.0 code goes into a GPL-2.0-or-later project only if the whole is GPL-3.0-or-later.
   A license the matrix lacks does not pass either (119 are in it; CC0-1.0 and ScanCode's
-  `LicenseRef-` ones are not), so 6 to 7% of shareable code is never shown this way. An exception
+  `LicenseRef-` ones are not), so some shareable code is never shown this way: 6.0 to 6.9% of it
+  for an MPL-2.0, GPL-2.0 or GPL-3.0 project, over the index of the 500 most-starred repositories
+  of 8 languages (#3). An exception
   the matrix lacks (`GPL-2.0-only WITH Linux-syscall-note`) takes its license's answer, unless that
   answer is No, since the exception may be what lifts it. A closed-source project has no row in the
   matrix; use `permissive`. The matrix (`src/provgrep/osadl/`) is OSADL's, a project of the Open
@@ -58,9 +60,9 @@ Every result carries the copyright statements that go with it: the ones in the f
 else the ones in the license files above it. Email addresses are removed from notices and from the
 comments and docstrings in code; string literals are code and stay. Addresses spelled out in words
 ("name at host dot org") are not recognized. A statement that is part of a license's own text, like
-the Free Software Foundation's in a copy of the GPL, is not a notice for the code and is left out. A
-quarter of files have a license and no copyright statement anywhere. Their notices are empty, and
-the license and the link are what attribution has.
+the Free Software Foundation's in a copy of the GPL, is not a notice for the code and is left out.
+Some files have a license and no copyright statement anywhere. Their notices are empty, and the
+license and the link are what attribution has.
 
 ## Queries
 
@@ -94,6 +96,7 @@ are embedded.
 Queries are embedded by a distillation of the model,
 [jina-v2-code-query-4l](https://huggingface.co/jjaroztegi/jina-v2-code-query-4l): its token
 embeddings and 4 of its 12 layers, in 8 bits, trained to point where the model points in the space
-an index ranks code in. It embeds a query at a third of the CPU, and the suites rank as well. How
+an index ranks code in. It embeds a query at a third of the CPU, and the suites rank as well
+([results](results.md#what-it-takes-to-serve)). How
 an index gets its embeddings, and how the query model is made again:
 [docs/build.md](build.md#embeddings).
