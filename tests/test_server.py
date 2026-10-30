@@ -135,4 +135,5 @@ def test_every_language_indexed_can_be_asked_for() -> None:
 
     indexed = {language.name for language in chunks.LANGUAGES.values()}
     assert set(server.LANGUAGES) == indexed
+    assert list(server.LANGUAGES) == sorted(server.LANGUAGES)  # the filter shows the keys
     assert set(get_args(mcp_server.Language)) == indexed
