@@ -15,27 +15,29 @@
   {% else %}
   <p class="withheld">The code is not shown here: no license found in it lets it be shared.</p>
   {% endif %}
-  {% if lic.notices %}
-  <ul class="notices">
-    {% for notice in lic.notices[:3] %}<li>{{ notice }}</li>{% endfor %}
-    {% if lic.notices|length > 3 %}<li class="more-notices">and {{ lic.notices|length - 3 }} more</li>{% endif %}
-  </ul>
-  {% elif lic.shareable %}
-  <p class="notices none">No copyright statement in the file or its license files.</p>
-  {% endif %}
-  <p class="evidence">evidence {{ lic.level }}: {% for e in lic.evidence %}{{ e.kind.replace("_", " ") }} <b>{{ e.path }}</b> ({{ e.expression or "none" }}){{ ", " if not loop.last }}{% else %}none found{% endfor %}{% if lic.conflict %}; <span class="warn">other evidence names other licenses</span>{% endif %}</p>
-  {% if r.compatibility %}
-  <p class="fits">Fits a project under {{ r.compatibility.project }}, says <a href="{{ osadl }}">OSADL's matrix</a>: {{ r.compatibility.reasons|join(" ") }}</p>
-  {% endif %}
-  {% if r.copies > 1 %}
-  <p class="copies">
-    {% if linked %}<a href="/s/{{ r.id }}">{% endif %}Same code in {{ "{:,}".format(r.copies) }} places{% if r.repos > 1 %}, {{ "{:,}".format(r.repos) }} repositories{% endif %}{% if linked %}</a>{% endif %}{% if r.licenses > 1 %}, <span class="warn">under {{ r.licenses }} different licenses</span>{% endif %}
-  </p>
-  {% endif %}
-  <p class="actions">
-    {% if v.attribution %}<button type="button" class="copy" data-copy="att-{{ r.id }}">copy with attribution</button>{% endif %}
-    <a href="{{ loc.url }}">open on GitHub</a>
-  </p>
-  {% if v.attribution %}<pre class="attribution" id="att-{{ r.id }}" hidden>{{ v.attribution }}</pre>{% endif %}
+  <div class="facts">
+    {% if lic.notices %}
+    <ul class="notices">
+      {% for notice in lic.notices[:3] %}<li>{{ notice }}</li>{% endfor %}
+      {% if lic.notices|length > 3 %}<li class="more-notices">and {{ lic.notices|length - 3 }} more</li>{% endif %}
+    </ul>
+    {% elif lic.shareable %}
+    <p class="notices none">No copyright statement in the file or its license files.</p>
+    {% endif %}
+    <p class="evidence">evidence {{ lic.level }}: {% for e in lic.evidence %}{{ e.kind.replace("_", " ") }} <b>{{ e.path }}</b> ({{ e.expression or "none" }}){{ ", " if not loop.last }}{% else %}none found{% endfor %}{% if lic.conflict %}; <span class="warn">other evidence names other licenses</span>{% endif %}</p>
+    {% if r.compatibility %}
+    <p class="fits">Fits a project under {{ r.compatibility.project }}, says <a href="{{ osadl }}">OSADL's matrix</a>: {{ r.compatibility.reasons|join(" ") }}</p>
+    {% endif %}
+    {% if r.copies > 1 %}
+    <p class="copies">
+      {% if linked %}<a href="/s/{{ r.id }}">{% endif %}Same code in {{ "{:,}".format(r.copies) }} places{% if r.repos > 1 %}, {{ "{:,}".format(r.repos) }} repositories{% endif %}{% if linked %}</a>{% endif %}{% if r.licenses > 1 %}, <span class="warn">under {{ r.licenses }} different licenses</span>{% endif %}
+    </p>
+    {% endif %}
+    <p class="actions">
+      {% if v.attribution %}<button type="button" class="copy" data-copy="att-{{ r.id }}">copy with attribution</button>{% endif %}
+      <a href="{{ loc.url }}">open on GitHub</a>
+    </p>
+    {% if v.attribution %}<pre class="attribution" id="att-{{ r.id }}" hidden>{{ v.attribution }}</pre>{% endif %}
+  </div>
 </article>
 {% endmacro %}
