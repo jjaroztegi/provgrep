@@ -118,6 +118,13 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--index", type=Path, default=Path("index/github"))
     p.add_argument("--gpu", action="store_true", help="on a CUDA GPU (needs onnxruntime-gpu)")
 
+    p = commands.add_parser(
+        "distill", help="distill the model into a smaller one for queries (a GPU, torch: docs)"
+    )
+    p.add_argument("--out", type=Path, default=Path("distilled"))
+    p.add_argument("--suites", type=Path, default=Path("truth/intents"), help="questions left out")
+    p.add_argument("--epochs", type=int, default=1)
+
     p = commands.add_parser("mcp", help="serve the search as MCP tools over stdio")
     p.add_argument("--index", type=Path, default=Path("index/github"))
 
@@ -192,6 +199,10 @@ def main(argv: list[str] | None = None) -> int:
         from provgrep.dense import embed
 
         print(json.dumps(embed(args.index, args.gpu), indent=1))
+    elif args.command == "distill":
+        from provgrep.distill import distill
+
+        print(json.dumps(distill(args.out, args.suites, args.epochs), indent=1))
     elif args.command == "mcp":
         from provgrep.mcp_server import server
         from provgrep.search import Index

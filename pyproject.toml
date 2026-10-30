@@ -50,7 +50,10 @@ strict = true
 files = ["src", "tests"]
 
 [[tool.mypy.overrides]]
-module = ["cluecode.*", "license_expression", "licensedcode.*", "onnxruntime", "scancode.*"]
+module = [
+    "cluecode.*", "license_expression", "licensedcode.*", "onnxruntime", "onnxruntime.*",
+    "scancode.*", "torch", "torch.*", "transformers",
+]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]
