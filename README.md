@@ -32,32 +32,33 @@ none. Files where both sides agree were not read. The audit, with its reasons an
 Four suites of intents in `truth/intents/`, each a question and the calls the code of a right answer
 contains; a result is a hit when its code has them all. Over the full index (built from
 corpus/github.json, sha256 4da3293d763e, at 53082cf, which is the code of 7e8a15f, with its
-embeddings, and searched at 04573f7; queries embedded with the model's 8-bit weights):
+embeddings, and searched at f697c4b; queries embedded by the model's 4-layer distillation):
 
 | suite | licenses | intents | a hit first | a hit in the top 10 | MRR@10 | answerable from the index |
 |---|---|---:|---:|---:|---:|---:|
-| APIs: common tasks in 8 languages | any | 89 | 42 | 76 | 0.60 | 89 |
-| | permissive | 89 | 41 | 77 | 0.59 | 89 |
-| XRender: what a live session needed | any | 19 | 8 | 14 | 0.47 | 18 |
-| | permissive | 19 | 5 | 13 | 0.37 | 18 |
-| Languages: common tasks in 19 more | any | 40 | 13 | 29 | 0.46 | 40 |
-| | permissive | 40 | 14 | 28 | 0.45 | 40 |
-| raylib: what a C program does with it | any | 15 | 5 | 10 | 0.45 | 15 |
-| | permissive | 15 | 6 | 12 | 0.52 | 15 |
+| APIs: common tasks in 8 languages | any | 89 | 41 | 76 | 0.59 | 89 |
+| | permissive | 89 | 44 | 77 | 0.61 | 89 |
+| XRender: what a live session needed | any | 19 | 8 | 14 | 0.51 | 18 |
+| | permissive | 19 | 4 | 13 | 0.36 | 18 |
+| Languages: common tasks in 19 more | any | 40 | 16 | 29 | 0.50 | 40 |
+| | permissive | 40 | 12 | 31 | 0.43 | 40 |
+| raylib: what a C program does with it | any | 15 | 7 | 11 | 0.51 | 15 |
+| | permissive | 15 | 7 | 12 | 0.56 | 15 |
 
 Search finds the functions that have the question's words (BM25 over identifiers split into words
 and kept whole, in partitions searched at once), then orders the first 100 by how close their code
 is to the question in meaning ([docs/search.md](docs/search.md#ordering-by-meaning)). Without that
 order (the same index without its `dense.json`), a hit came first for 31 and 26 of the API intents
-(MRR 0.48 and 0.46), 10 and 8 of the languages, and in the top 10 for 14 and 8 XRender questions.
-On the 8-core server (31 GB), `provgrep evaluate search truth/intents/apis.json
-truth/intents/xrender.json` run a second time gives a search 28 ms at the median and 52 ms at the
-95th percentile (14 and 30 ms without the order); it asks each question twice, with any license
-and with permissive ones, and the second time its embedding is remembered. What the order costs is the question's embedding,
-which shares the server's 8 cores with the searches of 14 partitions. The index of the 500
-most-starred repositories of 8 languages alone (21,259,913 functions, built at 378bb39 from corpus
-sha256 526db429d94b, searched at c1aaef1) had 41/76/0.59 and 42/77/0.60 on the APIs and 3/9/0.28 and
-3/8/0.24 on XRender, in 28 and 60 ms.
+(MRR 0.48 and 0.46), 10 and 8 of the languages, and in the top 10 for 14 and 8 XRender questions. On
+the 8-core server (31 GB), `provgrep evaluate search truth/intents/apis.json
+truth/intents/xrender.json` run a second time gives a search 17 ms at the median and 33 ms at the
+95th percentile (16 and 37 ms without the order; the middle of three runs); it asks each question
+twice, with any license and with permissive ones, and the second time its embedding is remembered.
+The order costs little: the question is embedded by a 4-layer distillation of the model, beside the
+searches of 14 partitions on the server's 8 cores. The index of the 500 most-starred repositories of
+8 languages alone (21,259,913 functions, built at 378bb39 from corpus sha256 526db429d94b, searched
+at c1aaef1) had 41/76/0.59 and 42/77/0.60 on the APIs and 3/9/0.28 and 3/8/0.24 on XRender, in 28
+and 60 ms.
 
 The XRender questions are the 19 a programmer had while writing an XRender program in C from
 scratch, live ([Tsoding Daily](https://www.youtube.com/watch?v=auzZCp45dJc)), each with the time it
