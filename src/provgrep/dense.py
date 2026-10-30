@@ -37,11 +37,9 @@ MAX_TOKENS = 512  # longer code is embedded by its first MAX_TOKENS tokens
 BATCH_TOKENS = 64 * MAX_TOKENS
 MAX_BATCH = 256
 PART = 100_000  # snippets embedded between two saves
-# Embedding a query is most of a search's time, and it runs beside the partitions' lexical
-# searches. On an 8-core CPU, a page of results took 35 ms at the median and 61 at the 95th
-# percentile with the 8-bit weights on 4 threads, against 40 and 68 in full precision; they rank
-# as well (41/76/.59 apis any, against 41/75/.59). On 8 threads a query alone is faster (12 ms
-# against 18), but a search is not: the threads take the cores the lexical searches need.
+# A query is embedded beside the partitions' lexical searches, which need the same cores. On an
+# 8-core CPU, a query of the suites takes 6.6 ms on 4 threads (23 CPU-ms), 10.4 on 2 (20 CPU-ms),
+# 18.6 on 1.
 QUERY_THREADS = 4
 _BLOCK = 100_000  # rows copied at a time
 # Measured on the intent suites, re-ranking the lexical top 100: 128 to 384 dimensions rank as
@@ -56,7 +54,6 @@ class Model:
     revision: str
     onnx: tuple[str, str]  # path in the repository, sha256
     onnx_fp16: tuple[str, str]  # the same in half precision, for a GPU
-    onnx_int8: tuple[str, str]  # in 8 bits, for queries on a CPU
     tokenizer: tuple[str, str]
     pad: str  # the token that pads a batch
     dimensions: int
@@ -75,10 +72,6 @@ MODEL = Model(
         "onnx/model_fp16.onnx",
         "1aafc4fcd63d2e6899e88402ff731e7c646c2e435048294a3cbc908a40d45d7c",
     ),
-    onnx_int8=(
-        "onnx/model_quantized.onnx",
-        "ed45870251c9f0cf656e78aab0d37a23489066df8a222bb1c8caf8a45f2cb16d",
-    ),
     tokenizer=(
         "tokenizer.json",
         "b01c78a902aa4facb2f47f95449f48e2f7bbfea5d2472ee2f6ce92323c6f86e5",
@@ -88,19 +81,29 @@ MODEL = Model(
     query_prefix="",
     pooling="mean",
 )
+# Queries are embedded by a distillation of MODEL (distill.py): its token embeddings and 4 of its 12
+# layers, in 8 bits, trained to point where MODEL does in the space an index ranks code in. A query
+# costs 23 CPU-ms on QUERY_THREADS, against 68 with MODEL's own 8-bit weights, and the suites rank
+# as well: a hit first for 136 of their searches and in the top 10 for 261, against 134 and 259.
+QUERIES = (
+    "jjaroztegi/jina-v2-code-query-4l",
+    "20f5439b2ab4fe76eba6a2cac5263351dc0afcae",
+    "onnx/model_quantized.onnx",
+    "a61bcbd5a1cca2fe06f0b21bd0531dfc5c011c1f1c641dbcc9e3836ab7215306",
+)
 
 
 class Encoder:
     """MODEL on onnxruntime: texts in, unit vectors out. Code is embedded in full or half
-    precision; queries in 8 bits, fast on a CPU."""
+    precision; queries by its distillation (QUERIES), fast on a CPU."""
 
     def __init__(self, gpu: bool = False, queries: bool = False) -> None:
         import onnxruntime
         from tokenizers import Tokenizer
 
-        onnx, tokenizer = _files(
-            MODEL.onnx_fp16 if gpu else MODEL.onnx_int8 if queries else MODEL.onnx
-        )
+        weights = MODEL.onnx_fp16 if gpu else MODEL.onnx
+        onnx = file(*QUERIES) if queries else file(MODEL.repo, MODEL.revision, *weights)
+        tokenizer = file(MODEL.repo, MODEL.revision, *MODEL.tokenizer)
         if gpu:
             onnxruntime.preload_dlls()  # the CUDA libraries are wheels, not on the loader's path
         providers = ["CUDAExecutionProvider" if gpu else "CPUExecutionProvider"]
@@ -389,11 +392,9 @@ def _project(index: Path, n: int, kept: Store, projection: Projection) -> None:
     part.replace(here / "vectors.npy")
 
 
-def _files(weights: tuple[str, str]) -> tuple[Path, Path]:
-    """One of the model's ONNX files and its tokenizer, downloaded once."""
-    base = f"https://huggingface.co/{MODEL.repo}/resolve/{MODEL.revision}/"
-    here = cache_dir() / "models" / f"{MODEL.repo.replace('/', '__')}@{MODEL.revision[:12]}"
-    onnx, tokenizer = (
-        download([base + path], sha256, here / path) for path, sha256 in (weights, MODEL.tokenizer)
+def file(repo: str, revision: str, path: str, sha256: str) -> Path:
+    """A file of a model on Hugging Face, downloaded once and checked."""
+    here = cache_dir() / "models" / f"{repo.replace('/', '__')}@{revision[:12]}"
+    return download(
+        [f"https://huggingface.co/{repo}/resolve/{revision}/{path}"], sha256, here / path
     )
-    return onnx, tokenizer

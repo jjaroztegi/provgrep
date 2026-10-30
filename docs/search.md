@@ -83,9 +83,20 @@ are put in order of how close each function's code is to the query in meaning, a
 embeds them; later results keep the lexical order. Lexical search still decides what is found:
 a function with none of the query's terms is not a result, however close its meaning. A
 result's score is then the cosine of its code with the query, not BM25. Only the first 512
-tokens of a long function are embedded. Queries are embedded with the model's 8-bit weights
-(`onnx/model_quantized.onnx`), which rank as well as full precision and take most of a search's
-time in less; code is embedded in full or half precision.
+tokens of a long function are embedded. Code is embedded in full or half precision. Queries are
+embedded by a distillation of the model,
+[jina-v2-code-query-4l](https://huggingface.co/jjaroztegi/jina-v2-code-query-4l): its token
+embeddings and 4 of its 12 layers, in 8 bits, trained to point where the model points in the space
+an index ranks code in. A query costs a third of the CPU, and the suites rank as well (its card has
+the numbers). `provgrep distill` makes it again from the staged corpus and the embeddings cache:
+37 minutes on an RTX A4000 for the corpus of sha256 4da3293d763e, as good on the suites (a
+training on a GPU is not byte for byte the same twice):
+
+```sh
+uv pip install torch --index-url https://download.pytorch.org/whl/cu128
+uv pip install "transformers==4.57.6" onnx
+uv run --no-sync provgrep distill --out distilled  # stopped, it keeps what the model embedded
+```
 
 Embedding the 11.2 million functions the corpus' later tiers added to the 21.3 million of the first
 (corpus sha256 4da3293d763e) took 8 hours on one 16 GB NVIDIA GPU, an RTX A4000: 9,639,242 in 25,105
