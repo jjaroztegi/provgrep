@@ -126,3 +126,13 @@ def test_about_says_what_is_kept(index: search.Index) -> None:
     page = TestClient(server.app(index)).get("/about").text
     assert "keeps no log of what is searched" in page
     assert "template=removal.yml" in page
+
+
+def test_every_language_indexed_can_be_asked_for() -> None:
+    from typing import get_args
+
+    from provgrep import chunks, mcp_server
+
+    indexed = {language.name for language in chunks.LANGUAGES.values()}
+    assert set(server.LANGUAGES) == indexed
+    assert set(get_args(mcp_server.Language)) == indexed

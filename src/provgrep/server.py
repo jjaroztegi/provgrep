@@ -65,15 +65,35 @@ _HEADERS = [
 ]
 # Search pages are endless, and each one runs a search: crawlers get the home page only.
 ROBOTS = "User-agent: *\nAllow: /$\nDisallow: /\n"
+# Every language the index cuts (chunks.LANGUAGES), as a reader names it, in the filters' order.
 LANGUAGES = {
+    "ada": "Ada",
     "c": "C",
+    "c3": "C3",
+    "commonlisp": "Common Lisp",
     "cpp": "C++",
+    "d": "D",
+    "erlang": "Erlang",
+    "fortran": "Fortran",
+    "glsl": "GLSL",
     "go": "Go",
+    "haskell": "Haskell",
+    "jai": "Jai",
     "java": "Java",
     "javascript": "JavaScript",
+    "julia": "Julia",
+    "lua": "Lua",
+    "nim": "Nim",
+    "ocaml": "OCaml",
+    "odin": "Odin",
+    "pascal": "Pascal",
     "python": "Python",
+    "racket": "Racket",
     "rust": "Rust",
+    "teal": "Teal",
     "typescript": "TypeScript",
+    "vala": "Vala",
+    "zig": "Zig",
 }
 LEVELS = {
     "A": "The file's own header names this license.",
