@@ -28,8 +28,8 @@ Linux and Windows 11. Keep paths, scripts and line endings cross-platform.
 
 ## Documentation
 
-- `README.md`: what provgrep is, what it found, how to start. `docs/`: how to use it and what is
-  unintuitive about it.
+- `README.md`: what provgrep is, why, what it found, how to start. `docs/`: how to use it, what is
+  unintuitive about it, and every measurement with what reproduces it (`docs/results.md`).
 - Before adding a paragraph, ask what a reader would get wrong without it: a finding, a source,
   a constraint, a trap. Do not restate what the code or `--help` shows; link the source.
 - Public files never name hosts, addresses, credentials or private notes.

@@ -2,7 +2,7 @@
 of its layers, trained to point where it points in the space an index ranks code in (dense.py's
 projection). A query is then a third of the CPU, and the suites rank as well.
 
-`provgrep distill`, on a GPU, with torch, transformers and onnx installed (docs/search.md):
+`provgrep distill`, on a GPU, with torch, transformers and onnx installed (docs/build.md):
 
 1. Query-like texts from the staged corpus (stage.py): the first sentence of a function's comment
    or docstring, its name split into words, a sentence with an identifier its code calls (people
