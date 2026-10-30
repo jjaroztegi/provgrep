@@ -106,3 +106,22 @@ a new index wait on the disk for what they need, and only that stays in memory. 
 to read the index before serving it. The 35 GB index serves at full speed in 2.5 GB of memory, the
 process's own included, and from a cold page cache the four suites took p95 0.23 s
 ([results](results.md#what-it-takes-to-serve)).
+
+The image `ghcr.io/jjaroztegi/provgrep`, built from `Dockerfile` for every commit on main
+(`sha-<commit>`, `main`) and every version tag, holds the server, its query model and the grammars
+that colour code. It needs no network and writes nothing, so it runs read-only as an unprivileged
+user (65532), with the index mounted:
+
+```sh
+docker run --read-only -p 127.0.0.1:8000:8000 -v "$PWD/index/github:/index" \
+    ghcr.io/jjaroztegi/provgrep:main serve --index /index --host 0.0.0.0 --public https://...
+```
+
+The mount cannot be read-only: tantivy opens `.tantivy-meta.lock` for writing to open an index,
+even to read it. `provgrep build` leaves that lock writable by anyone and every other file readable
+by anyone, so the image's user reads the index and takes the lock but changes nothing else. An
+index built before that needs `chmod -R a+rX` on it and `chmod a+w` on its
+`partitions/*/lexical/.tantivy-meta.lock`.
+
+A change to the index's format needs the code and the index switched together, so pin the image by
+its digest and change it with the index.

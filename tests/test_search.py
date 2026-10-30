@@ -1,4 +1,5 @@
 import json
+import os
 from compression import zstd
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
@@ -208,3 +209,15 @@ def test_searches_at_once_read_every_row(index: search.Index) -> None:
     with ThreadPoolExecutor(16) as pool:
         pages = list(pool.map(lambda _: index.search("render picture", licenses="any"), range(400)))
     assert all(page == expected for page in pages)
+
+
+@pytest.mark.skipif(os.name == "nt", reason="POSIX permissions")
+def test_index_is_readable_by_every_user(index: search.Index) -> None:
+    """A server under another user, as the container image's, reads the whole index and takes
+    tantivy's lock, which it opens for writing even to read."""
+    files = [p for p in index.path.rglob("*") if p.is_file()]
+    assert files
+    assert all(p.stat().st_mode & 0o004 for p in files)
+    locks = list(index.path.glob("partitions/*/lexical/.tantivy-meta.lock"))
+    assert locks
+    assert all(p.stat().st_mode & 0o002 for p in locks)

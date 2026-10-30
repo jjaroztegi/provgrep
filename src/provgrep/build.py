@@ -472,6 +472,11 @@ def _reduce(
     db.close()
     writer.commit()
     writer.wait_merging_threads()
+    # tantivy writes these for their owner alone, and opens its lock to read an index too: a
+    # server under another user (the container image's) reads the index and takes the lock only
+    for name in ("meta.json", ".managed.json"):
+        (here / "lexical" / name).chmod(0o644)
+    (here / "lexical" / ".tantivy-meta.lock").chmod(0o666)
     return counts, languages, levels
 
 
