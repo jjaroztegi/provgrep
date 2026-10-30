@@ -21,6 +21,8 @@ def test_terms_keep_identifiers_whole_with_their_family_and_parts() -> None:
     # A typed identifier weighs more; its single letters go.
     assert search.query_terms("XRender fill") == ["xrender^3.0", "render", "fill"]
     assert search.query_terms("X11 window") == ["x11", "11", "window"]  # a name, not an API
+    assert search.query_terms("parse the header of a packet") == ["parse", "header", "packet"]
+    assert search.query_terms("the of") == ["the", "of"]  # nothing else to search for
 
 
 def test_search_filters_and_withholds_unlicensed_code(index: search.Index) -> None:

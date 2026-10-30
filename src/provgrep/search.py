@@ -166,10 +166,14 @@ def query_terms(query: str) -> list[str]:
     (`XRender`, `epoll_wait`) weighs IDENTIFIER times a word: whoever types it knows the name.
     A name and a number (`X11`, `SDL2`) is a word: the code that calls Xlib does not say X11,
     and weighed as an identifier it brought the functions named after it first. The single
-    letters an identifier splits into (`XRender`: x) are left out; most code has them.
+    letters an identifier splits into (`XRender`: x) are left out; most code has them. So are
+    words like `the` and `to` (_STOP), unless the query has nothing else: each is in a fifth to a
+    third of all functions, and every result was moved along their postings in four fields.
     """
     out = []
     for word in _WORD.findall(query):
+        if word.lower() in _STOP:
+            continue
         found = terms(word)
         parts = _parts(word)
         numbered = len(parts) == 2 and parts[1].isdigit() and not parts[0].isdigit()
