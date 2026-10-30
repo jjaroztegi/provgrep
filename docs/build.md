@@ -49,9 +49,13 @@ them out (a repository is not even fetched) and counts what it left out in the m
 
 `provgrep serve` listens on 127.0.0.1. To listen on another address (`--host`), give the URL
 people reach the site at (`--public https://...`): MCP refuses requests addressed to any other host
-or sent from another site's pages. Each address may search twice a second, 30 at once, and the
-server takes 64 connections at a time; wider limits belong in the proxy in front of it. Nothing
-about a search is logged.
+or sent from another site's pages. `--public` is also the URL the site gives crawlers and link
+previews (sitemap, canonical links, the preview image); without it, the address a request came to.
+Each address may search twice a second, 30 at once, and the server takes 64 connections at a time;
+wider limits belong in the proxy in front of it. The address is the one the proxy forwards only if
+the proxy connects from 127.0.0.1: from anywhere else (a container), name it in
+`FORWARDED_ALLOW_IPS` (an address or a network), or every visitor shares the proxy's budget.
+Nothing about a search is logged; a proxy that logs requests logs what was searched.
 
 A search reads small parts of every partition, a page at a time on Linux, so the first searches on
 a new index wait on the disk for what they need, and only that stays in memory: there is no need to

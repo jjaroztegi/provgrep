@@ -4,11 +4,31 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="dark">
-<title>{% block title %}{% if query.q %}{{ query.q }} - {% endif %}provgrep{% endblock %}</title>
-<meta name="description" content="Search open-source code by what it does: real functions, each with the license it is under and the evidence for it.">
-<link rel="preload" href="{{ url_for('static', path='fonts/iosevka-400.woff2') }}" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="{{ url_for('static', path='site.css') }}">
-<script src="{{ url_for('static', path='site.js') }}" defer></script>
+<meta name="theme-color" content="#181818">
+{# site.js titles a search the same way #}
+<title>{% block title %}{% if query.q %}{{ query.q }} | provgrep{% else %}provgrep | copy-paste, with receipts{% endif %}{% endblock %}</title>
+<meta name="description" content="{% block description %}Search open-source code by what it does. Each result is a real function with its license, the evidence for that license, and its copyright notices.{% endblock %}">
+{# Searches are not pages for a search engine to list; robots.txt keeps crawlers to these #}
+{% block robots %}{% if found or error %}<meta name="robots" content="noindex">{% else %}<link rel="canonical" href="{{ base }}{{ request.url.path }}">{% endif %}{% endblock %}
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="provgrep">
+<meta property="og:title" content="{{ self.title() }}">
+<meta property="og:description" content="{{ self.description() }}">
+<meta property="og:url" content="{{ base }}{{ request.url.path }}{% if request.url.query %}?{{ request.url.query }}{% endif %}">
+<meta property="og:image" content="{{ base }}{{ asset('card.png') }}">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="provgrep: copy-paste, with receipts">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="{{ asset('icon.svg') }}" type="image/svg+xml">
+<link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}">
+<link rel="manifest" href="{{ asset('site.webmanifest') }}">
+<link rel="search" type="application/opensearchdescription+xml" title="provgrep" href="/opensearch.xml">
+<link rel="preload" href="/static/fonts/iosevka-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="{{ asset('site.css') }}">
+<script src="{{ asset('site.js') }}" defer></script>
+{% block head %}{% endblock %}
 </head>
 <body>
 <header class="top">

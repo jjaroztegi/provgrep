@@ -1,10 +1,16 @@
 {% extends "base.html" %}
-{% block title %}Not found - provgrep{% endblock %}
+{% block title %}Not found | provgrep{% endblock %}
+{% block robots %}<meta name="robots" content="noindex">{% endblock %}
 {% block page %}
 <main id="main" class="single">
 <section class="prose">
+  {% if snippet %}
   <h1>No snippet has that id.</h1>
   <p>It may come from another build of the index. Search for the code instead.</p>
+  {% else %}
+  <h1>Nothing is at this address.</h1>
+  <p>Search for the code instead, or start from <a href="/">the home page</a>.</p>
+  {% endif %}
 </section>
 </main>
 {% endblock %}

@@ -1,4 +1,10 @@
 {% extends "base.html" %}
+{% block head %}
+{% if not (found or error) %}{# the site's name, as search engines should give it #}
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebSite", "name": "provgrep", "url": {{ (base ~ "/")|tojson }}}</script>
+{% endif %}
+{% endblock %}
+{% block description %}{% if query.q %}Open-source functions for “{{ query.q }}”, each with the license it is under and the evidence for it.{% else %}{{ super() }}{% endif %}{% endblock %}
 {% block main %}
 {% if found or error %}
 {% include "results.html" %}
