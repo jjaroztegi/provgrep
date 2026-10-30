@@ -112,7 +112,7 @@ def test_copies_at_another_indentation_have_the_same_hash() -> None:
 
 
 def test_a_language_without_containers_takes_an_empty_error() -> None:
-    # A zero-width ERROR node is what the stand-in query for no containers matches.
+    # A zero-width ERROR node, in C, which has no containers.
     assert units("#define\\\n", "c") == []
 
 
