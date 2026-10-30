@@ -1,0 +1,17 @@
+# Python packages are not here on purpose: the staging key hashes the versions of the tools that
+# resolve licenses and cut functions, so a new version stages every repository again and can move
+# published numbers. They change in a PR of their own, measured. Security updates still come.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+    groups:
+      actions:
+        patterns: ["*"]
+    commit-message:
+      prefix: chore
+      include: scope
