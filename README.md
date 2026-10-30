@@ -48,12 +48,12 @@ embeddings, and searched at 04573f7; queries embedded with the model's 8-bit wei
 Search finds the functions that have the question's words (BM25 over identifiers split into words
 and kept whole, in partitions searched at once), then orders the first 100 by how close their code
 is to the question in meaning ([docs/search.md](docs/search.md#ordering-by-meaning)). Without that
-order, a hit came first for 31 and 26 of the API intents (MRR 0.48 and 0.46), 10 and 8 of the
-languages, and in the top 10 for 14 and 8 XRender questions. On the 8-core server (31 GB), once the
-index has been read from disk, a search of the first two suites takes 28 ms at the median and 52 ms
-at the 95th percentile (14 and 30 ms without the order, the index searched without its
-`dense.json`); the benchmark asks each question twice, with any license and with permissive ones,
-and the second time its embedding is remembered. What the order costs is the question's embedding,
+order (the same index without its `dense.json`), a hit came first for 31 and 26 of the API intents
+(MRR 0.48 and 0.46), 10 and 8 of the languages, and in the top 10 for 14 and 8 XRender questions.
+On the 8-core server (31 GB), `provgrep evaluate search truth/intents/apis.json
+truth/intents/xrender.json` run a second time gives a search 28 ms at the median and 52 ms at the
+95th percentile (14 and 30 ms without the order); it asks each question twice, with any license
+and with permissive ones, and the second time its embedding is remembered. What the order costs is the question's embedding,
 which shares the server's 8 cores with the searches of 14 partitions. The index of the 500
 most-starred repositories of 8 languages alone (21,259,913 functions, built at 378bb39 from corpus
 sha256 526db429d94b, searched at c1aaef1) had 41/76/0.59 and 42/77/0.60 on the APIs and 3/9/0.28 and
