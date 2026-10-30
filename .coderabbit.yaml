@@ -46,7 +46,8 @@ reviews:
     - path: "truth/**"
       instructions: >-
         Ground truth the published error rates are measured against: a changed label, audit
-        reason or intent needs its source, and the PR must say which numbers in README.md move.
+        reason or intent needs its source, and the PR must say which numbers in README.md and
+        docs/results.md move.
     - path: "tests/**"
       instructions: >-
         One small runnable check per non-trivial behaviour; flag new fixtures, mocks or

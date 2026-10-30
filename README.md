@@ -1,93 +1,59 @@
 # provgrep
 
-Search open-source code by what it does and get back the real snippet: the license it is under
-with the evidence for it, where else the same code is, and an attribution to paste with it. A
-search website, with a command line and an MCP server on the same engine.
+Search open-source code by what it does, and get back real functions, each with the license it is
+under, the evidence for that license, its copyright notices and an attribution to paste with it.
+A search website, with a command line and an MCP server on the same engine.
 
-Status: an index of 10,915 GitHub repositories, each pinned to a commit: the 500 most-starred of
-each of C, C++, Go, Java, JavaScript, Python, Rust and TypeScript (2026-10-24), then every C
-repository with 1,000 stars or more and the 300 most-starred with 10 or more of each of Ada, C3,
-Common Lisp, D, Erlang, Fortran, GLSL, Haskell, Jai, Julia, Lua, Nim, OCaml, Odin, Pascal, Racket,
-Teal, Vala and Zig, the languages [Tsoding](https://github.com/tsoding) writes in beside C
-(2026-10-29). 32,474,882 distinct functions, found by their words and ordered by meaning, from a
-local website, the command line, a JSON API and MCP. Which copy of a function came first is not
-decided yet.
+The idea is to search for code instead of generating it: find what people already wrote and
+published for the same task, and keep its authors' credit and license with it. You describe what
+you want to do; provgrep finds the functions that have your words, orders the first 100 by how
+close their code is to what you asked, and shows each one with where it came from. Code with no
+license that lets it be shared is linked to, not shown. Licenses are as detected, with their
+evidence, and they are not legal advice.
 
-## Licenses, measured
+## Where it started
 
-Every code file gets a license from its own header, the nearest license file above it, or the
-nearest package manifest, with the evidence and a level for how much of it agrees (A: the file's
-header; B: license file and manifest agree; C: one source, or they disagree; X: nothing found).
+[Tsoding](https://github.com/tsoding) wrote an XRender program in C from scratch, live
+([Tsoding Daily](https://www.youtube.com/watch?v=auzZCp45dJc)), from documentation that answers
+little. Most of what had to be found out was already in code that makes the same calls, in wine,
+vcxsrv, compton and other programs. The 19 questions of that session, each with the minute it came
+up, became one of provgrep's test suites, and the index grew for them: every C repository with
+1,000 stars or more, which answers 18 of the 19, and 19 more languages Tsoding writes in.
 
-Against the licenses Debian maintainers record in `debian/copyright` for 300 Python source
-packages from GitHub upstreams (19,534 code files, Debian snapshot 20261024T000000Z): of 15,555
-files a permissive filter would show, 74 are under a license Debian does not record as
-permissive. Each of the 74 was read by hand. Debian's record is stale for 30 (upstream
-relicensed since) and coarse for 44 (the files carry their own notices); provgrep is wrong for
-none. Files where both sides agree were not read. The audit, with its reasons and sources:
-[truth/debian-python-audit.json](truth/debian-python-audit.json).
+## What it found
 
-## Search, measured
+The index holds 32,474,882 distinct functions from 10,915 GitHub repositories, each pinned to a
+commit: the 500 most-starred of each of C, C++, Go, Java, JavaScript, Python, Rust and TypeScript,
+every C repository with 1,000 stars or more, and the 300 most-starred of each of 19 more languages.
 
-Four suites of intents in `truth/intents/`, each a question and the calls the code of a right answer
-contains; a result is a hit when its code has them all. Over the full index (built from
-corpus/github.json, sha256 4da3293d763e, at 53082cf, which is the code of 7e8a15f, with its
-embeddings, and searched at f697c4b; queries embedded by the model's 4-layer distillation):
+Licenses were checked against what Debian's maintainers record for 300 Python packages. Of the
+15,555 files a permissive filter would show, Debian records 74 under a license that is not
+permissive; read by hand, Debian's record is stale or coarse for all 74, and provgrep is wrong for
+none.
 
-| suite | licenses | intents | a hit first | a hit in the top 10 | MRR@10 | answerable from the index |
-|---|---|---:|---:|---:|---:|---:|
-| APIs: common tasks in 8 languages | any | 89 | 41 | 76 | 0.59 | 89 |
-| | permissive | 89 | 44 | 77 | 0.61 | 89 |
-| XRender: what a live session needed | any | 19 | 8 | 14 | 0.51 | 18 |
-| | permissive | 19 | 4 | 13 | 0.36 | 18 |
-| Languages: common tasks in 19 more | any | 40 | 16 | 29 | 0.50 | 40 |
-| | permissive | 40 | 12 | 31 | 0.43 | 40 |
-| raylib: what a C program does with it | any | 15 | 7 | 11 | 0.51 | 15 |
-| | permissive | 15 | 7 | 12 | 0.56 | 15 |
+Search is measured on four suites of questions, where a result is an answer when its code makes
+the calls a right answer makes. Counting only code under a permissive license:
 
-Search finds the functions that have the question's words (BM25 over identifiers split into words
-and kept whole, in partitions searched at once), then orders the first 100 by how close their code
-is to the question in meaning ([docs/search.md](docs/search.md#ordering-by-meaning)). Without that
-order (the same index without its `dense.json`), a hit came first for 31 and 26 of the API intents
-(MRR 0.48 and 0.46), 10 and 8 of the languages, and in the top 10 for 14 and 8 XRender questions. On
-the 8-core server (31 GB), `provgrep evaluate search truth/intents/apis.json
-truth/intents/xrender.json` run a second time gives a search 17 ms at the median and 33 ms at the
-95th percentile (16 and 37 ms without the order; the middle of three runs); it asks each question
-twice, with any license and with permissive ones, and the second time its embedding is remembered.
-The order costs little: the question is embedded by a 4-layer distillation of the model, beside the
-searches of 14 partitions on the server's 8 cores. The index of the 500 most-starred repositories of
-8 languages alone (21,259,913 functions, built at 378bb39 from corpus sha256 526db429d94b, searched
-at c1aaef1) had 41/76/0.59 and 42/77/0.60 on the APIs and 3/9/0.28 and 3/8/0.24 on XRender, in 28
-and 60 ms.
+| suite | questions | an answer first | an answer in the top 10 |
+|---|---:|---:|---:|
+| APIs: common tasks in 8 languages | 89 | 44 | 77 |
+| Languages: common tasks in 19 more | 40 | 12 | 31 |
+| raylib: what a C program does with it | 15 | 7 | 12 |
+| XRender: what the live session needed | 19 | 4 | 13 |
 
-The XRender questions are the 19 a programmer had while writing an XRender program in C from
-scratch, live ([Tsoding Daily](https://www.youtube.com/watch?v=auzZCp45dJc)), each with the time it
-came up. Every C repository with 1,000 stars or more is what answers most of them: wine, vcxsrv,
-compton, chadwm and uTox call what the 500 most-starred C repositories did not, and the index
-answers 18 of the 19 (16 before), one in the top 10 for 14. A shared memory image put on a pixmap
-and composited is in no function. Some first hits are vcxsrv's copy of libXrender, the call itself
-rather than code that makes it, which the grading cannot tell apart. The first steps of any X11
-program (XSelectInput, XStoreName with XMapWindow) are in 57 to 169 functions each, none of them in
-the top 10, where X11 window code that does something else comes first.
+The same code can be under different licenses. 4,019,689 functions appear in more than one
+repository, and 177,696 of those are under a permissive license in one and a copyleft one in
+another, 23,202 of them 40 lines or longer: vendored copies, forks that relicensed, code moved
+between projects.
 
-The languages suite asks 40 common tasks of the 19 languages, each in its own (a gen_server in
-Erlang, a counter in Haskell's State monad, a raylib window in Odin). The raylib suite asks what
-Tsoding's musializer and panim do with raylib in C, each question naming it; without the name, a hit
-was in the top 10 for 2 of the 15: raylib's calls are in 3 to 242 functions each, and a window, a
-texture or a sound are what SDL, GLFW and OpenGL code makes too.
+A search takes 17 ms at the median and 33 ms at the 95th percentile on an 8-core server, and
+serving the 35 GB index at full speed takes 2.5 GB of memory. Queries are embedded by
+[jina-v2-code-query-4l](https://huggingface.co/jjaroztegi/jina-v2-code-query-4l), a 4-layer
+distillation of jina-embeddings-v2-base-code made for provgrep, which embeds a query at a third of
+the full model's CPU.
 
-## The same code under different licenses
-
-Of the 32.5 million functions, 4,019,689 appear in more than one repository, and 177,696 of those
-are under a permissive license in one place and a copyleft one in another (`provgrep copies`, over
-the same index). Most are short helpers many projects share, but 23,202 are 40 lines or longer,
-identical but for whitespace: vendored copies, forks that relicensed, code moved between projects.
-One example: the same 34 lines of `ConcurrentHashMap.clear` are detected as Apache-2.0 in IntelliJ
-IDEA and as GPL-2.0 with the Classpath exception and CC0-1.0 in OpenJDK and in j2objc, which took
-them from it. All three files say that Doug Lea released the code to the public domain; in
-IntelliJ's the comment comes after the `package` line, where provgrep does not read it yet. A
-license taken from a repository says nothing about which of these a function is, and provgrep does
-not yet say which copy came first.
+Every number with the command, corpus and commit that reproduce it:
+[docs/results.md](docs/results.md).
 
 ## Start
 
@@ -103,8 +69,31 @@ uv run provgrep evaluate search             # the suites in truth/intents/
 uv run provgrep copies                      # functions whose copies disagree on the license
 ```
 
-`provgrep mcp` serves the same search to an agent over stdio. How results, filters and notices
-work, and what they do not say: [docs/search.md](docs/search.md). How an index is built, split
-across machines and served: [docs/build.md](docs/build.md).
+`provgrep mcp` serves the same search to an agent over stdio.
 
-Licenses are as detected, with their evidence. They are not legal advice.
+## Documentation
+
+- [Search](docs/search.md): what a result is, the license filters, notices, queries, and what a
+  result does not say
+- [Results](docs/results.md): what was measured, and how serving fits in 2.5 GB
+- [Building and serving an index](docs/build.md): caches, several machines, embeddings, removals
+
+## Removal
+
+To have a repository, a file or a function left out of the index, or to report personal data in a
+result, [open a removal request](https://github.com/jjaroztegi/provgrep/issues/new?template=removal.yml).
+
+## Development
+
+```sh
+uv sync
+uv run ruff format && uv run ruff check --fix
+uv run mypy
+uv run pytest
+```
+
+## License
+
+Apache-2.0, except the OSADL License Compatibility Matrix in `src/provgrep/osadl/`, under
+CC-BY-4.0, and the Iosevka fonts in `src/provgrep/static/fonts/`, under OFL-1.1
+([REUSE.toml](REUSE.toml)).
