@@ -1,5 +1,13 @@
 version = 1
 
+# provgrep's own files. In-file tags are ignored: the SPDX lines in tests and attribution.py are
+# data, not this repository's licensing. The later annotations override this one.
+[[annotations]]
+path = "**"
+precedence = "override"
+SPDX-FileCopyrightText = "2026 Juanjo Aroztegi"
+SPDX-License-Identifier = "Apache-2.0"
+
 [[annotations]]
 path = "src/provgrep/osadl/matrixseqexpl.json"
 precedence = "override"
