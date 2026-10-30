@@ -52,7 +52,7 @@ _COMMENTS: dict[str, tuple[tuple[str, ...], tuple[tuple[str, str], ...]]] = {
     ".zig": (_SLASH, ()),
     **dict.fromkeys((".odin", ".jai", ".vala"), (_SLASH, _C_BLOCK)),
     **dict.fromkeys((".c3", ".c3i"), (_SLASH, (("/*", "*/"), ("<*", "*>")))),
-    ".d": (_SLASH, (("/*", "*/"), ("/+", "+/"), ("/++", "+/"))),
+    ".d": (_SLASH, (("/*", "*/"), ("/+", "+/"))),
     ".nim": (_HASH, (("##[", "]##"), ("#[", "]#"))),
     ".jl": (_HASH, (("#=", "=#"),)),
     **dict.fromkeys((".adb", ".ada"), (("--",), ())),
@@ -72,6 +72,15 @@ _COMMENTS: dict[str, tuple[tuple[str, ...], tuple[tuple[str, str], ...]]] = {
     ),
 }
 CODE_SUFFIXES = frozenset(_COMMENTS)
+# Block comments that nest, by suffix: one inside another ends at the outer one's end.
+_NESTED = {
+    ".d": "/+",
+    ".nim": "#[",  # and ##[
+    ".jl": "#=",
+    ".hs": "{-",
+    ".ml": "(*",
+    **dict.fromkeys((".rkt", ".lisp", ".lsp"), "#|"),
+}
 
 # LICENSE, LICENSE-MIT, COPYING.LESSER, ... A LICENSES/ directory holds texts that other files
 # refer to (REUSE, bundled third-party texts), not a license for its directory.
@@ -125,13 +134,15 @@ def header_end(text: str, suffix: str) -> int:
     """Last line (1-based) of the leading comments and module docstring; 0 if there are none."""
     markers, blocks = _COMMENTS[suffix]
     end = 0
-    closing: str | None = None
+    block: tuple[str, str] | None = None  # the one the line is in
+    depth = 0
     for n, line in enumerate(text.splitlines(), 1):
         s = line.strip()
-        if closing is not None:
+        if block is not None:
             end = n
-            if closing in s:
-                closing = None
+            depth += _opened(block, s, suffix)
+            if depth <= 0:
+                block = None
             continue
         if not s or (n == 1 and s.startswith("#!")):
             continue
@@ -139,13 +150,22 @@ def header_end(text: str, suffix: str) -> int:
         block = next((b for b in blocks if body.startswith(b[0])), None)
         if block is not None:
             end = n
-            if block[1] not in body[len(block[0]) :]:
-                closing = block[1]
+            depth = 1 + _opened(block, body[len(block[0]) :], suffix)
+            if depth <= 0:
+                block = None
         elif s.startswith(markers):
             end = n
         else:
             break
     return end
+
+
+def _opened(block: tuple[str, str], text: str, suffix: str) -> int:
+    """How many of a block comment the text opens, less how many it closes; one that does not
+    nest closes at its first end."""
+    if suffix in _NESTED and _NESTED[suffix] in block[0]:
+        return text.count(block[0]) - text.count(block[1])
+    return -int(block[1] in text)
 
 
 def evidence_file(rel: PurePosixPath) -> bool:

@@ -29,6 +29,15 @@ def test_header_ends_at_the_first_statement() -> None:
     assert header_end(rkt, ".rkt") == 3  # `#lang` first, the notice after it
     nim = "##[ Copyright 2020 A\nMIT ]##\n# More.\nimport os\n"
     assert header_end(nim, ".nim") == 3
+    # Nested block comments end with the outer one; C's do not nest.
+    ml = "(* Copyright 2020 A\n   (* see below *)\n   Licensed under MIT *)\nlet x = 1\n"
+    assert header_end(ml, ".ml") == 3
+    hs = "{- Copyright {- 2020 -} A\n   MIT -}\nmodule M where\n"
+    assert header_end(hs, ".hs") == 2
+    nested = "##[ Copyright 2020 A\n#[ inner ]#\nMIT ]##\nimport os\n"
+    assert header_end(nested, ".nim") == 3
+    c = "/* Copyright 2020 A /* MIT\n */\nint x;\n"
+    assert header_end(c, ".c") == 2
 
 
 def test_every_language_cut_is_resolved() -> None:
