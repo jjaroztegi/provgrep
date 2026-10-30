@@ -1,6 +1,8 @@
 {% extends "base.html" %}
 {% from "card.html" import card %}
-{% block title %}{{ result.loc.symbol }} - provgrep{% endblock %}
+{% block title %}{{ result.loc.symbol }} in {{ result.loc.repo }} | provgrep{% endblock %}
+{% block description %}{{ result.loc.symbol }} from {{ result.loc.repo }}, under {{ result.lic.expression or "no license found" }}: the evidence for that license, and every copy of the code in the index.{% endblock %}
+{% block robots %}<meta name="robots" content="noindex">{% endblock %}
 {% block page %}
 <main id="main" class="single">
   {{ card(result, linked=False) }}

@@ -32,7 +32,7 @@ async function update() {
   const query = params();
   const words = query.get("q");
   history.replaceState(null, "", query.size ? `/?${query}` : "/");
-  document.title = words ? `${words} - provgrep` : "provgrep";
+  document.title = words ? `${words} | provgrep` : "provgrep | copy-paste, with receipts";  // as base.html
   if (filters) filters.querySelector(".state").textContent = describe();
   query.set("partial", "1");  // without words, the page from before a search
   pending?.abort();

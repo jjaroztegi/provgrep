@@ -1,4 +1,5 @@
 import json
+import re
 
 import pytest
 from starlette.testclient import TestClient
@@ -119,7 +120,33 @@ def test_public_serving_guards(index: search.Index, monkeypatch: pytest.MonkeyPa
     assert client.get("/static/site.css").status_code == 200  # not a search
     assert client.get("/static/fonts/iosevka-400.woff2").status_code == 200
     assert client.get("/healthz").json()["index_built"] == "test"  # the fixture's build
-    assert client.get("/robots.txt").text.startswith("User-agent: *\nAllow: /$\nDisallow: /")
+    for path in ("/robots.txt", "/sitemap.xml", "/opensearch.xml", "/favicon.ico"):
+        assert client.get(path).status_code == 200  # not searches either
+
+
+def test_what_crawlers_and_browsers_get(index: search.Index) -> None:
+    client = TestClient(server.app(index, public="https://search.example/"))
+    robots = client.get("/robots.txt").text
+    assert "Allow: /$\nAllow: /about$\nAllow: /static/" in robots
+    assert robots.endswith("Disallow: /\nSitemap: https://search.example/sitemap.xml\n")
+    assert "<loc>https://search.example/about</loc>" in client.get("/sitemap.xml").text
+    opensearch = client.get("/opensearch.xml").text
+    assert 'template="https://search.example/?q={searchTerms}"' in opensearch
+    home = client.get("/").text
+    assert "<title>provgrep | copy-paste, with receipts</title>" in home
+    assert '<link rel="canonical" href="https://search.example/">' in home
+    assert '"url": "https://search.example/"' in home  # the site's name, for search engines
+    found = client.get("/", params={"q": "<b>picture</b>"}).text
+    assert "<title>&lt;b&gt;picture&lt;/b&gt; | provgrep</title>" in found
+    assert '<meta property="og:title" content="&lt;b&gt;picture&lt;/b&gt; | provgrep">' in found
+    assert '<meta name="robots" content="noindex">' in found
+    css = re.search(r'href="(/static/site\.css\?v=\w+)"', home)
+    assert css is not None
+    assert "immutable" in client.get(css[1]).headers["cache-control"]
+    assert "immutable" not in client.get("/static/site.css").headers["cache-control"]
+    lost = client.get("/no/such/page")
+    assert lost.status_code == 404
+    assert "Nothing is at this address" in lost.text
 
 
 def test_about_says_what_is_kept(index: search.Index) -> None:

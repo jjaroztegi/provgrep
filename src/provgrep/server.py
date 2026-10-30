@@ -9,14 +9,17 @@
     GET /api/snippets/{id}?copies=100                  a snippet and up to that many copies
     POST /mcp                                           the same search as MCP tools
     GET /healthz                                        which build of the index is served
+    GET /robots.txt, /sitemap.xml, /opensearch.xml, /favicon.ico   for crawlers and browsers
 
 Pages are rendered on the server, so a search is a link that works without JavaScript; the
 script only fetches the same results as you type. The whole query is in the URL, and every
 request only reads the index: replicas of the server can serve the same index directory.
 """
 
+import hashlib
 import html
 import math
+import os
 import re
 import time
 from collections.abc import AsyncIterator
@@ -31,9 +34,9 @@ from markupsafe import Markup
 from mcp.server.transport_security import TransportSecuritySettings
 from starlette.applications import Starlette
 from starlette.requests import Request
-from starlette.responses import JSONResponse, PlainTextResponse, Response
+from starlette.responses import FileResponse, JSONResponse, PlainTextResponse, Response
 from starlette.routing import Mount, Route
-from starlette.staticfiles import StaticFiles
+from starlette.staticfiles import PathLike, StaticFiles
 from starlette.templating import Jinja2Templates
 from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
@@ -51,20 +54,48 @@ LOOPBACK = ("127.0.0.1", "localhost", "::1")
 # results at most four times a second, and only while typing.
 RATE = 2.0
 BURST = 30
-FREE = ("/static/", "/healthz", "/robots.txt")  # paths that do not search
+# Paths that do not search
+FREE = ("/static/", "/healthz", "/robots.txt", "/sitemap.xml", "/opensearch.xml", "/favicon.ico")
 _HEADERS = [
     (name.encode(), value.encode())
     for name, value in {
         # Nothing but this site's own script, styles and requests: no third parties, no inline code.
         "content-security-policy": "default-src 'none'; script-src 'self'; style-src 'self';"
-        " font-src 'self'; img-src 'self' data:; connect-src 'self'; form-action 'self';"
-        " base-uri 'none'; frame-ancestors 'none'",
+        " font-src 'self'; img-src 'self' data:; connect-src 'self'; manifest-src 'self';"
+        " form-action 'self'; base-uri 'none'; frame-ancestors 'none'",
         "x-content-type-options": "nosniff",
         "referrer-policy": "no-referrer",  # a link to GitHub does not say what was searched
     }.items()
 ]
-# Search pages are endless, and each one runs a search: crawlers get the home page only.
-ROBOTS = "User-agent: *\nAllow: /$\nDisallow: /\n"
+# A static file asked for by its content's hash (asset) does not change; anything else, for a day.
+YEAR = "public, max-age=31536000, immutable"
+DAY = "public, max-age=86400"
+# Search pages are endless, and each one runs a search: crawlers get the home and about pages,
+# and what they need to show them (styles, fonts, the icon).
+ROBOTS = """User-agent: *
+Allow: /$
+Allow: /about$
+Allow: /static/
+Allow: /favicon.ico$
+Disallow: /
+Sitemap: {base}/sitemap.xml
+"""
+SITEMAP = """<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<url><loc>{base}/</loc></url>
+<url><loc>{base}/about</loc></url>
+</urlset>
+"""
+# What a browser needs to offer the site as a search engine.
+OPENSEARCH = """<?xml version="1.0" encoding="UTF-8"?>
+<OpenSearchDescription xmlns="http://a9.com/-/spec/opensearch/1.1/">
+<ShortName>provgrep</ShortName>
+<Description>Open-source code by what it does, with the license it is under</Description>
+<InputEncoding>UTF-8</InputEncoding>
+<Image width="32" height="32" type="image/x-icon">{base}/favicon.ico</Image>
+<Url type="text/html" method="get" template="{base}/?q={{searchTerms}}"/>
+</OpenSearchDescription>
+"""
 # Every language the index cuts (chunks.LANGUAGES), as a reader names it, in the filters' order.
 LANGUAGES = {
     "ada": "Ada",
@@ -153,8 +184,18 @@ def app(index: Index, host: str = "127.0.0.1", public: str | None = None) -> Sta
     other origin (DNS rebinding protection), so listening beyond this machine needs public."""
     if public is None and host not in LOOPBACK:
         raise ValueError(f"listening on {host} needs the URL clients reach it at (--public)")
-    templates = Jinja2Templates(directory=_HERE / "templates")
-    templates.env.globals.update(projects=compatibility.PROJECTS, osadl=compatibility.SOURCE)
+
+    def base(request: Request) -> str:
+        """The site's URL, for links that leave the page (sitemap, previews, search engines)."""
+        return (public or str(request.base_url)).rstrip("/")
+
+    templates = Jinja2Templates(
+        directory=_HERE / "templates", context_processors=[lambda r: {"base": base(r)}]
+    )
+    templates.env.globals.update(
+        projects=compatibility.PROJECTS, osadl=compatibility.SOURCE, asset=_asset
+    )
+    plain = {"query": {"q": "", "license": "permissive"}, "languages": LANGUAGES}  # not a search
 
     def search(params: Any) -> tuple[dict[str, Any], Page]:
         """The query a request asks for, as the page shows it, and its page of results."""
@@ -215,11 +256,10 @@ def app(index: Index, host: str = "127.0.0.1", public: str | None = None) -> Sta
     def snippet_page(request: Request) -> Response:
         found = index.snippet(request.path_params["id"], COPIES)
         if found is None:
-            missing = {"query": {"q": "", "license": "permissive"}, "languages": LANGUAGES}
+            missing = {**plain, "snippet": True}
             return templates.TemplateResponse(request, "missing.html", missing, status_code=404)
         context: dict[str, Any] = {
-            "query": {"q": "", "license": "permissive"},
-            "languages": LANGUAGES,
+            **plain,
             "result": _view(found.result, ""),
             "copies": [(c, LEVELS[c.license.level], _category(c.license)) for c in found.copies],
         }
@@ -259,17 +299,29 @@ def app(index: Index, host: str = "127.0.0.1", public: str | None = None) -> Sta
     )
 
     def about(request: Request) -> Response:
-        context = {"query": {"q": "", "license": "permissive"}, "languages": LANGUAGES}
         return templates.TemplateResponse(
-            request, "about.html", {**context, "manifest": index.manifest}
+            request, "about.html", {**plain, "manifest": index.manifest}
         )
+
+    def not_found(request: Request, _: Exception) -> Response:
+        return templates.TemplateResponse(request, "missing.html", plain, status_code=404)
 
     def health(_: Request) -> JSONResponse:
         built = index.manifest.get("built")
         return JSONResponse({"index_built": built, "commit": index.manifest.get("commit")})
 
-    def robots(_: Request) -> Response:
-        return PlainTextResponse(ROBOTS)
+    def robots(request: Request) -> Response:
+        return PlainTextResponse(ROBOTS.format(base=base(request)))
+
+    def sitemap(request: Request) -> Response:
+        return Response(SITEMAP.format(base=html.escape(base(request))), media_type="text/xml")
+
+    def opensearch(request: Request) -> Response:
+        xml = OPENSEARCH.format(base=html.escape(base(request)))
+        return Response(xml, media_type="application/opensearchdescription+xml")
+
+    def favicon(_: Request) -> Response:
+        return FileResponse(_HERE / "static" / "favicon.ico", headers={"cache-control": DAY})
 
     def no_stream(_: Request) -> Response:
         # Stateless: there is no stream of server messages to hold open, and no session to end.
@@ -291,12 +343,35 @@ def app(index: Index, host: str = "127.0.0.1", public: str | None = None) -> Sta
             Route("/about", about),
             Route("/healthz", health),
             Route("/robots.txt", robots),
-            Mount("/static", StaticFiles(directory=_HERE / "static"), name="static"),
+            Route("/sitemap.xml", sitemap),
+            Route("/opensearch.xml", opensearch),
+            Route("/favicon.ico", favicon),
+            Mount("/static", Static(directory=_HERE / "static"), name="static"),
         ],
+        exception_handlers={404: not_found},
         lifespan=lifespan,
     )
     site.add_middleware(Guard)
     return site
+
+
+class Static(StaticFiles):
+    """The site's own files, which browsers and the caches between may keep (YEAR, DAY)."""
+
+    def file_response(
+        self, full_path: PathLike, stat_result: os.stat_result, scope: Scope, status_code: int = 200
+    ) -> Response:
+        response = super().file_response(full_path, stat_result, scope, status_code)
+        response.headers["cache-control"] = YEAR if b"v=" in scope["query_string"] else DAY
+        return response
+
+
+@lru_cache
+def _asset(path: str) -> str:
+    """A static file's URL, which changes when the file does. Relative to the site, so that it is
+    https behind a proxy whatever the proxy says the scheme is."""
+    digest = hashlib.sha256((_HERE / "static" / path).read_bytes()).hexdigest()[:12]
+    return f"/static/{path}?v={digest}"
 
 
 class Guard:
