@@ -1,21 +1,21 @@
 {
  "suite": "raylib",
- "about": "What a C program does with raylib (raylib.com), what Tsoding's musializer and panim draw and play sound with (github.com/tsoding). Expected identifiers are the raylib calls a working answer cannot do without.",
+ "about": "What a C program does with raylib (raylib.com), what Tsoding's musializer and panim draw and play sound with (github.com/tsoding). Each query names raylib, as someone looking for raylib code would. Expected identifiers are the raylib calls a working answer cannot do without.",
  "intents": [
-  {"id": "window-loop", "query": "open a window and draw frames until it is closed", "languages": ["c", "cpp"], "expect": ["InitWindow", "WindowShouldClose", "BeginDrawing", "EndDrawing"]},
-  {"id": "texture", "query": "load an image as a texture and draw it", "languages": ["c", "cpp"], "expect": ["LoadTexture", "DrawTexture|DrawTextureEx|DrawTexturePro"]},
-  {"id": "render-texture", "query": "draw into an offscreen render texture and then draw it scaled", "languages": ["c", "cpp"], "expect": ["LoadRenderTexture", "BeginTextureMode", "DrawTexturePro|DrawTextureRec|DrawTextureEx"]},
-  {"id": "shader", "query": "draw with a custom fragment shader and set its uniform", "languages": ["c", "cpp"], "expect": ["LoadShader|LoadShaderFromMemory", "SetShaderValue", "BeginShaderMode"]},
-  {"id": "sound", "query": "load a sound and play it when a key is pressed", "languages": ["c", "cpp"], "expect": ["LoadSound", "PlaySound", "IsKeyPressed"]},
-  {"id": "music-stream", "query": "stream music from a file and keep its buffer filled", "languages": ["c", "cpp"], "expect": ["LoadMusicStream", "UpdateMusicStream"]},
-  {"id": "audio-callback", "query": "generate audio samples in a callback for an audio stream", "languages": ["c", "cpp"], "expect": ["SetAudioStreamCallback|UpdateAudioStream", "LoadAudioStream"]},
-  {"id": "music-fft", "query": "read the samples of playing music to draw its spectrum", "languages": ["c", "cpp"], "expect": ["AttachAudioStreamProcessor|AttachAudioMixedProcessor"]},
-  {"id": "camera-2d", "query": "follow the player with a 2D camera and zoom with the mouse wheel", "languages": ["c", "cpp"], "expect": ["Camera2D", "BeginMode2D", "GetMouseWheelMove"]},
-  {"id": "camera-3d", "query": "draw a 3D scene with an orbiting camera", "languages": ["c", "cpp"], "expect": ["Camera3D|Camera", "BeginMode3D", "UpdateCamera"]},
-  {"id": "text", "query": "load a font and draw text centered on the screen", "languages": ["c", "cpp"], "expect": ["LoadFontEx|LoadFont", "MeasureTextEx", "DrawTextEx"]},
-  {"id": "drop-files", "query": "load the files dropped onto the window", "languages": ["c", "cpp"], "expect": ["IsFileDropped", "LoadDroppedFiles"]},
-  {"id": "collision", "query": "check whether two rectangles collide", "languages": ["c", "cpp"], "expect": ["CheckCollisionRecs"]},
-  {"id": "image-pixels", "query": "change the pixels of an image on the CPU and upload it to a texture", "languages": ["c", "cpp"], "expect": ["LoadImageColors|GetImageColor|ImageDrawPixel", "UpdateTexture|LoadTextureFromImage"]},
-  {"id": "screenshot-frames", "query": "read back what was rendered to save the frames of a video", "languages": ["c", "cpp"], "expect": ["LoadImageFromTexture|rlReadScreenPixels|LoadImageFromScreen"]}
+  {"id": "window-loop", "query": "open a raylib window and draw frames until it is closed", "languages": ["c", "cpp"], "expect": ["InitWindow", "WindowShouldClose", "BeginDrawing", "EndDrawing"]},
+  {"id": "texture", "query": "load an image as a raylib texture and draw it", "languages": ["c", "cpp"], "expect": ["LoadTexture", "DrawTexture|DrawTextureEx|DrawTexturePro"]},
+  {"id": "render-texture", "query": "draw into an offscreen raylib render texture and then draw it scaled", "languages": ["c", "cpp"], "expect": ["LoadRenderTexture", "BeginTextureMode", "DrawTexturePro|DrawTextureRec|DrawTextureEx"]},
+  {"id": "shader", "query": "draw with a custom fragment shader in raylib and set its uniform", "languages": ["c", "cpp"], "expect": ["LoadShader|LoadShaderFromMemory", "SetShaderValue", "BeginShaderMode"]},
+  {"id": "sound", "query": "load a sound with raylib and play it when a key is pressed", "languages": ["c", "cpp"], "expect": ["LoadSound", "PlaySound", "IsKeyPressed"]},
+  {"id": "music-stream", "query": "stream music from a file with raylib and keep its buffer filled", "languages": ["c", "cpp"], "expect": ["LoadMusicStream", "UpdateMusicStream"]},
+  {"id": "audio-callback", "query": "generate audio samples in a callback for a raylib audio stream", "languages": ["c", "cpp"], "expect": ["SetAudioStreamCallback|UpdateAudioStream", "LoadAudioStream"]},
+  {"id": "music-fft", "query": "read the samples of music playing in raylib to draw its spectrum", "languages": ["c", "cpp"], "expect": ["AttachAudioStreamProcessor|AttachAudioMixedProcessor"]},
+  {"id": "camera-2d", "query": "follow the player with a raylib 2D camera and zoom with the mouse wheel", "languages": ["c", "cpp"], "expect": ["Camera2D", "BeginMode2D", "GetMouseWheelMove"]},
+  {"id": "camera-3d", "query": "draw a 3D scene with an orbiting raylib camera", "languages": ["c", "cpp"], "expect": ["Camera3D|Camera", "BeginMode3D", "UpdateCamera"]},
+  {"id": "text", "query": "load a font in raylib and draw text centered on the screen", "languages": ["c", "cpp"], "expect": ["LoadFontEx|LoadFont", "MeasureTextEx", "DrawTextEx"]},
+  {"id": "drop-files", "query": "load the files dropped onto a raylib window", "languages": ["c", "cpp"], "expect": ["IsFileDropped", "LoadDroppedFiles"]},
+  {"id": "collision", "query": "check whether two rectangles collide in raylib", "languages": ["c", "cpp"], "expect": ["CheckCollisionRecs"]},
+  {"id": "image-pixels", "query": "change the pixels of a raylib image on the CPU and upload it to a texture", "languages": ["c", "cpp"], "expect": ["LoadImageColors|GetImageColor|ImageDrawPixel", "UpdateTexture|LoadTextureFromImage"]},
+  {"id": "screenshot-frames", "query": "read back what raylib rendered to save the frames of a video", "languages": ["c", "cpp"], "expect": ["LoadImageFromTexture|rlReadScreenPixels|LoadImageFromScreen"]}
  ]
 }
