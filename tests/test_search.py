@@ -1,4 +1,5 @@
 import json
+from compression import zstd
 from pathlib import Path
 
 import pytest
@@ -147,3 +148,20 @@ def test_what_was_asked_to_be_removed_is_left_out(index: search.Index, tmp_path:
     left = search.Index(out)
     assert left.search("fill picture render own", licenses="any").total == 0
     assert left.snippet(picture) is None
+
+
+def test_code_is_read_back_from_its_blocks(tmp_path: Path) -> None:
+    here = tmp_path / "partitions" / "0"
+    here.mkdir(parents=True)
+    writer = search.CodeWriter(here, zstd.ZstdCompressor(3))
+    code = [f"int f{i}(void) {{ return {i}; }} // añadido\n" * (i % 5 + 1) for i in range(1, 40)]
+    for c in code:
+        writer.add(c)
+    writer.close()
+    read = search.Code(tmp_path, 0)
+    wanted = [39, 1, 16, 17, 5]  # either side of a block's edge, and in the last, short one
+    assert read(wanted) == {i: code[i - 1] for i in wanted}
+    empty = tmp_path / "empty"
+    (empty / "partitions" / "0").mkdir(parents=True)
+    search.CodeWriter(empty / "partitions" / "0", zstd.ZstdCompressor(3)).close()
+    assert search.Code(empty, 0)([]) == {}

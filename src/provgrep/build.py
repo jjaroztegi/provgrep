@@ -17,11 +17,11 @@ The build writes `<out>.part/`, in steps, then puts it in place of out:
 2. sources.sqlite: the repositories and their files, each with its license, evidence and
    notices. The functions are routed meanwhile, by the first byte of their hash, to BUCKETS
    spool files; a partition is a run of buckets.
-3. partitions/<n>/: records.sqlite, the distinct functions (code compressed with code.zdict, a
-   zstd dictionary trained on the corpus) and their locations; lexical/, the search index over
-   them (search.py). The location shown for a function is its first copy outside a vendored
-   directory, in corpus order (most-starred repository first): the same corpus gives the same
-   index.
+3. partitions/<n>/: records.sqlite, the distinct functions and their locations; code.zst, their
+   code (search.Code), compressed with code.zdict, a zstd dictionary trained on the corpus;
+   lexical/, the search index over them (search.py), in one segment. The location shown for a
+   function is its first copy outside a vendored directory, in corpus order (most-starred
+   repository first): the same corpus gives the same index.
 4. manifest.json: what was built from what, with which versions, and what was left out.
 
 What people asked to have removed (corpus/removed.json) is left out of every build: whole
@@ -64,7 +64,13 @@ TASKS_PER_WORKER = 8
 PARTITION_SIZE = 3_400_000
 DICTIONARY_SIZE = 64 << 10  # 2.9 times smaller code at level 9, against 2.3 without one
 SAMPLES = 20_000  # functions the dictionary is trained on
-CODE_LEVEL = 9
+# A block of functions at 19 is 4% smaller than at 9, and as fast to read; it takes the build 5
+# times as long to write, minutes a partition.
+CODE_LEVEL = 19
+# A partition's lexical index is written by one thread into one segment: 16% smaller than the
+# dozen segments 8 threads and 512 MB made, and searched as well. The heap is how much it may
+# take before it starts another; a partition of 2.3 M functions stayed in one.
+LEXICAL_HEAP = 3 << 30
 SOURCES = """
 CREATE TABLE repos (
     id INTEGER PRIMARY KEY,  -- corpus order
@@ -96,21 +102,21 @@ CREATE TABLE snippets (
     id INTEGER PRIMARY KEY,  -- order of first appearance in the partition
     hash BLOB NOT NULL UNIQUE,  -- the first 16 bytes of the sha256 of the normalized code
     language TEXT NOT NULL,
-    code BLOB NOT NULL,  -- as found at the location shown, zstd with code.zdict
-    location INTEGER NOT NULL,  -- the one shown
+    location INTEGER NOT NULL,  -- the one shown, whose code code.zst has
     copies INTEGER NOT NULL,
     repos INTEGER NOT NULL,
     licenses INTEGER NOT NULL  -- distinct license expressions among the copies
 );
+-- Kept in order of their snippet, so a snippet's copies are read together and need no index.
 CREATE TABLE locations (
-    id INTEGER PRIMARY KEY,
     snippet INTEGER NOT NULL REFERENCES snippets,
+    id INTEGER NOT NULL,  -- corpus order
     file INTEGER NOT NULL,  -- in sources.sqlite
     symbol TEXT NOT NULL,
     start INTEGER NOT NULL,
-    end INTEGER NOT NULL
-);
-CREATE INDEX locations_snippet ON locations (snippet);
+    end INTEGER NOT NULL,
+    PRIMARY KEY (snippet, id)
+) WITHOUT ROWID;
 """
 
 
@@ -395,8 +401,10 @@ def _reduce(
     (here / "lexical").mkdir(parents=True)
     db = sqlite3.connect(here / "records.sqlite")
     db.executescript(RECORDS)
-    writer = tantivy.Index(search.schema(), path=str(here / "lexical")).writer(heap_size=1 << 29)
+    lexical = tantivy.Index(search.schema(), path=str(here / "lexical"))
+    writer = lexical.writer(heap_size=LEXICAL_HEAP, num_threads=1)
     compressor = zstd.ZstdCompressor(CODE_LEVEL, zstd_dict=search.dictionary(out))
+    codes = search.CodeWriter(here, compressor)
     counts: Counter[str] = Counter()
     languages: Counter[str] = Counter()
     levels: Counter[str] = Counter()
@@ -425,20 +433,21 @@ def _reduce(
                             s.symbol = symbol
                     s.repos.add(copy.repo)
                     s.licenses.add(copy.license or "")
-                    found.append((locations, s.id, copy.id, symbol, start, end))
+                    found.append((s.id, locations, copy.id, symbol, start, end))
+        found.sort()  # the table's order: its rows are added at its end
         db.executemany("INSERT INTO locations VALUES (?, ?, ?, ?, ?, ?)", found)
         for s in seen.values():
             row = (
                 s.id,
                 bytes.fromhex(s.hash[: 2 * search.HASH_BYTES]),
                 s.file.language,
-                compressor.compress(s.code.encode(), zstd.ZstdCompressor.FLUSH_FRAME),
                 s.location,
                 s.copies,
                 len(s.repos),
                 len(s.licenses),
             )
-            db.execute("INSERT INTO snippets VALUES (?, ?, ?, ?, ?, ?, ?, ?)", row)
+            db.execute("INSERT INTO snippets VALUES (?, ?, ?, ?, ?, ?, ?)", row)
+            codes.add(s.code)
             writer.add_document(
                 search.document(
                     s.id,
@@ -457,6 +466,7 @@ def _reduce(
             languages[s.file.language] += 1
             levels[s.file.level] += 1
         counts["snippets"] += len(seen)
+    codes.close()
     db.commit()
     db.close()
     writer.commit()

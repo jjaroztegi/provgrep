@@ -20,7 +20,6 @@ the wrong code.
 import json
 import time
 from collections.abc import Callable
-from compression import zstd
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from functools import cache
@@ -353,26 +352,19 @@ def _embed(index: Path, n: int, kept: Store, encoder: Callable[[], Encoder]) -> 
         shape = (len(missing), MODEL.dimensions)
         vectors = np.lib.format.open_memmap(names["vectors"], "w+", np.int8, shape)
         done = np.lib.format.open_memmap(names["done"], "w+", np.bool_, (len(missing),))
-    zdict = search.dictionary(index)
-    db = search.connect(index, n)
+    codes = search.Code(index, n)
     for start in range(0, len(missing), PART):
         rows = [r for r in range(start, min(start + PART, len(missing))) if not done[r]]
         if not rows:
             continue
         ids = [int(missing[r]) for r in rows]
-        code = {
-            snippet: zstd.decompress(blob, zstd_dict=zdict).decode()
-            for snippet, blob in db.execute(
-                "SELECT id, code FROM snippets WHERE id BETWEEN ? AND ?", (ids[0], ids[-1])
-            )
-        }
+        code = codes(ids)
         vectors[rows] = np.rint(encoder()([code[i] for i in ids]) * 127).astype(np.int8)
         vectors.flush()
         done[rows] = True
         done.flush()
         rate = (start + len(rows)) / (time.monotonic() - started)
         print(f"[{n}: {start + len(rows)}/{len(missing)}] {rate:.0f}/s", flush=True)
-    db.close()
     kept.add(keys[missing], np.asarray(vectors))
     del vectors, done  # close the maps before their files are removed
     for path in names.values():
