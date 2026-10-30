@@ -539,10 +539,12 @@ def units(text: str, language: str) -> list[Unit]:
         if node.id not in found:
             found[node.id] = (node, _first(match, "name"), _first(match, "scope"))
     named: dict[int, tuple[int, int, str]] = {}  # the first name found for each container
-    for _, m in QueryCursor(_query(language, "containers")).matches(root):
-        # A language without containers has a query that matches only an empty ERROR node.
-        if "container" in m and "name" in m and (box := m["container"][0]).id not in named:
-            named[box.id] = (box.start_byte, box.end_byte, _scope_name(m["name"][0], source))
+    # A query that stood in for a language's having none matched ERROR nodes by their text, and
+    # on a data file read as a GLSL shader took hours.
+    if LANGUAGES[language].containers:
+        for _, m in QueryCursor(_query(language, "containers")).matches(root):
+            if "name" in m and (box := m["container"][0]).id not in named:
+                named[box.id] = (box.start_byte, box.end_byte, _scope_name(m["name"][0], source))
     containers = sorted(named.values())
     docs = sorted(
         (n.start_byte, n.end_byte, without_emails(_text(n, source)))
@@ -712,5 +714,4 @@ def _parser(language: str) -> Parser:
 @cache
 def _query(language: str, kind: str) -> Query:
     source: str = getattr(LANGUAGES[language], kind)
-    # An empty query is not valid; one that matches nothing stands in for it.
-    return Query(_grammar(language), source.strip() or '((ERROR) @none (#eq? @none ""))')
+    return Query(_grammar(language), source)
