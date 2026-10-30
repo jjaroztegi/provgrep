@@ -23,6 +23,7 @@ search keeps the code OSADL's matrix says may go into it, and says why (compatib
 import itertools
 import json
 import mmap
+import os
 import re
 import sqlite3
 import struct
@@ -277,6 +278,7 @@ class Index:
             self.vectors = dense.Vectors(path, self.manifest["built"], self.partitions)
             # A query asked again (another filter, the next page) is not embedded again
             self._meaning = lru_cache(maxsize=1024)(dense.Encoder(queries=True).query)
+        random_reads(path)
 
     def search(
         self,
@@ -548,6 +550,34 @@ def connect(index: Path, n: int) -> sqlite3.Connection:
     db = sqlite3.connect(uri(records), uri=True, check_same_thread=False)
     db.execute("ATTACH DATABASE ? AS sources", (uri(index / "sources.sqlite"),))
     return db
+
+
+def random_reads(index: Path) -> None:
+    """Have every map of the index's files read the page a search asks for, and no more.
+    tantivy, numpy and the code blocks map their files without advice, so a page read from disk
+    brings the 31 around it into the page cache, and a search reads small pieces at random: a
+    term's entry, posting lists, 100 rows of vectors, 10 blocks of code. Linux only: the maps
+    are found in /proc/self/maps, by the files they map (an index may be made of symlinks)."""
+    if not hasattr(mmap, "MADV_RANDOM"):
+        return
+    try:
+        maps = Path("/proc/self/maps").read_text()
+    except OSError:  # not Linux, or not allowed: the index is read as before
+        return
+    import ctypes
+
+    files = {
+        os.path.realpath(os.path.join(directory, name))
+        for directory, _, names in os.walk(index, followlinks=True)
+        for name in names
+    }
+    libc = ctypes.CDLL(None, use_errno=True)
+    libc.madvise.argtypes = [ctypes.c_void_p, ctypes.c_size_t, ctypes.c_int]
+    for line in maps.splitlines():
+        fields = line.split(maxsplit=5)
+        if len(fields) == 6 and fields[5] in files:
+            start, end = (int(address, 16) for address in fields[0].split("-"))
+            libc.madvise(start, end - start, mmap.MADV_RANDOM)
 
 
 class Code:

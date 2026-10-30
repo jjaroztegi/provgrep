@@ -67,6 +67,38 @@ def test_snippet_lists_every_copy(index: search.Index) -> None:
     assert index.snippet("0" * search.ID_LENGTH) is None
 
 
+def _maps(under: Path) -> tuple[int, int]:
+    """How many maps of files under a directory this process has, and how many read a page at
+    a time (the `rr` of MADV_RANDOM in /proc/self/smaps)."""
+    advised, mapped = 0, 0
+    current = ""
+    for line in Path("/proc/self/smaps").read_text().splitlines():
+        fields = line.split(maxsplit=5)
+        if fields[0].endswith(":"):
+            if fields[0] == "VmFlags:" and current.startswith(str(under.resolve())):
+                mapped += 1
+                advised += "rr" in line.split()
+        else:  # a map's first line: its addresses, ..., and the file it maps, if any
+            current = fields[5] if len(fields) == 6 else ""
+    return mapped, advised
+
+
+@pytest.mark.skipif(not Path("/proc/self/smaps").exists(), reason="Linux only")
+def test_the_index_is_read_a_page_at_a_time(index: search.Index, tmp_path: Path) -> None:
+    mapped, advised = _maps(index.path)
+    assert mapped
+    assert advised == mapped
+    linked = tmp_path / "linked"  # an index made of symlinks maps the files they point to
+    linked.mkdir()
+    for entry in index.path.iterdir():
+        (linked / entry.name).symlink_to(entry)
+    opened = search.Index(linked)  # its maps last as long as it does
+    again, advised = _maps(index.path)
+    assert again > mapped
+    assert advised == again
+    assert opened.path == linked
+
+
 def test_partitions_page_as_one_index(
     index: search.Index, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

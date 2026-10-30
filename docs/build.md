@@ -53,9 +53,10 @@ or sent from another site's pages. Each address may search twice a second, 30 at
 server takes 64 connections at a time; wider limits belong in the proxy in front of it. Nothing
 about a search is logged.
 
-A search reads parts of every partition, so right after it starts on a new index the first searches
-wait on the disk. On the index of 10,915 repositories (corpus sha256 4da3293d763e), 35 GB on a
-server with 31 GB of memory, `provgrep evaluate search` over the four suites gave p95 0.8 s right
-after the index's files had been read once, and 0.17 s when it ran again. Read the index once after
-switching to it (`cat` its files to `/dev/null`, or `type` them to `NUL` on Windows); what does not
-fit in memory is read again as searches need it.
+A search reads small parts of every partition, a page at a time on Linux, so the first searches on
+a new index wait on the disk for what they need, and only that stays in memory: there is no need to
+read the index before serving it. On the index of 10,915 repositories (corpus sha256
+4da3293d763e, 35 GB), `provgrep evaluate search` over the four suites took p95 0.23 s from a cold
+page cache and left 2.0 GB of the index in it; run again, p95 67 ms, as fast with the process's
+`memory.high` (cgroup v2) at 2.5 GB. Read ahead in pages around each one, the first run left
+9.5 GB, and with 8 GB the second took p95 0.24 s.
