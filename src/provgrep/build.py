@@ -19,9 +19,10 @@ The build writes `<out>.part/`, in steps, then puts it in place of out:
    spool files; a partition is a run of buckets.
 3. partitions/<n>/: records.sqlite, the distinct functions and their locations; code.zst, their
    code (search.Code), compressed with code.zdict, a zstd dictionary trained on the corpus;
-   lexical/, the search index over them (search.py), in one segment. The location shown for a
-   function is its first copy outside a vendored directory, in corpus order (most-starred
-   repository first): the same corpus gives the same index.
+   lexical/, the search index over them (search.py), written by one thread in id order: a
+   segment's documents are consecutive snippets, so a search reads no document for its id. The
+   location shown for a function is its first copy outside a vendored directory, in corpus
+   order (most-starred repository first): the same corpus gives the same index.
 4. manifest.json: what was built from what, with which versions, and what was left out.
 
 What people asked to have removed (corpus/removed.json) is left out of every build: whole

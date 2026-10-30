@@ -265,6 +265,9 @@ class Index:
             tantivy.Index.open(str(path / "partitions" / str(n) / "lexical")).searcher()
             for n in range(self.partitions)
         ]
+        # A partition's segments hold its snippets in id order (build.py): a document's snippet is
+        # its segment's first one plus its address there, with no read of the document.
+        self._firsts = [_firsts(n, s) for n, s in enumerate(self._searchers)]
         self._schema = schema()
         self._documents = sum(searcher.num_docs for searcher in self._searchers)
         self._pool = ThreadPoolExecutor(self.partitions)  # tantivy-py releases the GIL
@@ -351,7 +354,8 @@ class Index:
         )[:depth]
         # A snippet is (partition, its id there).
         ranked = [
-            (score, (n, self._searchers[n].doc(address)["id"][0])) for score, n, address in hits
+            (score, (n, self._firsts[n][address.segment_ord] + address.doc))
+            for score, n, address in hits
         ]
         if vectors is not None:
             head = [snippet for _, snippet in ranked[:RERANK]]
@@ -505,6 +509,23 @@ def _result(row: tuple[Any, ...], score: float, project: str | None = None) -> R
     fits = compatibility.verdict(project, location.license.choices) if project else None
     id = hash_.hex()[:ID_LENGTH]
     return Result(id, score, language, shown, location, copies, repos, licenses, fits)
+
+
+def _firsts(n: int, searcher: tantivy.Searcher) -> list[int]:
+    """The snippet of each segment's first document, checked: each segment must hold a run of
+    consecutive snippets, or an address would name the wrong code."""
+
+    def snippet(segment: int, doc: int) -> int:
+        return int(searcher.doc(tantivy.DocAddress(segment, doc))["id"][0])
+
+    firsts = [snippet(segment, 0) for segment in range(searcher.num_segments)]
+    starts = sorted(firsts)
+    for segment, first in enumerate(firsts):
+        following = [start for start in starts if start > first]
+        last = (following[0] if following else searcher.num_docs + 1) - 1
+        if snippet(segment, last - first) != last:
+            raise ValueError(f"partition {n}: a segment's documents are not consecutive snippets")
+    return firsts
 
 
 def buckets(n: int, partitions: int) -> range:
