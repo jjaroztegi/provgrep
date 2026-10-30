@@ -4,10 +4,14 @@ Search open-source code by what it does and get back the real snippet: the licen
 with the evidence for it, where else the same code is, and an attribution to paste with it. A
 search website, with a command line and an MCP server on the same engine.
 
-Status: an index of the 500 most-starred GitHub repositories of each of C, C++, Go, Java,
-JavaScript, Python, Rust and TypeScript, pinned on 2026-10-24: 21,259,913 distinct functions,
-found by their words and ordered by meaning, from a local website, the command line, a JSON API
-and MCP. Which copy of a function came first is not decided yet.
+Status: an index of 10,915 GitHub repositories, each pinned to a commit: the 500 most-starred of
+each of C, C++, Go, Java, JavaScript, Python, Rust and TypeScript (2026-10-24), then every C
+repository with 1,000 stars or more and the 300 most-starred with 10 or more of each of Ada, C3,
+Common Lisp, D, Erlang, Fortran, GLSL, Haskell, Jai, Julia, Lua, Nim, OCaml, Odin, Pascal, Racket,
+Teal, Vala and Zig, the languages [Tsoding](https://github.com/tsoding) writes in beside C
+(2026-10-29). 32,474,882 distinct functions, found by their words and ordered by meaning, from a
+local website, the command line, a JSON API and MCP. Which copy of a function came first is not
+decided yet.
 
 ## Licenses, measured
 
@@ -25,50 +29,63 @@ none. Files where both sides agree were not read. The audit, with its reasons an
 
 ## Search, measured
 
-Two suites of intents in `truth/intents/`, each a question and the calls the code of a right
-answer contains; a result is a hit when its code has them all. Over the full index (built at
-378bb39 from corpus/github.json, sha256 526db429d94b, with its embeddings, and searched at
-c1aaef1; queries embedded with the model's 8-bit weights):
+Four suites of intents in `truth/intents/`, each a question and the calls the code of a right answer
+contains; a result is a hit when its code has them all. Over the full index (built from
+corpus/github.json, sha256 4da3293d763e, at 53082cf, which is the code of 7e8a15f, with its
+embeddings, and searched at b840804; queries embedded with the model's 8-bit weights):
 
 | suite | licenses | intents | a hit first | a hit in the top 10 | MRR@10 | answerable from the index |
 |---|---|---:|---:|---:|---:|---:|
-| APIs: common tasks in 8 languages | any | 89 | 41 | 76 | 0.59 | 89 |
-| | permissive | 89 | 42 | 77 | 0.60 | 89 |
-| XRender: what a live session needed | any | 19 | 3 | 9 | 0.28 | 16 |
-| | permissive | 19 | 3 | 8 | 0.24 | 14 |
+| APIs: common tasks in 8 languages | any | 89 | 44 | 78 | 0.62 | 89 |
+| | permissive | 89 | 42 | 76 | 0.60 | 89 |
+| XRender: what a live session needed | any | 19 | 9 | 13 | 0.51 | 18 |
+| | permissive | 19 | 4 | 12 | 0.31 | 18 |
+| Languages: common tasks in 19 more | any | 40 | 11 | 29 | 0.43 | 40 |
+| | permissive | 40 | 13 | 29 | 0.43 | 40 |
+| raylib: what a C program does with it | any | 15 | 5 | 10 | 0.41 | 15 |
+| | permissive | 15 | 6 | 12 | 0.52 | 15 |
 
 Search finds the functions that have the question's words (BM25 over identifiers split into words
 and kept whole, in partitions searched at once), then orders the first 100 by how close their code
 is to the question in meaning ([docs/search.md](docs/search.md#ordering-by-meaning)). Without that
-order, a hit came first for 32 and 29 of the API intents (MRR 0.49 and 0.47) and in the top 10
-for 5 XRender questions with any license. On the 8-core server, once the index has been read from
-disk, a search takes 28 ms at the median and 60 ms at the 95th percentile (23 and 53 ms without
-the order); the benchmark asks each question twice, with any license and with permissive ones,
-and the second time its embedding is remembered.
+order, a hit came first for 33 and 29 of the API intents (MRR 0.49 and 0.48), 9 and 9 of the
+languages, and in the top 10 for 14 and 8 XRender questions. On the 8-core server (31 GB), once the
+index has been read from disk, a search of the first two suites takes 35 ms at the median and 71 ms
+at the 95th percentile (22 and 51 ms without the order); the benchmark asks each question twice,
+with any license and with permissive ones, and the second time its embedding is remembered.
+Embedding the question is most of that: 18 ms alone, 26 to 31 while the 14 partitions are searched
+beside it. The index of the 500 most-starred repositories of 8 languages alone (21,259,913
+functions, built at 378bb39, searched at c1aaef1) had 41/76/0.59 and 42/77/0.60 on the APIs and
+3/9/0.28 and 3/8/0.24 on XRender, in 28 and 60 ms.
 
 The XRender questions are the 19 a programmer had while writing an XRender program in C from
 scratch, live ([Tsoding Daily](https://www.youtube.com/watch?v=auzZCp45dJc)), each with the time it
-came up. The index answers 16 of them; search puts one in the top 10 for 9. The misses are of two
-kinds. Most XRender calls are in a handful of functions among 21 million, and three are in none: the
-subpixel order, a picture of an uploaded pixmap, a shared memory image. And the first steps of any
-X11 program (XSelectInput, XStoreName with XMapWindow, XCreateImage) are in 35 to 64 functions
-each, none of them in the top 10, where X11 window code that does something else comes first. Some answers exist only under copyleft: the only three functions that fill a rectangle
-with `XRenderFillRectangle` and an `XRenderColor` are in TigerVNC (GPL-2.0-or-later) and the OpenJDK
-(GPL-2.0 with the Classpath exception). The OpenJDK's comes first for that question, and a project
-under MIT gets nothing to copy for it, and is told so.
+came up. Every C repository with 1,000 stars or more is what answers most of them: wine, vcxsrv,
+compton, chadwm and uTox call what the 500 most-starred C repositories did not, and the index
+answers 18 of the 19 (16 before), one in the top 10 for 13. A shared memory image put on a pixmap
+and composited is in no function. Some first hits are vcxsrv's copy of libXrender, the call itself
+rather than code that makes it, which the grading cannot tell apart. The first steps of any X11
+program (XSelectInput, XStoreName with XMapWindow) are in 57 to 169 functions each, none of them in
+the top 10, where X11 window code that does something else comes first.
+
+The languages suite asks 40 common tasks of the 19 languages, each in its own (a gen_server in
+Erlang, a counter in Haskell's State monad, a raylib window in Odin). The raylib suite asks what
+Tsoding's musializer and panim do with raylib in C, each question naming it; without the name, a hit
+was in the top 10 for 2 of the 15: raylib's calls are in 3 to 242 functions each, and a window, a
+texture or a sound are what SDL, GLFW and OpenGL code makes too.
 
 ## The same code under different licenses
 
-Of the 21.3 million functions, 1,817,661 appear in more than one repository, and 71,154 of those are
-under a permissive license in one place and a copyleft one in another (`provgrep copies`, over the
-same index). Most are short helpers many projects share, but 5,308 are 40 lines or longer, identical
-but for whitespace: vendored copies, forks that relicensed, code moved between projects. One
-example: the same 34 lines of `ConcurrentHashMap.clear` are under Apache-2.0 in IntelliJ IDEA and
-under GPL-2.0 with the Classpath exception and CC0-1.0 in OpenJDK and in j2objc, which took them
-from it. All three files say that Doug Lea released the code to the public domain; in IntelliJ's
-the comment comes after the `package` line, where provgrep does not read it yet. A license taken from a repository
-says nothing about which of these a function is, and provgrep does not yet say which copy came
-first.
+Of the 32.5 million functions, 4,019,689 appear in more than one repository, and 177,696 of those
+are under a permissive license in one place and a copyleft one in another (`provgrep copies`, over
+the same index). Most are short helpers many projects share, but 23,202 are 40 lines or longer,
+identical but for whitespace: vendored copies, forks that relicensed, code moved between projects.
+One example: the same 34 lines of `ConcurrentHashMap.clear` are under Apache-2.0 in IntelliJ IDEA
+and under GPL-2.0 with the Classpath exception and CC0-1.0 in OpenJDK and in j2objc, which took them
+from it. All three files say that Doug Lea released the code to the public domain; in IntelliJ's the
+comment comes after the `package` line, where provgrep does not read it yet. A license taken from a
+repository says nothing about which of these a function is, and provgrep does not yet say which copy
+came first.
 
 ## Start
 
@@ -77,7 +94,7 @@ Needs [uv](https://docs.astral.sh/uv/) and Python 3.14.
 ```sh
 uv run provgrep license PATH                # the license of every code file under PATH
 uv run provgrep evaluate licenses --jobs 8  # the Debian measurement: ~630 MB of downloads
-uv run provgrep build --jobs 8              # the pinned corpus: ~3 h on 16 threads, 26 GB of index
+uv run provgrep build --jobs 8              # the pinned corpus: ~5 h on 16 threads, 35 GB of index
 uv run provgrep serve                       # the website at http://127.0.0.1:8000, MCP at /mcp
 uv run provgrep search "parse an RTP header" --license any
 uv run provgrep evaluate search             # the suites in truth/intents/

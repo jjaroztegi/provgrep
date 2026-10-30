@@ -53,6 +53,8 @@ or sent from another site's pages. Each address may search twice a second, 30 at
 server takes 64 connections at a time; wider limits belong in the proxy in front of it. Nothing
 about a search is logged.
 
-A search reads parts of every partition, so right after it starts on a new index the first
-searches wait on the disk: on the 4,000-repository index, p95 was 0.7 s cold and 62 ms once the
-index had been read. Read the index once after switching to it (`cat` its files to `/dev/null`).
+A search reads parts of every partition, so right after it starts on a new index the first searches
+wait on the disk: on the index of 10,915 repositories, 35 GB on a server with 31 GB of memory, p95
+was 0.8 s for the first 326 searches and 0.17 s when they were asked again. Read the index once
+after switching to it (`cat` its files to `/dev/null`); what does not fit in memory is read again as
+searches need it.
