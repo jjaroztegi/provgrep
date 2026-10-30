@@ -26,6 +26,7 @@ import mmap
 import re
 import sqlite3
 import struct
+import threading
 from collections.abc import Iterable, Sequence
 from compression import zstd
 from concurrent.futures import ThreadPoolExecutor
@@ -256,6 +257,9 @@ class Index:
         self.manifest = json.loads((path / "manifest.json").read_text(encoding="utf-8"))
         self.partitions = len(list((path / "partitions").iterdir()))
         self._dbs = [connect(path, n) for n in range(self.partitions)]
+        # A connection runs one statement at a time: two threads with the same query share its
+        # prepared statement, and one's rows went missing from the other's (500s under load).
+        self._locks = [threading.Lock() for _ in range(self.partitions)]
         self._code = [Code(path, n) for n in range(self.partitions)]
         self._searchers = [
             tantivy.Index.open(str(path / "partitions" / str(n) / "lexical")).searcher()
@@ -365,14 +369,11 @@ class Index:
         if found is None:
             return None
         n, snippet = found
-        listed = (
-            self._dbs[n]
-            .execute(
-                f"SELECT {_LOCATION} FROM locations l JOIN files f ON f.id = l.file"
-                " JOIN repos r ON r.id = f.repo WHERE l.snippet = ? ORDER BY l.id LIMIT ?",
-                (snippet, max(0, min(copies, MAX_COPIES))),
-            )
-            .fetchall()
+        listed = self._read(
+            n,
+            f"SELECT {_LOCATION} FROM locations l JOIN files f ON f.id = l.file"
+            " JOIN repos r ON r.id = f.repo WHERE l.snippet = ? ORDER BY l.id LIMIT ?",
+            (snippet, max(0, min(copies, MAX_COPIES))),
         )
         result = _result(self._rows([found])[found], 0.0)
         return Snippet(result, [_location(c) for c in listed])
@@ -392,12 +393,8 @@ class Index:
         n = partition(int(id[:2], 16), self.partitions)
         low = bytes.fromhex(id)
         high = (int(id, 16) + 1).to_bytes(ID_LENGTH // 2) if id != "f" * ID_LENGTH else b"\xff" * 9
-        row = (
-            self._dbs[n]
-            .execute("SELECT id FROM snippets WHERE hash >= ? AND hash < ?", (low, high))
-            .fetchone()
-        )
-        return None if row is None else (n, row[0])
+        rows = self._read(n, "SELECT id FROM snippets WHERE hash >= ? AND hash < ?", (low, high))
+        return (n, rows[0][0]) if rows else None
 
     def _text(self, words: list[str]) -> Query | None:
         """The words in every field, weighted; a document must have one of the rarer ones (see
@@ -442,13 +439,19 @@ class Index:
             [(Occur.Should, Query.term_query(self._schema, field, v)) for v in values]
         )
 
+    def _read(self, n: int, sql: str, parameters: Sequence[Any]) -> list[Any]:
+        """The rows of a query of partition n's records."""
+        with self._locks[n]:
+            return self._dbs[n].execute(sql, parameters).fetchall()
+
     def _rows(self, snippets: list[tuple[int, int]]) -> dict[tuple[int, int], tuple[Any, ...]]:
         """The rows of snippets, by (partition, id), with their code decompressed."""
         out = {}
         for n in {n for n, _ in snippets}:
             ids = [snippet for m, snippet in snippets if m == n]
             code = self._code[n](ids)
-            rows = self._dbs[n].execute(
+            rows = self._read(
+                n,
                 f"SELECT {_LOCATION}, s.id, s.hash, s.language, s.copies, s.repos, s.licenses"
                 " FROM snippets s JOIN locations l ON l.snippet = s.id AND l.id = s.location"
                 " JOIN files f ON f.id = l.file JOIN repos r ON r.id = f.repo"
