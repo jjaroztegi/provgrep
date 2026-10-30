@@ -87,7 +87,7 @@ MODEL = Model(
 # as well: a hit first for 136 of their searches and in the top 10 for 261, against 134 and 259.
 QUERIES = (
     "jjaroztegi/jina-v2-code-query-4l",
-    "main",
+    "20f5439b2ab4fe76eba6a2cac5263351dc0afcae",
     "onnx/model_quantized.onnx",
     "a61bcbd5a1cca2fe06f0b21bd0531dfc5c011c1f1c641dbcc9e3836ab7215306",
 )
