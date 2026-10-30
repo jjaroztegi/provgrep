@@ -540,8 +540,8 @@ def units(text: str, language: str) -> list[Unit]:
             found[node.id] = (node, _first(match, "name"), _first(match, "scope"))
     named: dict[int, tuple[int, int, str]] = {}  # the first name found for each container
     for _, m in QueryCursor(_query(language, "containers")).matches(root):
-        box = m["container"][0]
-        if "name" in m and box.id not in named:
+        # A language without containers has a query that matches only an empty ERROR node.
+        if "container" in m and "name" in m and (box := m["container"][0]).id not in named:
             named[box.id] = (box.start_byte, box.end_byte, _scope_name(m["name"][0], source))
     containers = sorted(named.values())
     docs = sorted(

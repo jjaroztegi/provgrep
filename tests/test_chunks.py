@@ -111,6 +111,11 @@ def test_copies_at_another_indentation_have_the_same_hash() -> None:
     assert top[0].hash == method[0].hash
 
 
+def test_a_language_without_containers_takes_an_empty_error() -> None:
+    # A zero-width ERROR node is what the stand-in query for no containers matches.
+    assert units("#define\\\n", "c") == []
+
+
 def test_kind() -> None:
     def k(path: str, text: str = "", language: str = "python") -> str:
         return kind(PurePosixPath(path), text, language)
