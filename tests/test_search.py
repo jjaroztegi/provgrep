@@ -1,5 +1,6 @@
 import json
 from compression import zstd
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 import pytest
@@ -165,3 +166,11 @@ def test_code_is_read_back_from_its_blocks(tmp_path: Path) -> None:
     (empty / "partitions" / "0").mkdir(parents=True)
     search.CodeWriter(empty / "partitions" / "0", zstd.ZstdCompressor(3)).close()
     assert search.Code(empty, 0)([]) == {}
+
+
+def test_searches_at_once_read_every_row(index: search.Index) -> None:
+    # The server searches on many threads, each partition's records through one connection.
+    expected = index.search("render picture", licenses="any")
+    with ThreadPoolExecutor(16) as pool:
+        pages = list(pool.map(lambda _: index.search("render picture", licenses="any"), range(400)))
+    assert all(page == expected for page in pages)
