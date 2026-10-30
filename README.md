@@ -32,26 +32,26 @@ none. Files where both sides agree were not read. The audit, with its reasons an
 Four suites of intents in `truth/intents/`, each a question and the calls the code of a right answer
 contains; a result is a hit when its code has them all. Over the full index (built from
 corpus/github.json, sha256 4da3293d763e, at 53082cf, which is the code of 7e8a15f, with its
-embeddings, and searched at b840804; queries embedded with the model's 8-bit weights):
+embeddings, and searched at 04573f7; queries embedded with the model's 8-bit weights):
 
 | suite | licenses | intents | a hit first | a hit in the top 10 | MRR@10 | answerable from the index |
 |---|---|---:|---:|---:|---:|---:|
-| APIs: common tasks in 8 languages | any | 89 | 44 | 78 | 0.62 | 89 |
-| | permissive | 89 | 42 | 76 | 0.60 | 89 |
-| XRender: what a live session needed | any | 19 | 9 | 13 | 0.51 | 18 |
-| | permissive | 19 | 4 | 12 | 0.31 | 18 |
-| Languages: common tasks in 19 more | any | 40 | 11 | 29 | 0.43 | 40 |
-| | permissive | 40 | 13 | 29 | 0.43 | 40 |
-| raylib: what a C program does with it | any | 15 | 5 | 10 | 0.41 | 15 |
+| APIs: common tasks in 8 languages | any | 89 | 42 | 76 | 0.60 | 89 |
+| | permissive | 89 | 41 | 77 | 0.59 | 89 |
+| XRender: what a live session needed | any | 19 | 8 | 14 | 0.47 | 18 |
+| | permissive | 19 | 5 | 13 | 0.37 | 18 |
+| Languages: common tasks in 19 more | any | 40 | 13 | 29 | 0.46 | 40 |
+| | permissive | 40 | 14 | 28 | 0.45 | 40 |
+| raylib: what a C program does with it | any | 15 | 5 | 10 | 0.45 | 15 |
 | | permissive | 15 | 6 | 12 | 0.52 | 15 |
 
 Search finds the functions that have the question's words (BM25 over identifiers split into words
 and kept whole, in partitions searched at once), then orders the first 100 by how close their code
 is to the question in meaning ([docs/search.md](docs/search.md#ordering-by-meaning)). Without that
-order, a hit came first for 33 and 29 of the API intents (MRR 0.49 and 0.48), 9 and 9 of the
+order, a hit came first for 31 and 26 of the API intents (MRR 0.48 and 0.46), 10 and 8 of the
 languages, and in the top 10 for 14 and 8 XRender questions. On the 8-core server (31 GB), once the
-index has been read from disk, a search of the first two suites takes 35 ms at the median and 71 ms
-at the 95th percentile (22 and 51 ms without the order, the index searched without its
+index has been read from disk, a search of the first two suites takes 28 ms at the median and 52 ms
+at the 95th percentile (14 and 30 ms without the order, the index searched without its
 `dense.json`); the benchmark asks each question twice, with any license and with permissive ones,
 and the second time its embedding is remembered. What the order costs is the question's embedding,
 which shares the server's 8 cores with the searches of 14 partitions. The index of the 500
@@ -63,7 +63,7 @@ The XRender questions are the 19 a programmer had while writing an XRender progr
 scratch, live ([Tsoding Daily](https://www.youtube.com/watch?v=auzZCp45dJc)), each with the time it
 came up. Every C repository with 1,000 stars or more is what answers most of them: wine, vcxsrv,
 compton, chadwm and uTox call what the 500 most-starred C repositories did not, and the index
-answers 18 of the 19 (16 before), one in the top 10 for 13. A shared memory image put on a pixmap
+answers 18 of the 19 (16 before), one in the top 10 for 14. A shared memory image put on a pixmap
 and composited is in no function. Some first hits are vcxsrv's copy of libXrender, the call itself
 rather than code that makes it, which the grading cannot tell apart. The first steps of any X11
 program (XSelectInput, XStoreName with XMapWindow) are in 57 to 169 functions each, none of them in
