@@ -56,7 +56,7 @@ about a search is logged.
 A search reads small parts of every partition, a page at a time on Linux, so the first searches on
 a new index wait on the disk for what they need, and only that stays in memory: there is no need to
 read the index before serving it. On the index of 10,915 repositories (corpus sha256
-4da3293d763e, 35 GB), the four suites' questions asked as visits to the site by 4 clients at once
-took p95 0.34 s from a cold cache, reading 2 GB from disk, and 0.21 s the second time; the server
-then held 2.6 GB, and kept that speed with 2.5 GB of memory (its cgroup's `memory.high`). Read
-ahead in pages around each one, as before, the first pass read 9.6 GB and the server needed 8 GB.
+4da3293d763e, 35 GB), `provgrep evaluate search` over the four suites took p95 0.23 s from a cold
+page cache and left 2.0 GB of the index in it; run again, p95 67 ms, as fast with the process's
+`memory.high` (cgroup v2) at 2.5 GB. Read ahead in pages around each one, the first run left
+9.5 GB, and with 8 GB the second took p95 0.24 s.
