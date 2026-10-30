@@ -29,16 +29,16 @@
     </label>
   </fieldset>
   <fieldset>
+    <legend>--level</legend>
+    {% for value, label in levels %}
+    <label class="option"><input type="radio" name="level" value="{{ value }}" form="search" {% if level == value %}checked{% endif %}><span>{% if value %}<b>{{ value }}</b> {% endif %}{{ label }}</span></label>
+    {% endfor %}
+  </fieldset>
+  <fieldset class="languages">
     <legend>--language</legend>
     <label class="option"><input type="radio" name="language" value="" form="search" {% if not language %}checked{% endif %}><span>any</span></label>
     {% for key in languages %}
     <label class="option"><input type="radio" name="language" value="{{ key }}" form="search" {% if language == key %}checked{% endif %}><span>{{ key }}</span></label>
-    {% endfor %}
-  </fieldset>
-  <fieldset>
-    <legend>--level</legend>
-    {% for value, label in levels %}
-    <label class="option"><input type="radio" name="level" value="{{ value }}" form="search" {% if level == value %}checked{% endif %}><span>{% if value %}<b>{{ value }}</b> {% endif %}{{ label }}</span></label>
     {% endfor %}
   </fieldset>
 </details>

@@ -30,6 +30,7 @@
   --muted: #a0a0a0;
   --dim: #8a8a8a; /* line numbers and placeholders, 5:1 on --bg */
   --rule: #444;
+  --box: #333; /* a result's edges: quieter than a rule, as there are many */
   --yellow: #ffdd33;
   --green: #73d936; /* permissive */
   --warm: #cc8c3c; /* shareable on terms: copyleft and the like */
@@ -78,11 +79,14 @@ abbr { text-decoration: none; }
 
 /* The bar: the name, and the pages besides search */
 
+/* The bars run the whole width; what is in them, and the page, no wider than 100rem */
+.top, .search, .page, .colophon { padding-inline: max(1.5rem, (100% - 100rem) / 2); }
+
 .top {
   display: flex;
   align-items: baseline;
   gap: 3ch;
-  padding: 0.875rem 1.5rem;
+  padding-block: 0.875rem;
   border-bottom: 1px solid var(--rule);
 }
 .brand { color: var(--fg); font-weight: 700; text-decoration: none; }
@@ -97,7 +101,7 @@ abbr { text-decoration: none; }
   display: flex;
   align-items: center;
   gap: 1ch;
-  padding: 1rem 1.5rem;
+  padding-block: 1rem;
   border-bottom: 1px solid var(--rule);
   font-size: 1.125rem;
 }
@@ -128,22 +132,36 @@ abbr { text-decoration: none; }
 /* With the script, results follow what is typed and picked; the button is for without it. */
 .live .search button { display: none; }
 
-/* The page: the filters at the left, the results at the right */
+/* The page: the filters at the left, staying in view, the results at the right */
 
 .page { flex: 1; display: grid; grid-template-columns: 15rem minmax(0, 1fr); }
-main { min-width: 0; padding: 0 1.5rem 2rem; }
-main.single { flex: 1; width: 100%; max-width: 68rem; padding-top: 1.5rem; }
+main { min-width: 0; padding: 0 0 2rem 1.5rem; container: main / inline-size; }
+.page > main { border-left: 1px solid var(--rule); }
+main.single { flex: 1; padding: 1.5rem max(1.5rem, (100% - 100rem) / 2) 2rem; }
 
 .filters {
-  padding: 0.25rem 1.5rem 1.5rem;
-  border-right: 1px solid var(--rule);
+  position: sticky;
+  top: 0;
+  align-self: start;
+  max-height: 100dvh;
+  overflow-y: auto;
+  margin-left: -1.5ch; /* room for the ">" at the left of the checked option, which scrolling clips */
+  padding: 0.25rem 1.5rem 1.5rem 1.5ch;
   font-size: 0.8125rem;
 }
 .filters > summary { display: none; }
 .filters fieldset { min-width: 0; margin: 1.125rem 0 0; padding: 0; border: 0; }
 .filters legend { margin-bottom: 0.375rem; padding: 0; font-weight: 600; }
+/* Two columns, read down: the list is long, and the other filters stay above the fold */
+.languages { columns: 2; column-gap: 2.5ch; }
 
-.option { position: relative; display: block; color: var(--muted); cursor: pointer; }
+.option {
+  position: relative;
+  display: block;
+  break-inside: avoid;
+  color: var(--muted);
+  cursor: pointer;
+}
 .option input { position: absolute; width: 1px; height: 1px; margin: 0; opacity: 0; }
 .option:hover { color: var(--fg); }
 .option:has(:checked) { color: var(--fg); font-weight: 600; }
@@ -175,8 +193,7 @@ main.single { flex: 1; width: 100%; max-width: 68rem; padding-top: 1.5rem; }
   justify-content: space-between;
   gap: 2ch;
   margin: 0;
-  padding: 0.75rem 0;
-  border-bottom: 1px solid var(--rule);
+  padding: 0.75rem 0 0;
   color: var(--muted);
   font-size: 0.8125rem;
 }
@@ -192,19 +209,35 @@ main.single { flex: 1; width: 100%; max-width: 68rem; padding-top: 1.5rem; }
 .message, .next { margin: 1.25rem 0; color: var(--muted); }
 .message { max-width: 46rem; color: var(--fg); }
 
-/* A result: where it is and its license on one line, then the code, its notices and evidence.
-   The code's rule is in the colour of its license, so the page can be scanned for what fits. */
+/* A result is a box: where it is and its license in a bar at the top, then the code, then its
+   notices and evidence, which go beside the code where there is room. The box's left edge is in
+   the colour of the license, so the page can be scanned for what fits. */
 .result {
   --license: var(--green);
-  margin: 0 -0.75rem;
-  padding: 1rem 0.75rem;
-  border-bottom: 1px solid var(--rule);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  margin-top: 1rem;
+  border: 1px solid var(--box);
+  border-left: 3px solid var(--license);
 }
 .result.copyleft { --license: var(--warm); }
 .result.link { --license: var(--red); }
 :where(.result) :where(p, ul) { margin: 0; }
+@container main (min-width: 60rem) {
+  .result { grid-template-columns: minmax(0, 1fr) 22rem; }
+  .source { grid-column: 1 / -1; }
+  .result .facts { border-top: 0; border-left: 1px solid var(--box); }
+}
 
-.source { display: flex; align-items: baseline; gap: 1.5ch; min-width: 0; }
+.source {
+  display: flex;
+  align-items: baseline;
+  gap: 1.5ch;
+  min-width: 0;
+  padding: 0.5rem 1rem;
+  border-bottom: 1px solid var(--box);
+  background: var(--bg-lighter);
+}
 .repo { color: var(--fg); font-weight: 600; text-decoration: none; white-space: nowrap; }
 .repo:hover { color: var(--yellow); }
 /* A long path loses its start, not the file's name */
@@ -229,11 +262,9 @@ main.single { flex: 1; width: 100%; max-width: 68rem; padding-top: 1.5rem; }
 .license { color: var(--license); font-weight: 600; }
 .license abbr { color: var(--muted); font-weight: 400; }
 
-.code, .withheld, .notices { margin-top: 0.625rem; }
-.code { border-left: 2px solid var(--license); }
+.code { min-width: 0; padding: 0.5rem 0; }
 .code pre {
   margin: 0;
-  padding: 0.125rem 0;
   overflow: auto;
   font: 0.8125rem/1.65 var(--mono);
   font-variant-ligatures: none;
@@ -248,7 +279,9 @@ main.single { flex: 1; width: 100%; max-width: 68rem; padding-top: 1.5rem; }
 .code .c { color: var(--warm); } /* comments */
 .code .n { color: #95a99f; } /* numbers, constants, escapes */
 .code .t { color: #b6b6b6; } /* types */
-.code mark { background: #f4f4ff; color: #0a0a0a; } /* the theme's find: white, black text */
+/* The theme's find marks the match the cursor is on white and every other match grey, with black
+   text; a page has no cursor, so every match is one of the others. */
+.code mark { background: #8b8989de; color: #000; }
 .line::before {
   content: attr(data-n);
   display: inline-block;
@@ -259,19 +292,23 @@ main.single { flex: 1; width: 100%; max-width: 68rem; padding-top: 1.5rem; }
   user-select: none;
 }
 
-.withheld {
-  padding: 0.125rem 0 0.125rem 2ch;
-  border-left: 2px solid var(--license);
-  color: var(--muted);
-}
+.withheld { padding: 0.75rem 1rem; color: var(--muted); }
 
+.facts {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 0;
+  padding: 0.75rem 1rem;
+  border-top: 1px solid var(--box);
+}
 .notices { padding: 0; list-style: none; font-size: 0.8125rem; }
 .notices.none, .more-notices { color: var(--muted); }
 .evidence, .fits, .copies { color: var(--muted); font-size: 0.8125rem; }
 .evidence b { color: var(--fg); font-weight: 400; overflow-wrap: anywhere; }
 .warn { color: var(--red); }
 
-.actions { display: flex; flex-wrap: wrap; gap: 0.25rem 3ch; margin-top: 0.5rem; font-size: 0.8125rem; }
+.actions { display: flex; flex-wrap: wrap; gap: 0.25rem 3ch; font-size: 0.8125rem; }
 .copy, .more {
   padding: 0;
   border: 0;
@@ -283,9 +320,9 @@ main.single { flex: 1; width: 100%; max-width: 68rem; padding-top: 1.5rem; }
   text-underline-offset: 0.25em;
   cursor: pointer;
 }
-.more { margin-top: 0.375rem; font-size: 0.8125rem; }
+.more { margin: 0.375rem 0 0 8ch; font-size: 0.8125rem; } /* under the code, past its numbers */
 .attribution {
-  margin: 0.5rem 0 0;
+  margin: 0;
   padding: 0.5rem 0.75rem;
   max-height: 16em;
   overflow: auto;
@@ -331,7 +368,7 @@ main.single { flex: 1; width: 100%; max-width: 68rem; padding-top: 1.5rem; }
 .copies-list .path { color: var(--muted); overflow-wrap: anywhere; }
 
 .colophon {
-  padding: 1rem 1.5rem 2rem;
+  padding-block: 1rem 2rem;
   border-top: 1px solid var(--rule);
   color: var(--muted);
   font-size: 0.75rem;
@@ -342,10 +379,17 @@ main.single { flex: 1; width: 100%; max-width: 68rem; padding-top: 1.5rem; }
 /* Phones: the filters fold into one line that says what they are set to */
 
 @media (max-width: 760px) {
-  .top, .search, .colophon { padding-inline: 1rem; }
-  .page { grid-template-columns: minmax(0, 1fr); align-content: start; }
-  main { padding-inline: 1rem; }
-  .filters { padding: 0 1rem; border-right: 0; border-bottom: 1px solid var(--rule); }
+  .top, .search, .colophon, main, main.single { padding-inline: 1rem; }
+  .page { grid-template-columns: minmax(0, 1fr); align-content: start; padding-inline: 0; }
+  .page > main { border-left: 0; }
+  .filters {
+    position: static;
+    max-height: none;
+    overflow: visible;
+    margin-left: 0;
+    padding: 0 1rem;
+    border-bottom: 1px solid var(--rule);
+  }
   .filters[open] { padding-bottom: 1rem; }
   .filters > summary {
     display: flex;
@@ -364,8 +408,10 @@ main.single { flex: 1; width: 100%; max-width: 68rem; padding-top: 1.5rem; }
     text-underline-offset: 0.25em;
   }
   .filters fieldset { margin-top: 0.5rem; }
+  .languages { columns: auto; }
   .option { display: inline-block; margin-right: 2.5ch; }
-  .source { flex-wrap: wrap; }
+  .source { flex-wrap: wrap; padding-inline: 0.75rem; }
+  .facts, .withheld { padding-inline: 0.75rem; }
   .path { order: 3; flex-basis: 100%; }
   .count .api { display: none; }
   .intro { padding-top: 2rem; }
