@@ -66,6 +66,21 @@ def test_snippet_lists_every_copy(index: search.Index) -> None:
     assert index.snippet("0" * search.ID_LENGTH) is None
 
 
+@pytest.mark.skipif(not Path("/proc/self/smaps").exists(), reason="Linux only")
+def test_the_index_is_read_a_page_at_a_time(index: search.Index) -> None:
+    advised, mapped = 0, 0
+    current = ""
+    for line in Path("/proc/self/smaps").read_text().splitlines():
+        fields = line.split()
+        if "-" in fields[0] and len(fields) >= 6:
+            current = fields[5]
+        elif fields[0] == "VmFlags:" and current.startswith(str(index.path.resolve())):
+            mapped += 1
+            advised += "rr" in fields  # MADV_RANDOM
+    assert mapped
+    assert advised == mapped
+
+
 def test_partitions_page_as_one_index(
     index: search.Index, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

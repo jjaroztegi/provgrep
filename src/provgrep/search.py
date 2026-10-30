@@ -270,6 +270,7 @@ class Index:
             self.vectors = dense.Vectors(path, self.manifest["built"], self.partitions)
             # A query asked again (another filter, the next page) is not embedded again
             self._meaning = lru_cache(maxsize=1024)(dense.Encoder(queries=True).query)
+        random_reads(path)
 
     def search(
         self,
@@ -524,6 +525,27 @@ def connect(index: Path, n: int) -> sqlite3.Connection:
     db = sqlite3.connect(uri(records), uri=True, check_same_thread=False)
     db.execute("ATTACH DATABASE ? AS sources", (uri(index / "sources.sqlite"),))
     return db
+
+
+def random_reads(index: Path) -> None:
+    """Have every map of the index's files read the page a search asks for, and no more.
+    tantivy, numpy and the code blocks map their files without advice, so a page read from disk
+    brings the 31 around it into the page cache, and a search reads small pieces at random: a
+    term's entry, posting lists, 100 rows of vectors, 10 blocks of code. Linux only: the maps
+    are found in /proc/self/maps."""
+    maps = Path("/proc/self/maps")
+    if not maps.exists() or not hasattr(mmap, "MADV_RANDOM"):
+        return
+    import ctypes
+
+    libc = ctypes.CDLL(None, use_errno=True)
+    libc.madvise.argtypes = [ctypes.c_void_p, ctypes.c_size_t, ctypes.c_int]
+    root = str(index.resolve()) + "/"
+    for line in maps.read_text().splitlines():
+        fields = line.split(maxsplit=5)
+        if len(fields) == 6 and fields[5].startswith(root):
+            start, end = (int(address, 16) for address in fields[0].split("-"))
+            libc.madvise(start, end - start, mmap.MADV_RANDOM)
 
 
 class Code:
