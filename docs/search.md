@@ -88,8 +88,9 @@ embedded by a distillation of the model,
 [jina-v2-code-query-4l](https://huggingface.co/jjaroztegi/jina-v2-code-query-4l): its token
 embeddings and 4 of its 12 layers, in 8 bits, trained to point where the model points in the space
 an index ranks code in. A query costs a third of the CPU, and the suites rank as well (its card has
-the numbers). `provgrep distill` makes it again, in about an hour on a 16 GB GPU, from the staged
-corpus and the embeddings cache:
+the numbers). `provgrep distill` makes it again from the staged corpus and the embeddings cache:
+37 minutes on an RTX A4000 for the corpus of sha256 4da3293d763e, as good on the suites (a
+training on a GPU is not byte for byte the same twice):
 
 ```sh
 uv pip install torch --index-url https://download.pytorch.org/whl/cu128
