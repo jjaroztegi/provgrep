@@ -107,6 +107,8 @@ class Encoder:
         options = onnxruntime.SessionOptions()
         if queries:
             options.intra_op_num_threads = QUERY_THREADS
+            # Its threads would wait for work spinning, on the cores the lexical searches need.
+            options.add_session_config_entry("session.intra_op.allow_spinning", "0")
         self._session = onnxruntime.InferenceSession(str(onnx), options, providers=providers)
         if self._session.get_providers()[0] != providers[0]:  # it falls back without a word
             raise RuntimeError(f"onnxruntime cannot use {providers[0]} here")
