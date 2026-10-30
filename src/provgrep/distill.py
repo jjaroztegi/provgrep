@@ -134,6 +134,29 @@ def texts(staging: Path, suites: Path) -> list[str]:
     return out
 
 
+def listed(out: Path, staging: Path, suites: Path) -> list[str]:
+    """The texts out/texts.json keeps, listed from the staging the first time. A run that stopped
+    goes on from them and the embeddings made of them, unless they were listed from another
+    staging or other suites: then it stops rather than train on them."""
+    held = hashlib.sha256(
+        b"".join(path.read_bytes() for path in sorted(suites.glob("*.json")))
+    ).hexdigest()
+    made_from = {"staging": staging.name, "suites": held}
+    path = out / "texts.json"
+    if path.exists():
+        kept = json.loads(path.read_text(encoding="utf-8"))
+        if kept["made_from"] != made_from:
+            raise ValueError(f"{out} holds the texts of other inputs: give another --out")
+        return list(kept["texts"])
+    if not any(staging.glob("*.jsonl.gz")):
+        raise ValueError(f"nothing staged in {staging}: stage the corpus first")
+    out.mkdir(parents=True, exist_ok=True)
+    part = path.with_name(path.name + ".part")
+    part.write_text(json.dumps({"made_from": made_from, "texts": texts(staging, suites)}))
+    part.replace(path)  # a stop while writing leaves no half list
+    return list(json.loads(path.read_text(encoding="utf-8"))["texts"])
+
+
 def distill(out: Path, suites: Path, epochs: int = 1) -> dict[str, Any]:
     """Make the student in out/model_quantized.onnx; return what it was made from and how close
     it came."""
@@ -142,14 +165,7 @@ def distill(out: Path, suites: Path, epochs: int = 1) -> dict[str, Any]:
     from transformers import AutoModel
 
     started = time.monotonic()
-    out.mkdir(parents=True, exist_ok=True)
-    listed = out / "texts.json"
-    if not listed.exists():
-        staging = cache_dir() / "staging" / stage.key()
-        if not any(staging.glob("*.jsonl.gz")):
-            raise ValueError(f"nothing staged in {staging}: stage the corpus first")
-        listed.write_text(json.dumps(texts(staging, suites)))
-    corpus = json.loads(listed.read_text())
+    corpus = listed(out, cache_dir() / "staging" / stage.key(), suites)
     tokenizer = Tokenizer.from_file(
         str(dense.file(dense.MODEL.repo, dense.MODEL.revision, *dense.MODEL.tokenizer))
     )
