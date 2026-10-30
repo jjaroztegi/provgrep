@@ -87,8 +87,10 @@ tokens of a long function are embedded. Queries are embedded with the model's 8-
 time in less; code is embedded in full or half precision.
 
 Embedding the 11.2 million functions the corpus' later tiers added to the 21.3 million of the first
-took 8 hours on one 16 GB NVIDIA GPU (an RTX A4000, 390 functions a second; the 32.5 million from
-nothing, about 23), with the CUDA build of onnxruntime in place of the CPU one:
+(corpus sha256 4da3293d763e) took 8 hours on one 16 GB NVIDIA GPU, an RTX A4000: 9,639,242 in 25,105
+s (the `new` and `seconds` of the run's `dense.json`) after 1,578,089 in a first run, 390 functions
+a second. At that rate the 32.5 million from nothing would take about 23 hours. It runs with the
+CUDA build of onnxruntime in place of the CPU one:
 
 ```sh
 uv sync
@@ -97,11 +99,11 @@ uv pip install "onnxruntime-gpu[cuda,cudnn]==1.31.0"
 uv run --no-sync provgrep embed --gpu  # stopped, it goes on where it was
 ```
 
-Under WSL, NVIDIA's driver kills a run now and then (6 times in 15 hours, 2 in 8), with an illegal
-instruction or a segmentation fault while copying a batch's vectors off the GPU. What it saved
-before a crash is sound (a CPU embedding of 1,600 of the functions, 600 of them from right after a
-crash, agrees with the stored vectors to a cosine of 0.998, what storing them as int8 costs), so run
-it again until it exits with 0.
+Under WSL, NVIDIA's driver kills a run now and then (6 times in the 15 hours of the first index's
+run, 2 in the 8 of this one), with an illegal instruction or a segmentation fault while copying a
+batch's vectors off the GPU. What it saved before a crash is sound (a CPU embedding of 1,600 of the
+functions, 600 of them from right after a crash, agrees with the stored vectors to a cosine of
+0.998, what storing them as int8 costs), so run it again until it exits with 0.
 
 Every embedding the model makes is kept in the cache, by the hash of the code, apart from any
 index ([docs/build.md](build.md#caches-apart-from-the-index)). The embeddings in an index belong to

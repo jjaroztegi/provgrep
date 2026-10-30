@@ -51,12 +51,13 @@ is to the question in meaning ([docs/search.md](docs/search.md#ordering-by-meani
 order, a hit came first for 33 and 29 of the API intents (MRR 0.49 and 0.48), 9 and 9 of the
 languages, and in the top 10 for 14 and 8 XRender questions. On the 8-core server (31 GB), once the
 index has been read from disk, a search of the first two suites takes 35 ms at the median and 71 ms
-at the 95th percentile (22 and 51 ms without the order); the benchmark asks each question twice,
-with any license and with permissive ones, and the second time its embedding is remembered.
-Embedding the question is most of that: 18 ms alone, 26 to 31 while the 14 partitions are searched
-beside it. The index of the 500 most-starred repositories of 8 languages alone (21,259,913
-functions, built at 378bb39, searched at c1aaef1) had 41/76/0.59 and 42/77/0.60 on the APIs and
-3/9/0.28 and 3/8/0.24 on XRender, in 28 and 60 ms.
+at the 95th percentile (22 and 51 ms without the order, the index searched without its
+`dense.json`); the benchmark asks each question twice, with any license and with permissive ones,
+and the second time its embedding is remembered. What the order costs is the question's embedding,
+which shares the server's 8 cores with the searches of 14 partitions. The index of the 500
+most-starred repositories of 8 languages alone (21,259,913 functions, built at 378bb39 from corpus
+sha256 526db429d94b, searched at c1aaef1) had 41/76/0.59 and 42/77/0.60 on the APIs and 3/9/0.28 and
+3/8/0.24 on XRender, in 28 and 60 ms.
 
 The XRender questions are the 19 a programmer had while writing an XRender program in C from
 scratch, live ([Tsoding Daily](https://www.youtube.com/watch?v=auzZCp45dJc)), each with the time it
@@ -80,12 +81,12 @@ Of the 32.5 million functions, 4,019,689 appear in more than one repository, and
 are under a permissive license in one place and a copyleft one in another (`provgrep copies`, over
 the same index). Most are short helpers many projects share, but 23,202 are 40 lines or longer,
 identical but for whitespace: vendored copies, forks that relicensed, code moved between projects.
-One example: the same 34 lines of `ConcurrentHashMap.clear` are under Apache-2.0 in IntelliJ IDEA
-and under GPL-2.0 with the Classpath exception and CC0-1.0 in OpenJDK and in j2objc, which took them
-from it. All three files say that Doug Lea released the code to the public domain; in IntelliJ's the
-comment comes after the `package` line, where provgrep does not read it yet. A license taken from a
-repository says nothing about which of these a function is, and provgrep does not yet say which copy
-came first.
+One example: the same 34 lines of `ConcurrentHashMap.clear` are detected as Apache-2.0 in IntelliJ
+IDEA and as GPL-2.0 with the Classpath exception and CC0-1.0 in OpenJDK and in j2objc, which took
+them from it. All three files say that Doug Lea released the code to the public domain; in
+IntelliJ's the comment comes after the `package` line, where provgrep does not read it yet. A
+license taken from a repository says nothing about which of these a function is, and provgrep does
+not yet say which copy came first.
 
 ## Start
 
