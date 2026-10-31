@@ -2,7 +2,8 @@
 
 Search open-source code by what it does, and get back real functions, each with the license it is
 under, the evidence for that license, its copyright notices and an attribution to paste with it.
-A search website, with a command line and an MCP server on the same engine.
+A search website, with a command line and an MCP server on the same engine: try it at
+https://provgrep.aroztegi.com, or give an agent https://provgrep.aroztegi.com/mcp.
 
 The idea is to search for code instead of generating it: find what people already wrote and
 published for the same task, and keep its authors' credit and license with it. You describe what
