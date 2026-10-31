@@ -133,7 +133,6 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--host", default="127.0.0.1")
     p.add_argument("--port", type=int, default=8000)
     p.add_argument("--public", metavar="URL", help="the URL a proxy in front of it is reached at")
-    p.add_argument("--indexnow-key", metavar="KEY", help="serve KEY at /KEY.txt, for IndexNow")
 
     args = parser.parse_args(argv)
     if args.command == "license":
@@ -213,7 +212,9 @@ def main(argv: list[str] | None = None) -> int:
         from provgrep.server import serve
 
         try:
-            serve(args.index, args.host, args.port, args.public, args.indexnow_key)
+            # From the environment: a command line is readable by every user of the machine.
+            key = os.environ.get("PROVGREP_INDEXNOW_KEY") or None
+            serve(args.index, args.host, args.port, args.public, key)
         except ValueError as e:
             parser.error(str(e))
     elif args.command == "truth":

@@ -194,7 +194,9 @@ def app(
     if public is None and host not in LOOPBACK:
         raise ValueError(f"listening on {host} needs the URL clients reach it at (--public)")
     if indexnow_key is not None and not INDEXNOW_KEY.fullmatch(indexnow_key):
-        raise ValueError("an IndexNow key is 8 to 128 letters, digits and dashes (--indexnow-key)")
+        raise ValueError(
+            "an IndexNow key (PROVGREP_INDEXNOW_KEY) is 8 to 128 letters, digits and dashes"
+        )
 
     def base(request: Request) -> str:
         """The site's URL, for links that leave the page (sitemap, previews, search engines)."""
@@ -322,7 +324,8 @@ def app(
         return JSONResponse({"index_built": built, "commit": index.manifest.get("commit")})
 
     def robots(request: Request) -> Response:
-        indexnow = "Allow: /*.txt$\n" if indexnow_key else ""
+        # The longer rule wins, so a search ending in .txt (/?q=notes.txt) stays disallowed.
+        indexnow = "Disallow: /*?*.txt$\nAllow: /*.txt$\n" if indexnow_key else ""
         return PlainTextResponse(ROBOTS.format(base=base(request), indexnow=indexnow))
 
     def sitemap(request: Request) -> Response:

@@ -155,12 +155,12 @@ def test_indexnow_key(index: search.Index) -> None:
     answer = client.get(f"/{key}.txt")
     assert (answer.text, answer.headers["content-type"]) == (key, "text/plain; charset=utf-8")
     robots = client.get("/robots.txt").text
-    assert "Allow: /*.txt$\nDisallow: /" in robots
+    assert "Disallow: /*?*.txt$\nAllow: /*.txt$\nDisallow: /" in robots  # never a search
     assert key not in robots
     without = TestClient(server.app(index))
     assert without.get(f"/{key}.txt").status_code == 404
     assert "*.txt" not in without.get("/robots.txt").text
-    with pytest.raises(ValueError, match="--indexnow-key"):
+    with pytest.raises(ValueError, match="IndexNow key"):
         server.app(index, indexnow_key="../secret")
 
 
