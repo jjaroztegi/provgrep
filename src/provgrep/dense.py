@@ -84,7 +84,7 @@ MODEL = Model(
 # Queries are embedded by a distillation of MODEL (distill.py): its token embeddings and 4 of its 12
 # layers, in 8 bits, trained to point where MODEL does in the space an index ranks code in. A query
 # costs 23 CPU-ms on QUERY_THREADS, against 68 with MODEL's own 8-bit weights, and the suites rank
-# as well: a hit first for 136 of their searches and in the top 10 for 261, against 134 and 259.
+# as well: a hit first for 139 of their searches and in the top 10 for 263, against 134 and 259.
 QUERIES = (
     "jjaroztegi/jina-v2-code-query-4l",
     "20f5439b2ab4fe76eba6a2cac5263351dc0afcae",
