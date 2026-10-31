@@ -95,6 +95,13 @@ or sent from another site's pages. `--public` is also the URL the site gives cra
 previews (sitemap, canonical links, the preview image); without it, the site uses the address a
 request came to.
 
+With `PROVGREP_INDEXNOW_KEY` set, the site serves the key at `/<key>.txt`, which
+[IndexNow](https://www.indexnow.org/documentation) engines (Bing, Yandex and others) fetch to check
+that the site is the one sending them its pages: POST the sitemap's URLs, with the key, to
+`https://api.indexnow.org/indexnow` after a deploy that changes them. Only the site and the engines
+are meant to know the key, so it is not an option (a command line is visible to every user of the
+machine), and robots.txt lets the key file be fetched without naming it.
+
 Each address may search twice a second, 30 at once, and the server takes 64 connections at a time;
 wider limits belong in the proxy in front of it. The server sees the address the proxy forwards
 only if the proxy connects from 127.0.0.1 or ::1. From anywhere else (a container), name the proxy

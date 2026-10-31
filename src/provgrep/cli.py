@@ -212,7 +212,9 @@ def main(argv: list[str] | None = None) -> int:
         from provgrep.server import serve
 
         try:
-            serve(args.index, args.host, args.port, args.public)
+            # From the environment: a command line is readable by every user of the machine.
+            key = os.environ.get("PROVGREP_INDEXNOW_KEY") or None
+            serve(args.index, args.host, args.port, args.public, key)
         except ValueError as e:
             parser.error(str(e))
     elif args.command == "truth":
