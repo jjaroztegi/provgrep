@@ -2,8 +2,6 @@
 # AGENTS.md is read as the review guidelines (a CodeRabbit default). What follows adds what a
 # reviewer of this repository must know: a license label is a claim with evidence, code is shown
 # only with its notices, and published numbers rest on pinned inputs.
-# On the Free plan a private repository gets a summary of each PR (one an hour) and no line
-# review; the CodeRabbit CLI reviews it (three an hour) and reads this file too.
 language: en-US
 tone_instructions: >-
   Terse. Lead with the defect and what it breaks; no praise, no restating the diff.
@@ -34,8 +32,9 @@ reviews:
   path_instructions:
     - path: "**"
       instructions: >-
-        Written to be published: flag anything that names a host, user, home directory, IP
-        address outside loopback and private test ranges, credential, or private notes.
+        Written to be published: flag anything that names a host other than the website's own
+        (provgrep.aroztegi.com), a user, home directory, IP address outside loopback and private
+        test ranges, credential, or private notes.
     - path: "src/provgrep/**"
       instructions: >-
         A license is reported as detected, never concluded, and keeps its evidence (file, scope,

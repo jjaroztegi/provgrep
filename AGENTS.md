@@ -32,5 +32,6 @@ Linux and Windows 11. Keep paths, scripts and line endings cross-platform.
   unintuitive about it, and every measurement with what reproduces it (`docs/results.md`).
 - Before adding a paragraph, ask what a reader would get wrong without it: a finding, a source,
   a constraint, a trap. Do not restate what the code or `--help` shows; link the source.
-- Public files never name hosts, addresses, credentials or private notes.
+- Public files never name the machines behind the website, their addresses, credentials or private
+  notes. The website's own address is public.
 - When something changes, rewrite the affected text instead of appending another account.
