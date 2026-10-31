@@ -32,9 +32,10 @@ reviews:
   path_instructions:
     - path: "**"
       instructions: >-
-        Written to be published: flag anything that names a host other than the website's own
-        (provgrep.aroztegi.com), a user, home directory, IP address outside loopback and private
-        test ranges, credential, or private notes.
+        Written to be published: flag anything that names a private machine (one the website
+        runs on or an index is built on), a user, home directory, IP address outside loopback and
+        private test ranges, credential, or private notes. The website's own address and public
+        services (GitHub, Hugging Face, Cloudflare) are not private.
     - path: "src/provgrep/**"
       instructions: >-
         A license is reported as detected, never concluded, and keeps its evidence (file, scope,
