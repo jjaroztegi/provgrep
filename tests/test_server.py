@@ -152,6 +152,7 @@ def test_what_crawlers_and_browsers_get(index: search.Index) -> None:
 def test_about_says_what_is_kept(index: search.Index) -> None:
     page = TestClient(server.app(index)).get("/about").text
     assert "keeps no log of what is searched" in page
+    assert "served through Cloudflare" in page
     assert "template=removal.yml" in page
 
 
