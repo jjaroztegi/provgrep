@@ -71,15 +71,17 @@ _HEADERS = [
 YEAR = "public, max-age=31536000, immutable"
 DAY = "public, max-age=86400"
 # Search pages are endless, and each one runs a search: crawlers get the home and about pages,
-# and what they need to show them (styles, fonts, the icon).
+# and what they need to show them (styles, fonts, the icon). An IndexNow key is let through
+# without naming it: only the site and the search engines are meant to know it.
 ROBOTS = """User-agent: *
 Allow: /$
 Allow: /about$
 Allow: /static/
 Allow: /favicon.ico$
-Disallow: /
+{indexnow}Disallow: /
 Sitemap: {base}/sitemap.xml
 """
+INDEXNOW_KEY = re.compile(r"[A-Za-z0-9-]{8,128}")  # the protocol's (indexnow.org/documentation)
 SITEMAP = """<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 <url><loc>{base}/</loc></url>
@@ -178,12 +180,21 @@ _UNMARKED = frozenset(
 )
 
 
-def app(index: Index, host: str = "127.0.0.1", public: str | None = None) -> Starlette:
+def app(
+    index: Index,
+    host: str = "127.0.0.1",
+    public: str | None = None,
+    indexnow_key: str | None = None,
+) -> Starlette:
     """The site over an index. host is where it listens; public, the URL it is reached at, through
     a proxy or not. MCP refuses requests addressed to any other host or sent from a page of any
-    other origin (DNS rebinding protection), so listening beyond this machine needs public."""
+    other origin (DNS rebinding protection), so listening beyond this machine needs public.
+    indexnow_key is served at /<key>.txt, which proves to IndexNow engines that the site is the
+    one telling them about its pages."""
     if public is None and host not in LOOPBACK:
         raise ValueError(f"listening on {host} needs the URL clients reach it at (--public)")
+    if indexnow_key is not None and not INDEXNOW_KEY.fullmatch(indexnow_key):
+        raise ValueError("an IndexNow key is 8 to 128 letters, digits and dashes (--indexnow-key)")
 
     def base(request: Request) -> str:
         """The site's URL, for links that leave the page (sitemap, previews, search engines)."""
@@ -311,7 +322,8 @@ def app(index: Index, host: str = "127.0.0.1", public: str | None = None) -> Sta
         return JSONResponse({"index_built": built, "commit": index.manifest.get("commit")})
 
     def robots(request: Request) -> Response:
-        return PlainTextResponse(ROBOTS.format(base=base(request)))
+        indexnow = "Allow: /*.txt$\n" if indexnow_key else ""
+        return PlainTextResponse(ROBOTS.format(base=base(request), indexnow=indexnow))
 
     def sitemap(request: Request) -> Response:
         return Response(SITEMAP.format(base=html.escape(base(request))), media_type="text/xml")
@@ -346,6 +358,11 @@ def app(index: Index, host: str = "127.0.0.1", public: str | None = None) -> Sta
             Route("/sitemap.xml", sitemap),
             Route("/opensearch.xml", opensearch),
             Route("/favicon.ico", favicon),
+            *(
+                [Route(f"/{indexnow_key}.txt", lambda _: PlainTextResponse(indexnow_key))]
+                if indexnow_key
+                else []
+            ),
             Mount("/static", Static(directory=_HERE / "static"), name="static"),
         ],
         exception_handlers={404: not_found},
@@ -508,10 +525,12 @@ def _next(request: Request, found: Page | None, page: int) -> str | None:
     return "/?" + urlencode([*kept, ("page", str(page + 1))])
 
 
-def serve(index_path: Path, host: str, port: int, public: str | None) -> None:
+def serve(
+    index_path: Path, host: str, port: int, public: str | None, indexnow_key: str | None
+) -> None:
     import uvicorn
 
-    site = app(Index(index_path), host, public)
+    site = app(Index(index_path), host, public, indexnow_key)
     # Every search scores every partition: past this many connections, a 503 rather than a
     # queue. No access log: a request's URL is what someone searched for.
     uvicorn.run(site, host=host, port=port, limit_concurrency=MAX_CONNECTIONS, access_log=False)

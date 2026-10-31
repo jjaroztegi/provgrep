@@ -149,6 +149,21 @@ def test_what_crawlers_and_browsers_get(index: search.Index) -> None:
     assert "Nothing is at this address" in lost.text
 
 
+def test_indexnow_key(index: search.Index) -> None:
+    key = "0123abcd-ef"
+    client = TestClient(server.app(index, indexnow_key=key))
+    answer = client.get(f"/{key}.txt")
+    assert (answer.text, answer.headers["content-type"]) == (key, "text/plain; charset=utf-8")
+    robots = client.get("/robots.txt").text
+    assert "Allow: /*.txt$\nDisallow: /" in robots
+    assert key not in robots
+    without = TestClient(server.app(index))
+    assert without.get(f"/{key}.txt").status_code == 404
+    assert "*.txt" not in without.get("/robots.txt").text
+    with pytest.raises(ValueError, match="--indexnow-key"):
+        server.app(index, indexnow_key="../secret")
+
+
 def test_about_says_what_is_kept(index: search.Index) -> None:
     page = TestClient(server.app(index)).get("/about").text
     assert "keeps no log of what is searched" in page
